@@ -1,0 +1,6 @@
+type ExampleEntity @entity {
+  id: Bytes!
+  count: BigInt!
+  outbound_tkn: Bytes! # address
+  inbound_tkn: Bytes! # address
+}

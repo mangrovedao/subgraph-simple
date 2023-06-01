@@ -1,0 +1,87 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Mangrove
+    network: mumbai
+    source:
+      address: "0xd1805f6Fe12aFF69D4264aE3e49ef320895e2D8b"
+      abi: Mangrove
+      startBlock: 35666000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - Credit
+        - Debit
+        - Kill
+        - NewMgv
+        - OfferFail
+        - OfferRetract
+        - OfferSuccess
+        - OfferWrite
+        - OrderComplete
+        - OrderStart
+        - PosthookFail
+        - SetActive
+        - SetDensity
+        - SetFee
+        - SetGasbase
+        - SetGasmax
+        - SetGasprice
+        - SetGovernance
+        - SetMonitor
+        - SetNotify
+        - SetUseOracle
+      abis:
+        - name: Mangrove
+          file: ./abis/Mangrove.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,address,address,uint256)
+          handler: handleApproval
+        - event: Credit(indexed address,uint256)
+          handler: handleCredit
+        - event: Debit(indexed address,uint256)
+          handler: handleDebit
+        - event: Kill()
+          handler: handleKill
+        - event: NewMgv()
+          handler: handleNewMgv
+        - event: OfferFail(indexed address,indexed address,uint256,address,uint256,uint256,bytes32)
+          handler: handleOfferFail
+        - event: OfferRetract(indexed address,indexed address,uint256,bool)
+          handler: handleOfferRetract
+        - event: OfferSuccess(indexed address,indexed address,uint256,address,uint256,uint256)
+          handler: handleOfferSuccess
+        - event: OfferWrite(indexed address,indexed address,address,uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleOfferWrite
+        - event: OrderComplete(indexed address,indexed address,indexed address,uint256,uint256,uint256,uint256)
+          handler: handleOrderComplete
+        - event: OrderStart()
+          handler: handleOrderStart
+        - event: PosthookFail(indexed address,indexed address,uint256,bytes32)
+          handler: handlePosthookFail
+        - event: SetActive(indexed address,indexed address,bool)
+          handler: handleSetActive
+        - event: SetDensity(indexed address,indexed address,uint256)
+          handler: handleSetDensity
+        - event: SetFee(indexed address,indexed address,uint256)
+          handler: handleSetFee
+        - event: SetGasbase(indexed address,indexed address,uint256)
+          handler: handleSetGasbase
+        - event: SetGasmax(uint256)
+          handler: handleSetGasmax
+        - event: SetGasprice(uint256)
+          handler: handleSetGasprice
+        - event: SetGovernance(address)
+          handler: handleSetGovernance
+        - event: SetMonitor(address)
+          handler: handleSetMonitor
+        - event: SetNotify(bool)
+          handler: handleSetNotify
+        - event: SetUseOracle(bool)
+          handler: handleSetUseOracle
+      file: ./src/mangrove.ts
