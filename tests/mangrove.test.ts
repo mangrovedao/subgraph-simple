@@ -6,81 +6,42 @@ import {
   beforeAll,
   afterAll
 } from "matchstick-as/assembly/index"
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
-import { ExampleEntity } from "../generated/schema"
-import { Approval } from "../generated/Mangrove/Mangrove"
-import { handleApproval } from "../src/mangrove"
-import { createApprovalEvent } from "./mangrove-utils"
+import { Address, Bytes, Value } from "@graphprotocol/graph-ts"
+import { handleSetActive } from "../src/mangrove"
+import { createSetActiveEvent } from "./mangrove-utils"
+import { MarketEntity } from "../src/entities/market";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
+let token0 = Address.fromString("0x0000000000000000000000000000000000000000");
+let token1 = Address.fromString("0x0000000000000000000000000000000000000001");
+
 describe("Describe entity assertions", () => {
   beforeAll(() => {
-    let outbound_tkn = Address.fromString(
-      "0x0000000000000000000000000000000000000001"
-    )
-    let inbound_tkn = Address.fromString(
-      "0x0000000000000000000000000000000000000001"
-    )
-    let owner = Address.fromString("0x0000000000000000000000000000000000000001")
-    let spender = Address.fromString(
-      "0x0000000000000000000000000000000000000001"
-    )
-    let value = BigInt.fromI32(234)
-    let newApprovalEvent = createApprovalEvent(
-      outbound_tkn,
-      inbound_tkn,
-      owner,
-      spender,
-      value
-    )
-    handleApproval(newApprovalEvent)
+
   })
 
   afterAll(() => {
     clearStore()
   })
 
-  // For more test scenarios, see:
-  // https://thegraph.com/docs/en/developer/matchstick/#write-a-unit-test
+  test("MarketEntity created and stored", () => {
+    let setActiveEvent = createSetActiveEvent(token0, token1, true);
+    handleSetActive(setActiveEvent);
+    assert.entityCount("MarketEntity", 1);
 
-  test("ExampleEntity created and stored", () => {
-    assert.entityCount("ExampleEntity", 1)
+    let market = MarketEntity.load(token0, token1);
+    assert.assertNotNull(market);
 
-    // 0xa16081f360e3847006db660bae1c6d1b2e17ec2a is the default address used in newMockEvent() function
-    assert.fieldEquals(
-      "ExampleEntity",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a",
-      "outbound_tkn",
-      "0x0000000000000000000000000000000000000001"
-    )
-    assert.fieldEquals(
-      "ExampleEntity",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a",
-      "inbound_tkn",
-      "0x0000000000000000000000000000000000000001"
-    )
-    assert.fieldEquals(
-      "ExampleEntity",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a",
-      "owner",
-      "0x0000000000000000000000000000000000000001"
-    )
-    assert.fieldEquals(
-      "ExampleEntity",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a",
-      "spender",
-      "0x0000000000000000000000000000000000000001"
-    )
-    assert.fieldEquals(
-      "ExampleEntity",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a",
-      "value",
-      "234"
-    )
+    const id = Bytes.fromUTF8(`${token0.toHex()}-${token1.toHex()}`).toHexString();
 
-    // More assert options:
-    // https://thegraph.com/docs/en/developer/matchstick/#asserts
-  })
+    assert.fieldEquals('MarketEntity', id, 'active', 'true');
+
+    setActiveEvent = createSetActiveEvent(token0, token1, false);
+    handleSetActive(setActiveEvent);
+    
+    assert.fieldEquals('MarketEntity', id, 'active', 'false');
+    assert.entityCount("MarketEntity", 1);
+  });
 })

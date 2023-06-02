@@ -4,3 +4,34 @@ type ExampleEntity @entity {
   outbound_tkn: Bytes! # address
   inbound_tkn: Bytes! # address
 }
+
+type AccountEntity @entity(immutable: true) {
+  id: Bytes!
+  address: Bytes!
+}
+
+type TokenEntity @entity(immutable: true) {
+  id: Bytes!
+  adress: Bytes!
+  decimals: BigInt!
+}
+
+type MarketEntity @entity {
+  id: Bytes!
+  outbound_tkn: Bytes! # address
+  inbound_tkn: Bytes! # address
+  active: Boolean!
+}
+
+type OfferEntity @entity {
+  id: Bytes!
+  wants: BigInt!
+  gives: BigInt!
+  gasprice: BigInt!
+  gasreq: BigInt!
+  id: BigInt!
+  prev: BigInt!
+
+  market: MarketEntity!
+  maker: AccountEntity!
+}
