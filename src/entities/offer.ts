@@ -1,13 +1,17 @@
-import { BigInt, Bytes, Entity, Value, ValueKind, store } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Bytes, Entity, Value, ValueKind, store } from "@graphprotocol/graph-ts";
 import { AccountEntity } from "./account";
 import { MarketEntity } from "./market";
+import { log } from "matchstick-as";
 
 export class OfferEntity extends Entity {
-  constructor(id: Bytes, maker: AccountEntity, market: MarketEntity) {
+  static computeId(id: BigInt, outbound_tkn: Bytes, inbound_tkn: Bytes): Bytes {
+    const idAsHexString = Bytes.fromByteArray(Bytes.fromBigInt(id)).toHexString();
+    return Bytes.fromUTF8(`${outbound_tkn.toHex()}-${inbound_tkn.toHex()}-${idAsHexString}`);
+  }
+
+  constructor(id: BigInt, outbound_tkn: Address, inbound_tkn: Address) {
     super();
-    this.set("id", Value.fromBytes(id));
-    this.set("maker", Value.fromBytes(maker.address));
-    this.set("market", Value.fromBytes(market.id));
+    this.set("id", Value.fromBytes(OfferEntity.computeId(id, outbound_tkn, inbound_tkn)));
   }
 
   save(): void {
@@ -28,9 +32,16 @@ export class OfferEntity extends Entity {
     );
   }
 
-  static load(id: Bytes): OfferEntity | null {
+  static _load(id: Bytes): OfferEntity | null {
     return changetype<OfferEntity | null>(
       store.get("OfferEntity", id.toHexString())
+    );
+  }
+
+  static load(id: BigInt, outbound_tkn: Address, inbound_tkn: Address): OfferEntity | null {
+    const _id = OfferEntity.computeId(id, outbound_tkn, inbound_tkn);
+    return changetype<OfferEntity | null>(
+      store.get("OfferEntity", _id.toHexString()),
     );
   }
 
@@ -47,6 +58,32 @@ export class OfferEntity extends Entity {
     this.set("id", Value.fromBytes(value));
   }
 
+  getMarket(): MarketEntity {
+    let value = this.get("market");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return MarketEntity._load(value.toBytes())!;
+    }
+  }
+
+  setMarket(market: MarketEntity): void {
+    this.set("market", Value.fromBytes(market.id));
+  }
+
+  getMaker(): AccountEntity {
+    let value = this.get("maker");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return AccountEntity.load(value.toBytes())!;
+    }
+  }
+
+  setMaker(acount: AccountEntity): void {
+    this.set("maker", Value.fromBytes(acount.id));
+  }
+
   get wants(): BigInt {
     let value = this.get("wants");
     if (!value || value.kind == ValueKind.NULL) {
@@ -58,6 +95,32 @@ export class OfferEntity extends Entity {
 
   set wants(value: BigInt) {
     this.set('wants', Value.fromBigInt(value));
+  }
+
+  get initialWants(): BigInt {
+    let value = this.get("initialWants");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set initialWants(value: BigInt) {
+    this.set('initialWants', Value.fromBigInt(value));
+  }
+
+  get initialGives(): BigInt {
+    let value = this.get("initialGives");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set initialGives(value: BigInt) {
+    this.set('initialGives', Value.fromBigInt(value));
   }
 
   get gives(): BigInt {
@@ -123,5 +186,57 @@ export class OfferEntity extends Entity {
 
   set prev(value: BigInt) {
     this.set('prev', Value.fromBigInt(value));
+  }
+
+  get isOpen(): bool {
+    let value = this.get("isOpen");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBoolean();
+    }
+  }
+
+  set isOpen(value: bool) {
+    this.set('isOpen', Value.fromBoolean(value));
+  }
+
+  get isFailed(): bool {
+    let value = this.get("isFailed");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBoolean();
+    }
+  }
+
+  set isFailed(value: bool) {
+    this.set('isFailed', Value.fromBoolean(value));
+  }
+
+  get isFilled(): bool {
+    let value = this.get("isFilled");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBoolean();
+    }
+  }
+
+  set isFilled(value: bool) {
+    this.set('isFilled', Value.fromBoolean(value));
+  }
+
+  get failedReason(): string {
+    let value = this.get("failedReason");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set failedReason(value: string) {
+    this.set('failedReason', Value.fromString(value));
   }
 }

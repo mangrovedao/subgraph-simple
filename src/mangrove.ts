@@ -27,7 +27,6 @@ import {
 import { MarketEntity } from "./entities/market"
 import { AccountEntity } from "./entities/account"
 import { OfferEntity } from "./entities/offer"
-import { log } from "matchstick-as"
 
 const getOrCreateAccount = (address: Address): AccountEntity => {
   let account = AccountEntity.load(address);
@@ -50,21 +49,66 @@ export function handleKill(event: Kill): void {}
 
 export function handleNewMgv(event: NewMgv): void {}
 
-export function handleOfferFail(event: OfferFail): void {}
+export function handleOfferFail(event: OfferFail): void {
+  const offer = OfferEntity.load(event.params.id, event.params.outbound_tkn, event.params.inbound_tkn)!; 
 
-export function handleOfferRetract(event: OfferRetract): void {}
+  offer.isOpen = false;
+  offer.isFailed = false;
 
-export function handleOfferSuccess(event: OfferSuccess): void {}
+  offer.failedReason = event.params.mgvData.toString();
+
+  offer.save();
+}
+
+export function handleOfferRetract(event: OfferRetract): void {
+  const offer = OfferEntity.load(event.params.id, event.params.outbound_tkn, event.params.inbound_tkn)!; 
+
+  offer.isOpen = false;
+
+  offer.save();
+}
+
+export function handleOfferSuccess(event: OfferSuccess): void {
+  const offer = OfferEntity.load(event.params.id, event.params.outbound_tkn, event.params.inbound_tkn)!;
+
+  offer.wants = offer.wants.minus(event.params.takerWants);
+  offer.gives = offer.gives.minus(event.params.takerGives);
+
+  const BN_0 = BigInt.fromI32(0);
+  if (offer.wants == BN_0 && offer.gives == BN_0) {
+    offer.isOpen = false;
+    offer.isFilled = false;
+  }
+
+  offer.save();
+}
 
 export function handleOfferWrite(event: OfferWrite): void {
-  const owner = getOrCreateAccount(event.params.maker);
-  const market = MarketEntity.load(event.params.outbound_tkn, event.params.inbound_tkn)!;
-
   const offer = new OfferEntity(
-    Bytes.fromUTF8(`${event.transaction.hash.toHex()}-${event.logIndex}`),
-    owner,
-    market
+      event.params.id,
+      event.params.outbound_tkn,
+      event.params.inbound_tkn,
   );
+
+  const owner = getOrCreateAccount(event.params.maker);
+  offer.setMaker(owner);
+
+  const market = MarketEntity.load(event.params.outbound_tkn, event.params.inbound_tkn)!;
+  offer.setMarket(market)
+
+  offer.wants = event.params.wants,
+  offer.initialWants = event.params.wants;
+
+  offer.gives = event.params.gives,
+  offer.initialGives = event.params.gives;
+
+  offer.gasprice = event.params.gasprice,
+  offer.gasreq = event.params.gasreq,
+  offer._id = event.params.id,
+  offer.prev = event.params.prev,
+  offer.isOpen = true;
+  offer.isFailed = false;
+  offer.isFilled = true;
  
   offer.save();
 }

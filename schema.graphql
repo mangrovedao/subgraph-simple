@@ -26,11 +26,18 @@ type MarketEntity @entity {
 type OfferEntity @entity {
   id: Bytes!
   wants: BigInt!
+  initialWants: BigInt!
+  gives: BigInt!
+  initialGives: BigInt!
   gives: BigInt!
   gasprice: BigInt!
   gasreq: BigInt!
   id: BigInt!
   prev: BigInt!
+  isOpen: Boolean!
+  isFailed: Boolean!
+  isFilled: Boolean!
+  failedReason: String
 
   market: MarketEntity!
   maker: AccountEntity!
