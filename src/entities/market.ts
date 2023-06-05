@@ -1,7 +1,7 @@
 import { Address, Bytes, Entity, Value, ValueKind, store } from "@graphprotocol/graph-ts";
 import { log } from "matchstick-as";
 
-export class MarketEntity extends Entity {
+export class Market extends Entity {
   constructor(outbound_tkn: Address, inbound_tkn: Address) {
     super();
     const id = Bytes.fromUTF8(`${outbound_tkn.toHex()}-${inbound_tkn.toHex()}`);
@@ -13,31 +13,31 @@ export class MarketEntity extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id != null, "Cannot save MarketEntity entity without an ID");
+    assert(id != null, "Cannot save Market entity without an ID");
     if (id) {
       assert(
         id.kind == ValueKind.BYTES,
-        `Entities of type MarketEntity must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
+        `Entities of type Market must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
       );
-      store.set("MarketEntity", id.toBytes().toHexString(), this);
+      store.set("Market", id.toBytes().toHexString(), this);
     }
   }
 
-  static loadInBlock(id: Bytes): MarketEntity | null {
-    return changetype<MarketEntity | null>(
-      store.get_in_block("MarketEntity", id.toHexString())
+  static loadInBlock(id: Bytes): Market | null {
+    return changetype<Market | null>(
+      store.get_in_block("Market", id.toHexString())
     );
   }
 
-  static _load(id: Bytes): MarketEntity | null {
-    return changetype<MarketEntity | null>(
-      store.get("MarketEntity", id.toHexString())
+  static _load(id: Bytes): Market | null {
+    return changetype<Market | null>(
+      store.get("Market", id.toHexString())
     );
   }
 
-  static load(outbound_tkn: Address, inbound_tkn: Address): MarketEntity | null {
+  static load(outbound_tkn: Address, inbound_tkn: Address): Market | null {
     const id = Bytes.fromUTF8(`${outbound_tkn.toHex()}-${inbound_tkn.toHex()}`);
-    return MarketEntity._load(id);
+    return Market._load(id);
   }
 
   get id(): Bytes {

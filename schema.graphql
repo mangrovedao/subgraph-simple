@@ -1,16 +1,16 @@
-type AccountEntity @entity(immutable: true) {
+type Account @entity(immutable: true) {
   id: Bytes!
   address: Bytes!
 }
 
-type MarketEntity @entity {
+type Market @entity {
   id: Bytes!
   outbound_tkn: Bytes! # address
   inbound_tkn: Bytes! # address
   active: Boolean!
 }
 
-type OfferEntity @entity {
+type Offer @entity {
   id: Bytes!
   wants: BigInt!
   initialWants: BigInt!
@@ -24,6 +24,6 @@ type OfferEntity @entity {
   isFilled: Boolean!
   failedReason: String
 
-  market: MarketEntity!
-  maker: AccountEntity!
+  market: Market!
+  maker: Account!
 }

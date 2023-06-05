@@ -24,15 +24,15 @@ import {
   SetNotify,
   SetUseOracle
 } from "../generated/Mangrove/Mangrove"
-import { MarketEntity } from "./entities/market"
-import { AccountEntity } from "./entities/account"
-import { OfferEntity } from "./entities/offer"
+import { Market } from "./entities/market"
+import { Account } from "./entities/account"
+import { Offer } from "./entities/offer"
 
-const getOrCreateAccount = (address: Address): AccountEntity => {
-  let account = AccountEntity.load(address);
+const getOrCreateAccount = (address: Address): Account => {
+  let account = Account.load(address);
 
   if (!account) {
-    account = new AccountEntity(address, address);
+    account = new Account(address, address);
     account.save();
   }
 
@@ -50,7 +50,7 @@ export function handleKill(event: Kill): void {}
 export function handleNewMgv(event: NewMgv): void {}
 
 export function handleOfferFail(event: OfferFail): void {
-  const offer = OfferEntity.load(event.params.id, event.params.outbound_tkn, event.params.inbound_tkn)!; 
+  const offer = Offer.load(event.params.id, event.params.outbound_tkn, event.params.inbound_tkn)!; 
 
   offer.isOpen = false;
   offer.isFailed = false;
@@ -61,7 +61,7 @@ export function handleOfferFail(event: OfferFail): void {
 }
 
 export function handleOfferRetract(event: OfferRetract): void {
-  const offer = OfferEntity.load(event.params.id, event.params.outbound_tkn, event.params.inbound_tkn)!; 
+  const offer = Offer.load(event.params.id, event.params.outbound_tkn, event.params.inbound_tkn)!; 
 
   offer.isOpen = false;
 
@@ -69,7 +69,7 @@ export function handleOfferRetract(event: OfferRetract): void {
 }
 
 export function handleOfferSuccess(event: OfferSuccess): void {
-  const offer = OfferEntity.load(event.params.id, event.params.outbound_tkn, event.params.inbound_tkn)!;
+  const offer = Offer.load(event.params.id, event.params.outbound_tkn, event.params.inbound_tkn)!;
 
   offer.wants = offer.wants.minus(event.params.takerWants);
   offer.gives = offer.gives.minus(event.params.takerGives);
@@ -84,7 +84,7 @@ export function handleOfferSuccess(event: OfferSuccess): void {
 }
 
 export function handleOfferWrite(event: OfferWrite): void {
-  const offer = new OfferEntity(
+  const offer = new Offer(
       event.params.id,
       event.params.outbound_tkn,
       event.params.inbound_tkn,
@@ -93,7 +93,7 @@ export function handleOfferWrite(event: OfferWrite): void {
   const owner = getOrCreateAccount(event.params.maker);
   offer.setMaker(owner);
 
-  const market = MarketEntity.load(event.params.outbound_tkn, event.params.inbound_tkn)!;
+  const market = Market.load(event.params.outbound_tkn, event.params.inbound_tkn)!;
   offer.setMarket(market)
 
   offer.wants = event.params.wants,
@@ -119,10 +119,10 @@ export function handleOrderStart(event: OrderStart): void {}
 export function handlePosthookFail(event: PosthookFail): void {}
 
 export function handleSetActive(event: SetActive): void {
-  let market = MarketEntity.load(event.params.outbound_tkn, event.params.inbound_tkn);
+  let market = Market.load(event.params.outbound_tkn, event.params.inbound_tkn);
 
   if (!market) {
-    market = new MarketEntity(event.params.outbound_tkn, event.params.inbound_tkn);
+    market = new Market(event.params.outbound_tkn, event.params.inbound_tkn);
   }
 
   market.active = event.params.value;

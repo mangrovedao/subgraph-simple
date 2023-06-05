@@ -1,8 +1,8 @@
 import { Address, BigInt, Bytes, Entity, Value, ValueKind, store } from "@graphprotocol/graph-ts";
-import { AccountEntity } from "./account";
-import { MarketEntity } from "./market";
+import { Account } from "./account";
+import { Market } from "./market";
 
-export class OfferEntity extends Entity {
+export class Offer extends Entity {
   static computeId(id: BigInt, outbound_tkn: Bytes, inbound_tkn: Bytes): Bytes {
     const _id = Bytes.fromBigInt(id);
     return Bytes.fromUTF8(`${outbound_tkn.toHex()}-${inbound_tkn.toHex()}-${_id}`);
@@ -10,37 +10,37 @@ export class OfferEntity extends Entity {
 
   constructor(id: BigInt, outbound_tkn: Address, inbound_tkn: Address) {
     super();
-    this.set("id", Value.fromBytes(OfferEntity.computeId(id, outbound_tkn, inbound_tkn)));
+    this.set("id", Value.fromBytes(Offer.computeId(id, outbound_tkn, inbound_tkn)));
   }
 
   save(): void {
     let id = this.get("id");
-    assert(id != null, "Cannot save OfferEntity entity without an ID");
+    assert(id != null, "Cannot save Offer entity without an ID");
     if (id) {
       assert(
         id.kind == ValueKind.BYTES,
-        `Entities of type OfferEntity must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
+        `Entities of type Offer must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
       );
-      store.set("OfferEntity", id.toBytes().toHexString(), this);
+      store.set("Offer", id.toBytes().toHexString(), this);
     }
   }
 
-  static loadInBlock(id: Bytes): OfferEntity | null {
-    return changetype<OfferEntity | null>(
-      store.get_in_block("OfferEntity", id.toHexString())
+  static loadInBlock(id: Bytes): Offer | null {
+    return changetype<Offer | null>(
+      store.get_in_block("Offer", id.toHexString())
     );
   }
 
-  static _load(id: Bytes): OfferEntity | null {
-    return changetype<OfferEntity | null>(
-      store.get("OfferEntity", id.toHexString())
+  static _load(id: Bytes): Offer | null {
+    return changetype<Offer | null>(
+      store.get("Offer", id.toHexString())
     );
   }
 
-  static load(id: BigInt, outbound_tkn: Address, inbound_tkn: Address): OfferEntity | null {
-    const _id = OfferEntity.computeId(id, outbound_tkn, inbound_tkn);
-    return changetype<OfferEntity | null>(
-      store.get("OfferEntity", _id.toHexString()),
+  static load(id: BigInt, outbound_tkn: Address, inbound_tkn: Address): Offer | null {
+    const _id = Offer.computeId(id, outbound_tkn, inbound_tkn);
+    return changetype<Offer | null>(
+      store.get("Offer", _id.toHexString()),
     );
   }
 
@@ -57,29 +57,29 @@ export class OfferEntity extends Entity {
     this.set("id", Value.fromBytes(value));
   }
 
-  getMarket(): MarketEntity {
+  getMarket(): Market {
     let value = this.get("market");
     if (!value || value.kind == ValueKind.NULL) {
       throw new Error("Cannot return null for a required field.");
     } else {
-      return MarketEntity._load(value.toBytes())!;
+      return Market._load(value.toBytes())!;
     }
   }
 
-  setMarket(market: MarketEntity): void {
+  setMarket(market: Market): void {
     this.set("market", Value.fromBytes(market.id));
   }
 
-  getMaker(): AccountEntity {
+  getMaker(): Account {
     let value = this.get("maker");
     if (!value || value.kind == ValueKind.NULL) {
       throw new Error("Cannot return null for a required field.");
     } else {
-      return AccountEntity.load(value.toBytes())!;
+      return Account.load(value.toBytes())!;
     }
   }
 
-  setMaker(acount: AccountEntity): void {
+  setMaker(acount: Account): void {
     this.set("maker", Value.fromBytes(acount.id));
   }
 

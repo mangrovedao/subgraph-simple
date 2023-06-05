@@ -1,6 +1,6 @@
 import { Bytes, Entity, Value, ValueKind, store } from "@graphprotocol/graph-ts";
 
-export class AccountEntity extends Entity {
+export class Account extends Entity {
   constructor(id: Bytes, address:  Bytes) {
     super();
     this.set("id", Value.fromBytes(id));
@@ -9,25 +9,25 @@ export class AccountEntity extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id != null, "Cannot save AccountEntity entity without an ID");
+    assert(id != null, "Cannot save Account entity without an ID");
     if (id) {
       assert(
         id.kind == ValueKind.BYTES,
-        `Entities of type AccountEntity must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
+        `Entities of type Account must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
       );
-      store.set("AccountEntity", id.toBytes().toHexString(), this);
+      store.set("Account", id.toBytes().toHexString(), this);
     }
   }
 
-  static loadInBlock(id: Bytes): AccountEntity | null {
-    return changetype<AccountEntity | null>(
-      store.get_in_block("AccountEntity", id.toHexString())
+  static loadInBlock(id: Bytes): Account | null {
+    return changetype<Account | null>(
+      store.get_in_block("Account", id.toHexString())
     );
   }
 
-  static load(id: Bytes): AccountEntity | null {
-    return changetype<AccountEntity | null>(
-      store.get("AccountEntity", id.toHexString())
+  static load(id: Bytes): Account | null {
+    return changetype<Account | null>(
+      store.get("Account", id.toHexString())
     );
   }
 
