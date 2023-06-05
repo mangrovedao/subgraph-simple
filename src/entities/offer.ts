@@ -1,7 +1,6 @@
 import { Address, BigInt, Bytes, Entity, Value, ValueKind, store } from "@graphprotocol/graph-ts";
 import { AccountEntity } from "./account";
 import { MarketEntity } from "./market";
-import { log } from "matchstick-as";
 
 export class OfferEntity extends Entity {
   static computeId(id: BigInt, outbound_tkn: Bytes, inbound_tkn: Bytes): Bytes {

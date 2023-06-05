@@ -19,7 +19,6 @@ type OfferEntity @entity {
   gives: BigInt!
   gasprice: BigInt!
   gasreq: BigInt!
-  id: BigInt!
   prev: BigInt!
   isOpen: Boolean!
   isFailed: Boolean!
