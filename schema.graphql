@@ -16,7 +16,6 @@ type OfferEntity @entity {
   initialWants: BigInt!
   gives: BigInt!
   initialGives: BigInt!
-  gives: BigInt!
   gasprice: BigInt!
   gasreq: BigInt!
   prev: BigInt!
