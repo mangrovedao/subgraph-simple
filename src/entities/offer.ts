@@ -5,8 +5,8 @@ import { log } from "matchstick-as";
 
 export class OfferEntity extends Entity {
   static computeId(id: BigInt, outbound_tkn: Bytes, inbound_tkn: Bytes): Bytes {
-    const idAsHexString = Bytes.fromByteArray(Bytes.fromBigInt(id)).toHexString();
-    return Bytes.fromUTF8(`${outbound_tkn.toHex()}-${inbound_tkn.toHex()}-${idAsHexString}`);
+    const _id = Bytes.fromBigInt(id);
+    return Bytes.fromUTF8(`${outbound_tkn.toHex()}-${inbound_tkn.toHex()}-${_id}`);
   }
 
   constructor(id: BigInt, outbound_tkn: Address, inbound_tkn: Address) {

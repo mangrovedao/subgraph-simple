@@ -3,12 +3,6 @@ type AccountEntity @entity(immutable: true) {
   address: Bytes!
 }
 
-type TokenEntity @entity(immutable: true) {
-  id: Bytes!
-  adress: Bytes!
-  decimals: BigInt!
-}
-
 type MarketEntity @entity {
   id: Bytes!
   outbound_tkn: Bytes! # address
