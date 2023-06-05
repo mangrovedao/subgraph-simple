@@ -161,19 +161,6 @@ export class OfferEntity extends Entity {
     this.set('gasreq', Value.fromBigInt(value));
   }
 
-  get _id(): BigInt {
-    let value = this.get("_id");
-    if (!value || value.kind == ValueKind.NULL) {
-      throw new Error("Cannot return null for a required field.");
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set _id(value: BigInt) {
-    this.set('_id', Value.fromBigInt(value));
-  }
-
   get prev(): BigInt {
     let value = this.get("prev");
     if (!value || value.kind == ValueKind.NULL) {

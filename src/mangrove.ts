@@ -104,7 +104,6 @@ export function handleOfferWrite(event: OfferWrite): void {
 
   offer.gasprice = event.params.gasprice,
   offer.gasreq = event.params.gasreq,
-  offer._id = event.params.id,
   offer.prev = event.params.prev,
   offer.isOpen = true;
   offer.isFailed = false;
