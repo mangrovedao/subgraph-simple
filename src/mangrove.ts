@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { Address, BigInt, Bytes, Value } from "@graphprotocol/graph-ts"
 import {
   Mangrove,
   Approval,
