@@ -106,16 +106,17 @@ describe("Describe entity assertions", () => {
 
     const offerId = Offer.computeId(id, token0, token1).toHexString();
 
-    assert.fieldEquals('Offer', offerId, 'wants', '990');
-    assert.fieldEquals('Offer', offerId, 'gives', '1980');
+    assert.fieldEquals('Offer', offerId, 'wants', '980');
+    assert.fieldEquals('Offer', offerId, 'gives', '1990');
+    assert.fieldEquals('Offer', offerId, 'isFilled', 'false');
 
-    offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, BigInt.fromI32(990), BigInt.fromI32(1980));
+    offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, BigInt.fromI32(1990), BigInt.fromI32(980));
     handleOfferSuccess(offerSuccess);
 
     assert.fieldEquals('Offer', offerId, 'wants', '0');
     assert.fieldEquals('Offer', offerId, 'gives', '0');
     assert.fieldEquals('Offer', offerId, 'isOpen', 'false');
-    assert.fieldEquals('Offer', offerId, 'isFilled', 'false');
+    assert.fieldEquals('Offer', offerId, 'isFilled', 'true');
 
     assert.entityCount("Offer", 1);
   });

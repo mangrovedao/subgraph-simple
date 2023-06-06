@@ -71,13 +71,13 @@ export function handleOfferRetract(event: OfferRetract): void {
 export function handleOfferSuccess(event: OfferSuccess): void {
   const offer = Offer.load(event.params.id, event.params.outbound_tkn, event.params.inbound_tkn)!;
 
-  offer.wants = offer.wants.minus(event.params.takerWants);
-  offer.gives = offer.gives.minus(event.params.takerGives);
+  offer.wants = offer.wants.minus(event.params.takerGives);
+  offer.gives = offer.gives.minus(event.params.takerWants);
 
   const BN_0 = BigInt.fromI32(0);
   if (offer.wants == BN_0 && offer.gives == BN_0) {
     offer.isOpen = false;
-    offer.isFilled = false;
+    offer.isFilled = true;
   }
 
   offer.save();
@@ -107,7 +107,7 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.prev = event.params.prev,
   offer.isOpen = true;
   offer.isFailed = false;
-  offer.isFilled = true;
+  offer.isFilled = false;
  
   offer.save();
 }
