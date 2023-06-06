@@ -57,6 +57,19 @@ export class Offer extends Entity {
     this.set("id", Value.fromBytes(value));
   }
 
+  get offerId(): BigInt {
+    let value = this.get("offerId");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set offerId(value: BigInt) {
+    this.set('offerId', Value.fromBigInt(value));
+  }
+
   getMarket(): Market {
     let value = this.get("market");
     if (!value || value.kind == ValueKind.NULL) {

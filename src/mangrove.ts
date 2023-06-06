@@ -96,6 +96,7 @@ export function handleOfferWrite(event: OfferWrite): void {
   const market = Market.load(event.params.outbound_tkn, event.params.inbound_tkn)!;
   offer.setMarket(market)
 
+  offer.offerId = event.params.id;
   offer.wants = event.params.wants,
   offer.initialWants = event.params.wants;
 

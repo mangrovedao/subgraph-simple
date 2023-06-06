@@ -12,6 +12,7 @@ type Market @entity {
 
 type Offer @entity {
   id: Bytes!
+  offerId: BigInt!
   wants: BigInt!
   initialWants: BigInt!
   gives: BigInt!
