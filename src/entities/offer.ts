@@ -75,12 +75,12 @@ export class Offer extends Entity {
     if (!value || value.kind == ValueKind.NULL) {
       throw new Error("Cannot return null for a required field.");
     } else {
-      return Market._load(value.toBytes())!;
+      return Market._load(value.toString())!;
     }
   }
 
   setMarket(market: Market): void {
-    this.set("market", Value.fromBytes(market.id));
+    this.set("market", Value.fromString(market.id));
   }
 
   getMaker(): Account {

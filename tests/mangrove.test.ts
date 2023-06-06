@@ -6,7 +6,7 @@ import {
   beforeAll,
   afterAll
 } from "matchstick-as/assembly/index"
-import { Address, BigInt, Bytes, Value } from "@graphprotocol/graph-ts"
+import { Address, BigInt } from "@graphprotocol/graph-ts"
 import { handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleSetActive } from "../src/mangrove"
 import { createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createSetActiveEvent } from "./mangrove-utils"
 import { Market } from "../src/entities/market";
@@ -37,8 +37,7 @@ describe("Describe entity assertions", () => {
     let market = Market.load(token0, token1);
     assert.assertNotNull(market);
 
-    const id = Bytes.fromUTF8(`${token0.toHex()}-${token1.toHex()}`).toHexString();
-
+    const id = Market.computeId(token0, token1);
     assert.fieldEquals('Market', id, 'active', 'true');
 
     setActiveEvent = createSetActiveEvent(token0, token1, false);

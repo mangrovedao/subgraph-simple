@@ -4,7 +4,7 @@ type Account @entity(immutable: true) {
 }
 
 type Market @entity {
-  id: Bytes!
+  id: String!
   outbound_tkn: Bytes! # address
   inbound_tkn: Bytes! # address
   active: Boolean!
