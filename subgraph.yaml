@@ -1,6 +1,76 @@
 specVersion: 0.0.5
 schema:
   file: ./schema.graphql
+templates:
+  - kind: ethereum
+    name: Kandel
+    network: mumbai
+    source:
+      abi: Kandel
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Credit
+        - Debit
+        - LogIncident
+        - Mgv
+        - Pair
+        - PopulateEnd
+        - PopulateStart
+        - RetractEnd
+        - RetractStart
+        - SetAdmin
+        - SetCompoundRates
+        - SetGasprice
+        - SetGasreq
+        - SetGeometricParams
+        - SetIndexMapping
+        - SetLength
+        - SetReserveId
+        - SetRouter
+      abis:
+        - name: Kandel
+          file: ./abis/Kandel.json
+      eventHandlers:
+        - event: Credit(indexed address,uint256)
+          handler: handleCredit
+        - event: Debit(indexed address,uint256)
+          handler: handleDebit
+        - event: LogIncident(address,indexed address,indexed address,indexed uint256,bytes32,bytes32)
+          handler: handleLogIncident
+        - event: Mgv(address)
+          handler: handleMgv
+        - event: Pair(address,address)
+          handler: handlePair
+        - event: PopulateEnd()
+          handler: handlePopulateEnd
+        - event: PopulateStart()
+          handler: handlePopulateStart
+        - event: RetractEnd()
+          handler: handleRetractEnd
+        - event: RetractStart()
+          handler: handleRetractStart
+        - event: SetAdmin(address)
+          handler: handleSetAdmin
+        - event: SetCompoundRates(uint256,uint256)
+          handler: handleSetCompoundRates
+        - event: SetGasprice(uint256)
+          handler: handleSetGasprice
+        - event: SetGasreq(uint256)
+          handler: handleSetGasreq
+        - event: SetGeometricParams(uint256,uint256)
+          handler: handleSetGeometricParams
+        - event: SetIndexMapping(indexed uint8,uint256,uint256)
+          handler: handleSetIndexMapping
+        - event: SetLength(uint256)
+          handler: handleSetLength
+        - event: SetReserveId(indexed address)
+          handler: handleSetReserveId
+        - event: SetRouter(address)
+          handler: handleSetRouter
+      file: ./src/kandel.ts
 dataSources:
   - kind: ethereum
     name: Mangrove
@@ -85,3 +155,27 @@ dataSources:
         - event: SetUseOracle(bool)
           handler: handleSetUseOracle
       file: ./src/mangrove.ts
+  - kind: ethereum
+    name: KandelSeeder
+    network: mumbai
+    source:
+      address: "0xb4A9Ac8Ae5b405193271A0e62682c9be47d578B9"
+      abi: KandelSeeder
+      startBlock: 35666000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - NewAaveKandel
+        - NewKandel
+      abis:
+        - name: KandelSeeder
+          file: ./abis/KandelSeeder.json
+      eventHandlers:
+        - event: NewAaveKandel(indexed address,indexed address,indexed address,address,address)
+          handler: handleNewAaveKandel
+        - event: NewKandel(indexed address,indexed address,indexed address,address)
+          handler: handleNewKandel
+      file: ./src/kandel-seeder.ts
+

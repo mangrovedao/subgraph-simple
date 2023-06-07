@@ -23,7 +23,7 @@ import {
   SetMonitor,
   SetNotify,
   SetUseOracle
-} from "../generated/Mangrove/Mangrove"
+} from "../../generated/Mangrove/Mangrove"
 
 export function createApprovalEvent(
   outbound_tkn: Address,

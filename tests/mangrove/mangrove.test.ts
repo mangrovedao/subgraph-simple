@@ -7,10 +7,10 @@ import {
   afterAll
 } from "matchstick-as/assembly/index"
 import { Address, BigInt } from "@graphprotocol/graph-ts"
-import { handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleSetActive } from "../src/mangrove"
+import { handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleSetActive } from "../../src/mangrove"
 import { createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createSetActiveEvent } from "./mangrove-utils"
-import { Market } from "../src/entities/market";
-import { Offer } from "../src/entities/offer";
+import { Market } from "../../src/entities/market";
+import { Offer } from "../../src/entities/offer";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0

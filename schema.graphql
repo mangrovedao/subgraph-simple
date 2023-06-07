@@ -28,3 +28,14 @@ type Offer @entity {
   market: Market!
   maker: Account!
 }
+
+type Kandel @entity {
+  id: Bytes!
+  seeder: Bytes!
+  address: Bytes!
+
+  base: Bytes!
+  quote: Bytes!
+  
+  owner: Account!
+}

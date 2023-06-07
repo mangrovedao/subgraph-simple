@@ -1,0 +1,131 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "contract IMangrove",
+        "name": "mgv",
+        "type": "address"
+      },
+      { "internalType": "uint256", "name": "kandelGasreq", "type": "uint256" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "contract IERC20",
+        "name": "base",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "contract IERC20",
+        "name": "quote",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "aaveKandel",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "reserveId",
+        "type": "address"
+      }
+    ],
+    "name": "NewAaveKandel",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "contract IERC20",
+        "name": "base",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "contract IERC20",
+        "name": "quote",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "kandel",
+        "type": "address"
+      }
+    ],
+    "name": "NewKandel",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "KANDEL_GASREQ",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MGV",
+    "outputs": [
+      { "internalType": "contract IMangrove", "name": "", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "contract IERC20",
+            "name": "base",
+            "type": "address"
+          },
+          {
+            "internalType": "contract IERC20",
+            "name": "quote",
+            "type": "address"
+          },
+          { "internalType": "uint256", "name": "gasprice", "type": "uint256" },
+          { "internalType": "bool", "name": "liquiditySharing", "type": "bool" }
+        ],
+        "internalType": "struct AbstractKandelSeeder.KandelSeed",
+        "name": "seed",
+        "type": "tuple"
+      }
+    ],
+    "name": "sow",
+    "outputs": [
+      {
+        "internalType": "contract GeometricKandel",
+        "name": "kandel",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

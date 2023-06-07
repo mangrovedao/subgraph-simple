@@ -1,0 +1,820 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "contract IMangrove",
+        "name": "mgv",
+        "type": "address"
+      },
+      { "internalType": "contract IERC20", "name": "base", "type": "address" },
+      { "internalType": "contract IERC20", "name": "quote", "type": "address" },
+      { "internalType": "uint256", "name": "gasreq", "type": "uint256" },
+      { "internalType": "uint256", "name": "gasprice", "type": "uint256" },
+      { "internalType": "address", "name": "reserveId", "type": "address" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "contract IERC20",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Credit",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "contract IERC20",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Debit",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "contract IMangrove",
+        "name": "mangrove",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "contract IERC20",
+        "name": "outbound_tkn",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "contract IERC20",
+        "name": "inbound_tkn",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "offerId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "makerData",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "mgvData",
+        "type": "bytes32"
+      }
+    ],
+    "name": "LogIncident",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "contract IMangrove",
+        "name": "mgv",
+        "type": "address"
+      }
+    ],
+    "name": "Mgv",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "contract IERC20",
+        "name": "base",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "contract IERC20",
+        "name": "quote",
+        "type": "address"
+      }
+    ],
+    "name": "Pair",
+    "type": "event"
+  },
+  { "anonymous": false, "inputs": [], "name": "PopulateEnd", "type": "event" },
+  {
+    "anonymous": false,
+    "inputs": [],
+    "name": "PopulateStart",
+    "type": "event"
+  },
+  { "anonymous": false, "inputs": [], "name": "RetractEnd", "type": "event" },
+  { "anonymous": false, "inputs": [], "name": "RetractStart", "type": "event" },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "admin",
+        "type": "address"
+      }
+    ],
+    "name": "SetAdmin",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "compoundRateBase",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "compoundRateQuote",
+        "type": "uint256"
+      }
+    ],
+    "name": "SetCompoundRates",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "SetGasprice",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "SetGasreq",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "spread",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "ratio",
+        "type": "uint256"
+      }
+    ],
+    "name": "SetGeometricParams",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "enum OfferType",
+        "name": "ba",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "offerId",
+        "type": "uint256"
+      }
+    ],
+    "name": "SetIndexMapping",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "SetLength",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "reserveId",
+        "type": "address"
+      }
+    ],
+    "name": "SetReserveId",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "contract AbstractRouter",
+        "name": "router",
+        "type": "address"
+      }
+    ],
+    "name": "SetRouter",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "BASE",
+    "outputs": [
+      { "internalType": "contract IERC20", "name": "", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MGV",
+    "outputs": [
+      { "internalType": "contract IMangrove", "name": "", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "NO_ROUTER",
+    "outputs": [
+      {
+        "internalType": "contract AbstractRouter",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "OFFER_GASREQ",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "PRECISION",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "QUOTE",
+    "outputs": [
+      { "internalType": "contract IERC20", "name": "", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "RESERVE_ID",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract IERC20[]",
+        "name": "tokens",
+        "type": "address[]"
+      }
+    ],
+    "name": "activate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "admin",
+    "outputs": [
+      { "internalType": "address", "name": "current", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "contract IERC20", "name": "token", "type": "address" },
+      { "internalType": "address", "name": "spender", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "approve",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract IERC20[]",
+        "name": "tokens",
+        "type": "address[]"
+      }
+    ],
+    "name": "checkList",
+    "outputs": [],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "baseAmount", "type": "uint256" },
+      { "internalType": "uint256", "name": "quoteAmount", "type": "uint256" }
+    ],
+    "name": "depositFunds",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "enum OfferType", "name": "ba", "type": "uint8" },
+      { "internalType": "uint256", "name": "index", "type": "uint256" }
+    ],
+    "name": "getOffer",
+    "outputs": [
+      { "internalType": "OfferPacked", "name": "offer", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "enum OfferType", "name": "ba", "type": "uint8" },
+      { "internalType": "uint256", "name": "offerId", "type": "uint256" }
+    ],
+    "name": "indexOfOfferId",
+    "outputs": [
+      { "internalType": "uint256", "name": "index", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          { "internalType": "uint256", "name": "offerId", "type": "uint256" },
+          { "internalType": "OfferPacked", "name": "offer", "type": "uint256" },
+          { "internalType": "uint256", "name": "wants", "type": "uint256" },
+          { "internalType": "uint256", "name": "gives", "type": "uint256" },
+          {
+            "internalType": "OfferDetailPacked",
+            "name": "offerDetail",
+            "type": "uint256"
+          },
+          {
+            "internalType": "GlobalPacked",
+            "name": "global",
+            "type": "uint256"
+          },
+          { "internalType": "LocalPacked", "name": "local", "type": "uint256" }
+        ],
+        "internalType": "struct MgvLib.SingleOrder",
+        "name": "order",
+        "type": "tuple"
+      }
+    ],
+    "name": "makerExecute",
+    "outputs": [
+      { "internalType": "bytes32", "name": "ret", "type": "bytes32" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          { "internalType": "uint256", "name": "offerId", "type": "uint256" },
+          { "internalType": "OfferPacked", "name": "offer", "type": "uint256" },
+          { "internalType": "uint256", "name": "wants", "type": "uint256" },
+          { "internalType": "uint256", "name": "gives", "type": "uint256" },
+          {
+            "internalType": "OfferDetailPacked",
+            "name": "offerDetail",
+            "type": "uint256"
+          },
+          {
+            "internalType": "GlobalPacked",
+            "name": "global",
+            "type": "uint256"
+          },
+          { "internalType": "LocalPacked", "name": "local", "type": "uint256" }
+        ],
+        "internalType": "struct MgvLib.SingleOrder",
+        "name": "order",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          { "internalType": "bytes32", "name": "makerData", "type": "bytes32" },
+          { "internalType": "bytes32", "name": "mgvData", "type": "bytes32" }
+        ],
+        "internalType": "struct MgvLib.OrderResult",
+        "name": "result",
+        "type": "tuple"
+      }
+    ],
+    "name": "makerPosthook",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "offerGasreq",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "enum OfferType", "name": "ba", "type": "uint8" },
+      { "internalType": "uint256", "name": "index", "type": "uint256" }
+    ],
+    "name": "offerIdOfIndex",
+    "outputs": [
+      { "internalType": "uint256", "name": "offerId", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "enum OfferType", "name": "ba", "type": "uint8" }
+    ],
+    "name": "offeredVolume",
+    "outputs": [
+      { "internalType": "uint256", "name": "volume", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "params",
+    "outputs": [
+      { "internalType": "uint16", "name": "gasprice", "type": "uint16" },
+      { "internalType": "uint24", "name": "gasreq", "type": "uint24" },
+      { "internalType": "uint24", "name": "ratio", "type": "uint24" },
+      {
+        "internalType": "uint24",
+        "name": "compoundRateBase",
+        "type": "uint24"
+      },
+      {
+        "internalType": "uint24",
+        "name": "compoundRateQuote",
+        "type": "uint24"
+      },
+      { "internalType": "uint8", "name": "spread", "type": "uint8" },
+      { "internalType": "uint8", "name": "pricePoints", "type": "uint8" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "enum OfferType", "name": "ba", "type": "uint8" }
+    ],
+    "name": "pending",
+    "outputs": [{ "internalType": "int256", "name": "", "type": "int256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256[]",
+            "name": "indices",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "baseDist",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "quoteDist",
+            "type": "uint256[]"
+          }
+        ],
+        "internalType": "struct DirectWithBidsAndAsksDistribution.Distribution",
+        "name": "distribution",
+        "type": "tuple"
+      },
+      { "internalType": "uint256[]", "name": "pivotIds", "type": "uint256[]" },
+      { "internalType": "uint256", "name": "firstAskIndex", "type": "uint256" },
+      {
+        "components": [
+          { "internalType": "uint16", "name": "gasprice", "type": "uint16" },
+          { "internalType": "uint24", "name": "gasreq", "type": "uint24" },
+          { "internalType": "uint24", "name": "ratio", "type": "uint24" },
+          {
+            "internalType": "uint24",
+            "name": "compoundRateBase",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "compoundRateQuote",
+            "type": "uint24"
+          },
+          { "internalType": "uint8", "name": "spread", "type": "uint8" },
+          { "internalType": "uint8", "name": "pricePoints", "type": "uint8" }
+        ],
+        "internalType": "struct GeometricKandel.Params",
+        "name": "parameters",
+        "type": "tuple"
+      },
+      { "internalType": "uint256", "name": "baseAmount", "type": "uint256" },
+      { "internalType": "uint256", "name": "quoteAmount", "type": "uint256" }
+    ],
+    "name": "populate",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256[]",
+            "name": "indices",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "baseDist",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "quoteDist",
+            "type": "uint256[]"
+          }
+        ],
+        "internalType": "struct DirectWithBidsAndAsksDistribution.Distribution",
+        "name": "distribution",
+        "type": "tuple"
+      },
+      { "internalType": "uint256[]", "name": "pivotIds", "type": "uint256[]" },
+      { "internalType": "uint256", "name": "firstAskIndex", "type": "uint256" }
+    ],
+    "name": "populateChunk",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "outbound_tkn",
+        "type": "address"
+      },
+      {
+        "internalType": "contract IERC20",
+        "name": "inbound_tkn",
+        "type": "address"
+      },
+      { "internalType": "uint256", "name": "offerId", "type": "uint256" }
+    ],
+    "name": "provisionOf",
+    "outputs": [
+      { "internalType": "uint256", "name": "provision", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "enum OfferType", "name": "ba", "type": "uint8" }
+    ],
+    "name": "reserveBalance",
+    "outputs": [
+      { "internalType": "uint256", "name": "balance", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "from", "type": "uint256" },
+      { "internalType": "uint256", "name": "to", "type": "uint256" },
+      { "internalType": "uint256", "name": "baseAmount", "type": "uint256" },
+      { "internalType": "uint256", "name": "quoteAmount", "type": "uint256" },
+      { "internalType": "uint256", "name": "freeWei", "type": "uint256" },
+      {
+        "internalType": "address payable",
+        "name": "recipient",
+        "type": "address"
+      }
+    ],
+    "name": "retractAndWithdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "from", "type": "uint256" },
+      { "internalType": "uint256", "name": "to", "type": "uint256" }
+    ],
+    "name": "retractOffers",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "router",
+    "outputs": [
+      {
+        "internalType": "contract AbstractRouter",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "admin_", "type": "address" }
+    ],
+    "name": "setAdmin",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "compoundRateBase",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "compoundRateQuote",
+        "type": "uint256"
+      }
+    ],
+    "name": "setCompoundRates",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "gasprice", "type": "uint256" }
+    ],
+    "name": "setGasprice",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "gasreq", "type": "uint256" }
+    ],
+    "name": "setGasreq",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract AbstractRouter",
+        "name": "router_",
+        "type": "address"
+      }
+    ],
+    "name": "setRouter",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "amount", "type": "uint256" },
+      {
+        "internalType": "address payable",
+        "name": "receiver",
+        "type": "address"
+      }
+    ],
+    "name": "withdrawFromMangrove",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "baseAmount", "type": "uint256" },
+      { "internalType": "uint256", "name": "quoteAmount", "type": "uint256" },
+      { "internalType": "address", "name": "recipient", "type": "address" }
+    ],
+    "name": "withdrawFunds",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  { "stateMutability": "payable", "type": "receive" }
+]
