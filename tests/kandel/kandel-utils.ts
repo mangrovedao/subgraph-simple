@@ -19,7 +19,7 @@ import {
   SetLength,
   SetReserveId,
   SetRouter
-} from "../../generated/templates//Kandel/Kandel"
+} from "../../generated/templates/Kandel/Kandel"
 
 export function createCreditEvent(token: Address, amount: BigInt): Credit {
   let creditEvent = changetype<Credit>(newMockEvent())

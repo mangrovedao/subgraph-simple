@@ -1,4 +1,4 @@
-import { Address, Bytes, Entity, Value, ValueKind, store } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Bytes, Entity, Value, ValueKind, store } from "@graphprotocol/graph-ts";
 
 export class Kandel extends Entity {
   constructor(id: Bytes) {
@@ -93,6 +93,19 @@ export class Kandel extends Entity {
 
   set quote(quote: Bytes) {
     this.set("quote", Value.fromBytes(quote));
+  }
+
+  get gasprice(): BigInt {
+    let value = this.get("gasprice");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set gasprice(gasprice: BigInt) {
+    this.set("gasprice", Value.fromBigInt(gasprice));
   }
 
   get owner(): Address {

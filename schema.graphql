@@ -36,6 +36,8 @@ type Kandel @entity {
 
   base: Bytes!
   quote: Bytes!
+
+  gasprice: BigInt
   
   owner: Account!
 }

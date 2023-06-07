@@ -20,6 +20,7 @@ import {
   SetReserveId,
   SetRouter
 } from "../generated/templates/Kandel/Kandel"
+import { Kandel as  KandelEntity } from "./entities/kandel";
 
 export function handleCredit(event: Credit): void {
   // Entities can be loaded from the store using a string ID; this ID
@@ -46,7 +47,13 @@ export function handleSetAdmin(event: SetAdmin): void {}
 
 export function handleSetCompoundRates(event: SetCompoundRates): void {}
 
-export function handleSetGasprice(event: SetGasprice): void {}
+export function handleSetGasprice(event: SetGasprice): void {
+  const kandel = KandelEntity.load(event.address)!;
+
+  kandel.gasprice = event.params.value;
+
+  kandel.save();
+}
 
 export function handleSetGasreq(event: SetGasreq): void {}
 

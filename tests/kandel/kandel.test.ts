@@ -1,4 +1,4 @@
-import { Address } from "@graphprotocol/graph-ts";
+import { Address, BigInt } from "@graphprotocol/graph-ts";
 import {
   assert,
   describe,
@@ -9,6 +9,8 @@ import {
 } from "matchstick-as/assembly/index"
 import { createNewKandelEvent } from "./kandel-seeder-utils";
 import { handleNewKandel } from "../../src/kandel-seeder";
+import { createSetGaspriceEvent } from "./kandel-utils";
+import { handleSetGasprice } from "../../src/kandel";
 
 
 // Tests structure (matchstick-as >=0.5.0)
@@ -31,5 +33,16 @@ describe("Describe entity assertions", () => {
 
   test("Kandel created and stored", () => {
     assert.entityCount('Kandel', 1);
+  });
+
+  test("Kandel setGasPrice", () => {
+    assert.entityCount('Kandel', 1);
+
+    const bi10 = BigInt.fromI32(10);
+    const setGasPriceEvent = createSetGaspriceEvent(bi10)
+    setGasPriceEvent.address = kandel;
+    handleSetGasprice(setGasPriceEvent);
+     
+    assert.fieldEquals('Kandel', kandel.toHexString(), 'gasprice', '10');
   });
 })
