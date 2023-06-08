@@ -39,19 +39,19 @@ const getOrCreateAccount = (address: Address): Account => {
   return account;
 }
 
-const context = new TypedMap<string, Entity>();
+const context = new TypedMap<string, Order>();
 let id = 0;
 
-const addElementToQueue = (entity: Entity): void => {
+const addOrderToQueue = (entity: Order): void => {
   context.set(id.toString(), entity)
   id = id + 1;
 }
 
-const getElementFromQueue = (): Entity => {
-  return context.get(id.toString())!;
+const getOrderFromQueue = (): Order => {
+  return context.get((id - 1).toString())!;
 }
 
-const removeElementFromQueue = (): void => {
+const removeOrderFromQueue = (): void => {
   id = id - 1;
 }
 
@@ -111,6 +111,14 @@ export function handleOfferSuccess(event: OfferSuccess): void {
     offer.isFilled = true;
   }
 
+  const order = getOrderFromQueue();
+
+  let offers = order.offers;
+  offers.push(offer.id);
+
+  let orders = offer.orders;
+  orders.push(order.id);
+
   offer.save();
 }
 
@@ -144,7 +152,8 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.prev = event.params.prev,
   offer.isOpen = true;
   offer.isFailed = false;
-  offer.isFilled = false;
+  offer.isFilled = false
+  offer.orders = new Array<string>();
  
   offer.save();
 }
@@ -152,10 +161,13 @@ export function handleOfferWrite(event: OfferWrite): void {
 export function handleOrderComplete(event: OrderComplete): void {}
 
 export function handleOrderStart(event: OrderStart): void {
-  const id = `${event.address}-${event.logIndex}`;
+  const id = `${event.address.toHex()}-${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
   const order = new Order(id);
 
+  order.offers = new Array<string>();
   order.save();
+
+  addOrderToQueue(order);
 }
 
 export function handlePosthookFail(event: PosthookFail): void {}

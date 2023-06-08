@@ -27,7 +27,7 @@ type Offer @entity {
 
   market: Market!
   maker: Account!
-  orders: [Order!]
+  orders: [Order!]! 
 }
 
 type Order @entity {
@@ -38,7 +38,7 @@ type Order @entity {
   penalty: BigInt
   feePaid: BigInt
 
-  offers: [Offer!]! @derivedFrom(field: "orders")
+  offers: [Offer!]!
 }
 
 type Kandel @entity {

@@ -6,7 +6,7 @@ import {
   beforeAll,
   afterAll
 } from "matchstick-as/assembly/index"
-import { Address, BigInt } from "@graphprotocol/graph-ts"
+import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderStart, handleSetActive } from "../../src/mangrove"
 import { createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils"
 import { Market } from "../../generated/schema";
@@ -86,6 +86,9 @@ describe("Describe entity assertions", () => {
     handleSetActive(setActiveEvent);
     assert.entityCount("Market", 1);
 
+    const order = createOrderStartEvent();
+    handleOrderStart(order);
+
     const id = BigInt.fromI32(0);
     let offerWrite = createOfferWriteEvent(
       token0, 
@@ -130,8 +133,48 @@ describe("Describe entity assertions", () => {
       const order = createOrderStartEvent();
       handleOrderStart(order);
 
+      assert.entityCount("Order", 1);
+    });
+
+    test("Order recursive", () => {
+      let order = createOrderStartEvent();
+      handleOrderStart(order);
 
       assert.entityCount("Order", 1);
+
+      let id = BigInt.fromI32(0);
+      let offerWrite = createOfferWriteEvent(
+        token0, 
+        token1,
+        maker,
+        BigInt.fromI32(1000), // wants
+        BigInt.fromI32(2000), // gives
+        BigInt.fromI32(0),
+        BigInt.fromI32(0),
+        id,
+        BigInt.fromI32(0),
+      );
+      handleOfferWrite(offerWrite);
+
+      order = createOrderStartEvent()
+      order.transaction.hash = Bytes.fromUTF8("0xccc");
+      handleOrderStart(order);
+
+      id = BigInt.fromI32(1);
+      offerWrite = createOfferWriteEvent(
+        token0, 
+        token1,
+        maker,
+        BigInt.fromI32(1000), // wants
+        BigInt.fromI32(2000), // gives
+        BigInt.fromI32(0),
+        BigInt.fromI32(0),
+        id,
+        BigInt.fromI32(0),
+      );
+      handleOfferWrite(offerWrite);
+
+      assert.entityCount("Order", 2);
     });
 
   });
