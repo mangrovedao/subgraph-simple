@@ -11,7 +11,7 @@ type Market @entity {
 }
 
 type Offer @entity {
-  id: Bytes!
+  id: String!
   offerId: BigInt!
   wants: BigInt!
   initialWants: BigInt!
@@ -27,6 +27,18 @@ type Offer @entity {
 
   market: Market!
   maker: Account!
+  orders: [Order!]
+}
+
+type Order @entity {
+  id: String!
+  taker: Bytes
+  takerGot: BigInt
+  takerGave: BigInt
+  penalty: BigInt
+  feePaid: BigInt
+
+  offers: [Offer!]! @derivedFrom(field: "orders")
 }
 
 type Kandel @entity {

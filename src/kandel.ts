@@ -20,7 +20,7 @@ import {
   SetReserveId,
   SetRouter
 } from "../generated/templates/Kandel/Kandel"
-import { Kandel as  KandelEntity } from "./entities/kandel";
+import { Kandel as  KandelEntity } from "../generated/schema";
 
 export function handleCredit(event: Credit): void {
   // Entities can be loaded from the store using a string ID; this ID

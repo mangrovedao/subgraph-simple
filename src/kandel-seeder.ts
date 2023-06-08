@@ -3,7 +3,7 @@ import {
   NewKandel
 } from "../generated/KandelSeeder/KandelSeeder"
 import { Kandel } from "../generated/templates"
-import { Kandel as KandelEntity } from "./entities//kandel";
+import { Kandel as KandelEntity } from "../generated/schema";
 
 export function handleNewAaveKandel(event: NewAaveKandel): void {
 

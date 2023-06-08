@@ -7,10 +7,10 @@ import {
   afterAll
 } from "matchstick-as/assembly/index"
 import { Address, BigInt } from "@graphprotocol/graph-ts"
-import { handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleSetActive } from "../../src/mangrove"
-import { createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createSetActiveEvent } from "./mangrove-utils"
-import { Market } from "../../src/entities/market";
-import { Offer } from "../../src/entities/offer";
+import { handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderStart, handleSetActive } from "../../src/mangrove"
+import { createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils"
+import { Market } from "../../generated/schema";
+import { getMarketId, getOfferId } from "../../src/helpers";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -34,16 +34,16 @@ describe("Describe entity assertions", () => {
     handleSetActive(setActiveEvent);
     assert.entityCount("Market", 1);
 
-    let market = Market.load(token0, token1);
+    const marketId = getMarketId(token0, token1)
+    let market = Market.load(marketId);
     assert.assertNotNull(market);
 
-    const id = Market.computeId(token0, token1);
-    assert.fieldEquals('Market', id, 'active', 'true');
+    assert.fieldEquals('Market', marketId, 'active', 'true');
 
     setActiveEvent = createSetActiveEvent(token0, token1, false);
     handleSetActive(setActiveEvent);
     
-    assert.fieldEquals('Market', id, 'active', 'false');
+    assert.fieldEquals('Market', marketId, 'active', 'false');
     assert.entityCount("Market", 1);
   });
 
@@ -66,8 +66,8 @@ describe("Describe entity assertions", () => {
     );
     handleOfferWrite(offerWrite);
 
-    const offerId = Offer.computeId(id, token0, token1);
-    assert.fieldEquals('Offer', offerId.toHexString(), 'isOpen', 'true');
+    const offerId = getOfferId(token0, token1, id);
+    assert.fieldEquals('Offer', offerId, 'isOpen', 'true');
 
     let offerRetract = createOfferRetractEvent(
       token0,
@@ -77,7 +77,7 @@ describe("Describe entity assertions", () => {
     );
     handleOfferRetract(offerRetract);
 
-    assert.fieldEquals('Offer', offerId.toHexString(), 'isOpen', 'false');
+    assert.fieldEquals('Offer', offerId, 'isOpen', 'false');
     assert.entityCount("Offer", 1);
   });
 
@@ -103,7 +103,7 @@ describe("Describe entity assertions", () => {
     let offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, BigInt.fromI32(10), BigInt.fromI32(20));
     handleOfferSuccess(offerSuccess);
 
-    const offerId = Offer.computeId(id, token0, token1).toHexString();
+    const offerId = getOfferId(token0, token1, id);
 
     assert.fieldEquals('Offer', offerId, 'wants', '980');
     assert.fieldEquals('Offer', offerId, 'gives', '1990');
@@ -118,5 +118,21 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'isFilled', 'true');
 
     assert.entityCount("Offer", 1);
+  });
+
+  describe("Order created", () => {
+    beforeAll(() => {
+      let setActiveEvent = createSetActiveEvent(token0, token1, true);
+      handleSetActive(setActiveEvent);
+    });
+    
+    test("OrderStart", () => {
+      const order = createOrderStartEvent();
+      handleOrderStart(order);
+
+
+      assert.entityCount("Order", 1);
+    });
+
   });
 })
