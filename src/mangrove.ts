@@ -24,7 +24,7 @@ import {
   SetNotify,
   SetUseOracle
 } from "../generated/Mangrove/Mangrove"
-import { Market, Account, Order, Offer, Contex } from "../generated/schema"
+import { Market, Account, Order, Offer, Kandel } from "../generated/schema"
 import { getMarketId, getOfferId } from "./helpers";
 
 const getOrCreateAccount = (address: Address): Account => {
@@ -113,6 +113,10 @@ export function handleOfferWrite(event: OfferWrite): void {
   if (!offer) {
     offer = new Offer(offerId);
     offer.transactionHash = event.transaction.hash;
+    const kandel = Kandel.load(event.params.maker);
+    if (kandel) {
+      offer.kandel = event.params.maker;
+    }
   }
 
   const owner = getOrCreateAccount(event.params.maker);

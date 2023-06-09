@@ -178,4 +178,3 @@ dataSources:
         - event: NewKandel(indexed address,indexed address,indexed address,address)
           handler: handleNewKandel
       file: ./src/kandel-seeder.ts
-
