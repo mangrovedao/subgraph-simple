@@ -203,6 +203,8 @@ export function handleOrderComplete(event: OrderComplete): void {
   order.penalty = event.params.penalty;
   order.feePaid = event.params.feePaid;
 
+  order.save();
+
   removeOrderFromQueue();
 }
 
