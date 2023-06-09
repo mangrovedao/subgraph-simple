@@ -53,3 +53,7 @@ type Kandel @entity {
   
   owner: Account!
 }
+
+type Contex @entity {
+  id: String!
+}

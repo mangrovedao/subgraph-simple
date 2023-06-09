@@ -165,8 +165,8 @@ describe("Describe entity assertions", () => {
         token0, 
         token1,
         maker,
-        BigInt.fromI32(1000), // wants
-        BigInt.fromI32(2000), // gives
+        BigInt.fromI32(500), // wants
+        BigInt.fromI32(1000), // gives
         BigInt.fromI32(0),
         BigInt.fromI32(0),
         id,

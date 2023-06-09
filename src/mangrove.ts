@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes, Entity, TypedMap, Value } from "@graphprotocol/graph-ts"
+import { Address, BigInt, Value } from "@graphprotocol/graph-ts"
 import {
   Mangrove,
   Approval,
@@ -24,7 +24,7 @@ import {
   SetNotify,
   SetUseOracle
 } from "../generated/Mangrove/Mangrove"
-import { Market, Account, Order, Offer } from "../generated/schema"
+import { Market, Account, Order, Offer, Contex } from "../generated/schema"
 import { getMarketId, getOfferId } from "./helpers";
 
 const getOrCreateAccount = (address: Address): Account => {
@@ -39,20 +39,41 @@ const getOrCreateAccount = (address: Address): Account => {
   return account;
 }
 
-const context = new TypedMap<string, Order>();
-let id = 0;
+const addOrderToQueue = (order: Order): void => {
+  let context = Contex.load('context');
+  if (!context) {
+    context = new Contex('context');
+    context.setI32('_id', 0);
+  }
+  let _id = context.getI32('_id');
 
-const addOrderToQueue = (entity: Order): void => {
-  context.set(id.toString(), entity)
-  id = id + 1;
+  context.set(_id.toString(), Value.fromString(order.id));
+  context.setI32('_id', _id + 1);
+
+  context.save();
 }
 
 const getOrderFromQueue = (): Order => {
-  return context.get((id - 1).toString())!;
+  const context = Contex.load('context')!;
+
+  const _id = context.getI32('_id');
+
+  const orderId = context.get((_id - 1).toString())!.toString();
+
+  const order = Order.load(orderId)!;
+
+  return order;
 }
 
 const removeOrderFromQueue = (): void => {
-  id = id - 1;
+  let context = Contex.load('context')!;
+  let _id = context.getI32('_id');
+  _id = _id - 1;
+ 
+  context.unset(_id.toString());
+  context.setI32('_id', _id);
+
+  context.save();
 }
 
 export function handleApproval(event: Approval): void {}
@@ -158,7 +179,16 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.save();
 }
 
-export function handleOrderComplete(event: OrderComplete): void {}
+export function handleOrderComplete(event: OrderComplete): void {
+  const order = getOrderFromQueue();
+  order.taker = event.params.taker;
+  order.takerGot = event.params.takerGot;
+  order.takerGave = event.params.takerGave;
+  order.penalty = event.params.penalty;
+  order.feePaid = event.params.feePaid;
+
+  removeOrderFromQueue();
+}
 
 export function handleOrderStart(event: OrderStart): void {
   const id = `${event.address.toHex()}-${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
