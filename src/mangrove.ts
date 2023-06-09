@@ -136,6 +136,23 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   if (offer.wants == BN_0 && offer.gives == BN_0) {
     offer.isOpen = false;
     offer.isFilled = true;
+
+    const newOfferId = `${offerId}-${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
+    offer.unset(offerId);
+    offer.id = newOfferId;
+
+    let orders = offer.orders!;
+    for (let i = 0 ; i < orders.length ; ++i) {
+      const order = Order.load(orders[i])!;
+      for (let j = 0 ; j < order.offers!.length ; ++j) {
+        const referencedOffer = Offer.load(order.offers![j])!;
+        if (referencedOffer.id === offerId) {
+          referencedOffer.id = newOfferId;
+        }
+      }
+    }
+
+    offer.orders = orders;
   }
 
   const order = getOrderFromQueue();
@@ -161,7 +178,12 @@ export function handleOfferWrite(event: OfferWrite): void {
     event.params.inbound_tkn,
     event.params.id,
   );
-  const offer = new Offer(offerId);
+
+  let offer = Offer.load(offerId);
+  if (!offer) {
+    offer = new Offer(offerId);
+    offer.transactionHash = event.transaction.hash;
+  }
 
   const owner = getOrCreateAccount(event.params.maker);
   offer.maker = owner.id;

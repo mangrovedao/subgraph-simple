@@ -108,7 +108,7 @@ describe("Describe entity assertions", () => {
     let offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, BigInt.fromI32(10), BigInt.fromI32(20));
     handleOfferSuccess(offerSuccess);
 
-    const offerId = getOfferId(token0, token1, id);
+    let offerId = getOfferId(token0, token1, id);
 
     assert.fieldEquals('Offer', offerId, 'wants', '980');
     assert.fieldEquals('Offer', offerId, 'gives', '1990');
@@ -117,12 +117,13 @@ describe("Describe entity assertions", () => {
     offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, BigInt.fromI32(1990), BigInt.fromI32(980));
     handleOfferSuccess(offerSuccess);
 
+    offerId = `${offerId}-${offerSuccess.transaction.hash.toHex()}-${offerSuccess.logIndex.toHex()}`;
     assert.fieldEquals('Offer', offerId, 'wants', '0');
     assert.fieldEquals('Offer', offerId, 'gives', '0');
     assert.fieldEquals('Offer', offerId, 'isOpen', 'false');
     assert.fieldEquals('Offer', offerId, 'isFilled', 'true');
 
-    assert.entityCount("Offer", 1);
+    assert.entityCount("Offer", 2);
   });
 
   describe("Order created", () => {
@@ -226,22 +227,43 @@ describe("Describe entity assertions", () => {
 
       assert.entityCount("Order", 2);
 
-      const offerId1 = getOfferId(token0, token1, id1)
+      let offerId1 = getOfferId(token0, token1, id1)
+      offerId1 = `${offerId1}-${offerSuccess2.transaction.hash.toHex()}-${offerSuccess2.logIndex.toHex()}`;
+
+      const orderId1 = `${startEvent2.address.toHex()}-${startEvent2.transaction.hash.toHex()}-${startEvent2.logIndex.toHex()}`;
 
       assert.fieldEquals(
         'Offer',
         offerId1,
         'orders', 
-        `[${startEvent2.address.toHex()}-${startEvent2.transaction.hash.toHex()}-${startEvent2.logIndex.toHex()}]`,
+        `[${orderId1}]`,
       );
 
-      const offerId2 = getOfferId(token0, token1, id2);
+      let offerId2 = getOfferId(token0, token1, id2);
+      offerId2 = `${offerId2}-${offerSuccess2.transaction.hash.toHex()}-${offerSuccess2.logIndex.toHex()}`;
+
+      const orderId2 = `${startEvent1.address.toHex()}-${startEvent1.transaction.hash.toHex()}-${startEvent1.logIndex.toHex()}`;
       assert.fieldEquals(
         'Offer',
         offerId2,
         'orders', 
-        `[${startEvent1.address.toHex()}-${startEvent1.transaction.hash.toHex()}-${startEvent1.logIndex.toHex()}]`
+        `[${orderId2}]`
       );
+
+      assert.fieldEquals(
+        'Order',
+        orderId1,
+        'offers', 
+        `[${offerId1}]`
+      );
+
+      assert.fieldEquals(
+        'Order',
+        orderId2,
+        'offers', 
+        `[${offerId2}]`
+      );
+
     });
   });
 })

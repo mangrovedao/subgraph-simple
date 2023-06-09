@@ -13,6 +13,7 @@ type Market @entity {
 type Offer @entity {
   id: String!
   offerId: BigInt!
+  transactionHash: Bytes!
   wants: BigInt!
   initialWants: BigInt!
   gives: BigInt!
