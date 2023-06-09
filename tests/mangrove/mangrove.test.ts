@@ -193,12 +193,11 @@ describe("Describe entity assertions", () => {
       startEvent1.transaction.hash = Bytes.fromUTF8("0xccc");
 
       handleOrderStart(startEvent1);
-      handleOfferSuccess(offerSuccess1);
 
       const startEvent2 = createOrderStartEvent()
       startEvent2.transaction.hash = Bytes.fromUTF8("0xddd");
-      handleOrderStart(startEvent2);
 
+      handleOrderStart(startEvent2);
       const orderComplete1 = createOrderCompleteEvent(
         token0, 
         token1, 
@@ -208,8 +207,10 @@ describe("Describe entity assertions", () => {
         BigInt.fromI32(0),
         BigInt.fromI32(0),
       );
+      handleOfferSuccess(offerSuccess1);
+
       handleOrderComplete(orderComplete1);
-      
+
       handleOfferSuccess(offerSuccess2);
 
       const orderComplete2 = createOrderCompleteEvent(
@@ -231,7 +232,7 @@ describe("Describe entity assertions", () => {
         'Offer',
         offerId1,
         'orders', 
-        `[${startEvent1.address.toHex()}-${startEvent1.transaction.hash.toHex()}-${startEvent1.logIndex.toHex()}]`,
+        `[${startEvent2.address.toHex()}-${startEvent2.transaction.hash.toHex()}-${startEvent2.logIndex.toHex()}]`,
       );
 
       const offerId2 = getOfferId(token0, token1, id2);
@@ -239,7 +240,7 @@ describe("Describe entity assertions", () => {
         'Offer',
         offerId2,
         'orders', 
-        `[${startEvent2.address.toHex()}-${startEvent2.transaction.hash.toHex()}-${startEvent2.logIndex.toHex()}]`
+        `[${startEvent1.address.toHex()}-${startEvent1.transaction.hash.toHex()}-${startEvent1.logIndex.toHex()}]`
       );
     });
   });

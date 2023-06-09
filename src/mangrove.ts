@@ -41,16 +41,18 @@ const getOrCreateAccount = (address: Address): Account => {
 
 const addOrderToQueue = (order: Order): void => {
   let context = Contex.load('context');
-  let _id = 0;
+  let currentId = 0;
   if (!context) {
     context = new Contex('context');
-    context.setI32('_id', 0);
+    context.setI32('currentId', 0);
   } else {
-    _id = context.getI32('_id');
+    currentId = context.getI32('currentId');
   }
 
-  context.set(_id.toString(), Value.fromString(order.id));
-  context.setI32('_id', _id + 1);
+  context.set(currentId.toString(), Value.fromString(order.id));
+
+  currentId = currentId + 1;
+  context.setI32('currentId', currentId);
 
   context.save();
 }
@@ -58,9 +60,9 @@ const addOrderToQueue = (order: Order): void => {
 const getOrderFromQueue = (): Order => {
   const context = Contex.load('context')!;
 
-  const _id = context.getI32('_id');
+  const currentId = context.getI32('currentId');
 
-  const orderId = context.get((_id - 1).toString())!.toString();
+  const orderId = context.get((currentId - 1).toString())!.toString();
 
   const order = Order.load(orderId)!;
 
@@ -69,11 +71,13 @@ const getOrderFromQueue = (): Order => {
 
 const removeOrderFromQueue = (): void => {
   let context = Contex.load('context')!;
-  let _id = context.getI32('_id');
-  _id = _id - 1;
+  let currentId = context.getI32('currentId');
 
-  context.unset(_id.toString());
-  context.setI32('_id', _id);
+  context.unset(currentId.toString());
+
+  currentId = currentId - 1;
+
+  context.setI32('currentId', currentId);
 
   context.save();
 }
@@ -185,7 +189,6 @@ export function handleOfferWrite(event: OfferWrite): void {
   let orders = offer.orders;
   if (!orders) {
     offer.orders = new Array<string>();
-
   }
  
   offer.save();
@@ -193,6 +196,7 @@ export function handleOfferWrite(event: OfferWrite): void {
 
 export function handleOrderComplete(event: OrderComplete): void {
   const order = getOrderFromQueue();
+  
   order.taker = event.params.taker;
   order.takerGot = event.params.takerGot;
   order.takerGave = event.params.takerGave;
