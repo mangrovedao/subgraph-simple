@@ -4,12 +4,14 @@ import {
   test,
   clearStore,
   beforeAll,
-  afterAll
+  afterAll,
+  beforeEach,
+  afterEach
 } from "matchstick-as/assembly/index"
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
-import { handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderStart, handleSetActive } from "../../src/mangrove"
-import { createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils"
-import { Market } from "../../generated/schema";
+import { Address, BigInt, Bytes, log } from "@graphprotocol/graph-ts"
+import { handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive } from "../../src/mangrove"
+import { createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils"
+import { Market, Offer } from "../../generated/schema";
 import { getMarketId, getOfferId } from "../../src/helpers";
 
 // Tests structure (matchstick-as >=0.5.0)
@@ -124,9 +126,13 @@ describe("Describe entity assertions", () => {
   });
 
   describe("Order created", () => {
-    beforeAll(() => {
+    beforeEach(() => {
       let setActiveEvent = createSetActiveEvent(token0, token1, true);
       handleSetActive(setActiveEvent);
+    });
+
+    afterEach(() => {
+      clearStore();
     });
     
     test("OrderStart", () => {
@@ -137,13 +143,8 @@ describe("Describe entity assertions", () => {
     });
 
     test("Order recursive", () => {
-      let order = createOrderStartEvent();
-      handleOrderStart(order);
-
-      assert.entityCount("Order", 1);
-
-      let id = BigInt.fromI32(0);
-      let offerWrite = createOfferWriteEvent(
+      const id1 = BigInt.fromI32(0);
+      const offerWrite1 = createOfferWriteEvent(
         token0, 
         token1,
         maker,
@@ -151,17 +152,22 @@ describe("Describe entity assertions", () => {
         BigInt.fromI32(2000), // gives
         BigInt.fromI32(0),
         BigInt.fromI32(0),
-        id,
+        id1,
         BigInt.fromI32(0),
       );
-      handleOfferWrite(offerWrite);
+      handleOfferWrite(offerWrite1);
 
-      order = createOrderStartEvent()
-      order.transaction.hash = Bytes.fromUTF8("0xccc");
-      handleOrderStart(order);
+      const offerSuccess1 = createOfferSuccessEvent(
+        token0, 
+        token1, 
+        id1, 
+        taker, 
+        BigInt.fromI32(2000), 
+        BigInt.fromI32(1000)
+      );
 
-      id = BigInt.fromI32(1);
-      offerWrite = createOfferWriteEvent(
+      const id2 = BigInt.fromI32(1);
+      const offerWrite2 = createOfferWriteEvent(
         token0, 
         token1,
         maker,
@@ -169,13 +175,72 @@ describe("Describe entity assertions", () => {
         BigInt.fromI32(1000), // gives
         BigInt.fromI32(0),
         BigInt.fromI32(0),
-        id,
+        id2,
         BigInt.fromI32(0),
       );
-      handleOfferWrite(offerWrite);
+      handleOfferWrite(offerWrite2);
+
+      const offerSuccess2 = createOfferSuccessEvent(
+        token0, 
+        token1, 
+        id2, 
+        taker, 
+        BigInt.fromI32(1000), 
+        BigInt.fromI32(500)
+      );
+
+      const startEvent1 = createOrderStartEvent()
+      startEvent1.transaction.hash = Bytes.fromUTF8("0xccc");
+
+      handleOrderStart(startEvent1);
+      handleOfferSuccess(offerSuccess1);
+
+      const startEvent2 = createOrderStartEvent()
+      startEvent2.transaction.hash = Bytes.fromUTF8("0xddd");
+      handleOrderStart(startEvent2);
+
+      const orderComplete1 = createOrderCompleteEvent(
+        token0, 
+        token1, 
+        taker,
+        BigInt.fromI32(1000),
+        BigInt.fromI32(500),
+        BigInt.fromI32(0),
+        BigInt.fromI32(0),
+      );
+      handleOrderComplete(orderComplete1);
+      
+      handleOfferSuccess(offerSuccess2);
+
+      const orderComplete2 = createOrderCompleteEvent(
+        token0, 
+        token1, 
+        taker,
+        BigInt.fromI32(2000),
+        BigInt.fromI32(100),
+        BigInt.fromI32(0),
+        BigInt.fromI32(0),
+      );
+      handleOrderComplete(orderComplete2);
 
       assert.entityCount("Order", 2);
-    });
 
+      const offerId1 = getOfferId(token0, token1, id1)
+
+      assert.fieldEquals(
+        'Offer',
+        offerId1,
+        'orders', 
+        `[${startEvent1.address.toHex()}-${startEvent1.transaction.hash.toHex()}-${startEvent1.logIndex.toHex()}]`,
+      );
+
+      const offerId2 = getOfferId(token0, token1, id2);
+      assert.fieldEquals(
+        'Offer',
+        offerId2,
+        'orders', 
+        `[${startEvent2.address.toHex()}-${startEvent2.transaction.hash.toHex()}-${startEvent2.logIndex.toHex()}]`
+      );
+    });
   });
 })

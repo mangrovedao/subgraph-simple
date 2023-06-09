@@ -69,7 +69,7 @@ const removeOrderFromQueue = (): void => {
   let context = Contex.load('context')!;
   let _id = context.getI32('_id');
   _id = _id - 1;
- 
+
   context.unset(_id.toString());
   context.setI32('_id', _id);
 
@@ -135,12 +135,18 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   const order = getOrderFromQueue();
 
   let offers = order.offers;
+  if (!offers) {
+    offers = new Array<string>();
+  }
   offers.push(offer.id);
+  order.offers = offers;
 
-  let orders = offer.orders;
+  let orders = offer.orders!;
   orders.push(order.id);
+  offer.orders = orders;
 
   offer.save();
+  order.save();
 }
 
 export function handleOfferWrite(event: OfferWrite): void {
@@ -174,7 +180,11 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.isOpen = true;
   offer.isFailed = false;
   offer.isFilled = false
-  offer.orders = new Array<string>();
+  let orders = offer.orders;
+  if (!orders) {
+    offer.orders = new Array<string>();
+
+  }
  
   offer.save();
 }
