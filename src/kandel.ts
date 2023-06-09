@@ -1,4 +1,4 @@
-import { BigInt } from "@graphprotocol/graph-ts"
+import { Address, BigInt } from "@graphprotocol/graph-ts"
 import {
   Kandel,
   Credit,
@@ -21,6 +21,7 @@ import {
   SetRouter
 } from "../generated/templates/Kandel/Kandel"
 import { KandelDepositWithdraw, Kandel as  KandelEntity } from "../generated/schema";
+import { log } from "matchstick-as";
 
 export function handleCredit(event: Credit): void {
   const deposit = new KandelDepositWithdraw(
@@ -35,6 +36,17 @@ export function handleCredit(event: Credit): void {
 
   deposit.kandel = event.address;
 
+  const kandel = KandelEntity.load(event.address)!;
+
+  if (Address.fromBytes(kandel.base).equals(event.params.token)) {
+    kandel.depositedBase = kandel.depositedBase.plus(event.params.amount);
+    kandel.totalBase = kandel.totalBase.plus(event.params.amount);
+  } else {
+    kandel.depositedQuote = kandel.depositedQuote.plus(event.params.amount);
+    kandel.totalQuote = kandel.totalQuote.plus(event.params.amount);
+  }
+
+  kandel.save()
   deposit.save();
 }
 
@@ -53,12 +65,12 @@ export function handleDebit(event: Debit): void {
 
   const kandel = KandelEntity.load(event.address)!;
 
-  if (kandel.base === event.address) {
-    kandel.depositedBase = kandel.depositedBase.plus(event.params.amount);
-    kandel.totalBase = kandel.totalBase.plus(event.params.amount);
+  if (Address.fromBytes(kandel.base).equals(event.params.token)) {
+    kandel.depositedBase = kandel.depositedBase.minus(event.params.amount);
+    kandel.totalBase = kandel.totalBase.minus(event.params.amount);
   } else {
-    kandel.depositedQuote = kandel.depositedQuote.plus(event.params.amount);
-    kandel.totalQuote = kandel.totalQuote.plus(event.params.amount);
+    kandel.depositedQuote = kandel.depositedQuote.minus(event.params.amount);
+    kandel.totalQuote = kandel.totalQuote.minus(event.params.amount);
   }
 
   kandel.save();
