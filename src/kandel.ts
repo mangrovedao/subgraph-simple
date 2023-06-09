@@ -51,6 +51,17 @@ export function handleDebit(event: Debit): void {
 
   withdraw.kandel = event.address;
 
+  const kandel = KandelEntity.load(event.address)!;
+
+  if (kandel.base === event.address) {
+    kandel.depositedBase = kandel.depositedBase.plus(event.params.amount);
+    kandel.totalBase = kandel.totalBase.plus(event.params.amount);
+  } else {
+    kandel.depositedQuote = kandel.depositedQuote.plus(event.params.amount);
+    kandel.totalQuote = kandel.totalQuote.plus(event.params.amount);
+  }
+
+  kandel.save();
   withdraw.save();
 }
 

@@ -59,6 +59,12 @@ type Kandel @entity {
   address: Bytes!
 
   base: Bytes!
+  depositedBase: BigInt!
+  depositedQuote: BigInt!
+
+  totalBase: BigInt!
+  totalQuote: BigInt!
+
   quote: Bytes!
 
   gasprice: BigInt
