@@ -39,54 +39,6 @@ const getOrCreateAccount = (address: Address): Account => {
   return account;
 }
 
-const addOrderToQueue = (order: Order): void => {
-  let context = Contex.load('context');
-  let currentId = 0;
-  if (!context) {
-    context = new Contex('context');
-    context.setI32('currentId', 0);
-  } else {
-    let valueCurrentId = context.get('currentId');
-    if (valueCurrentId) {
-      currentId = valueCurrentId.toI32();
-    } else {
-      currentId = 0;
-    }
-  }
-
-  context.set(currentId.toString(), Value.fromString(order.id));
-
-  currentId = currentId + 1;
-  context.setI32('currentId', currentId);
-
-  context.save();
-}
-
-const getOrderFromQueue = (): Order => {
-  const context = Contex.load('context')!;
-
-  const currentId = context.getI32('currentId');
-
-  const orderId = context.get((currentId - 1).toString())!.toString();
-
-  const order = Order.load(orderId)!;
-
-  return order;
-}
-
-const removeOrderFromQueue = (): void => {
-  let context = Contex.load('context')!;
-  let currentId = context.getI32('currentId');
-
-  context.unset(currentId.toString());
-
-  currentId = currentId - 1;
-
-  context.setI32('currentId', currentId);
-
-  context.save();
-}
-
 export function handleApproval(event: Approval): void {}
 
 export function handleCredit(event: Credit): void {}
@@ -147,10 +99,7 @@ export function handleOfferSuccess(event: OfferSuccess): void {
     offer.id = newOfferId;
   }
 
-  const order = getOrderFromQueue();
-
   offer.save();
-  order.save();
 }
 
 export function handleOfferWrite(event: OfferWrite): void {
@@ -194,8 +143,10 @@ export function handleOfferWrite(event: OfferWrite): void {
 }
 
 export function handleOrderComplete(event: OrderComplete): void {
-  const order = getOrderFromQueue();
-  
+  const id = `${event.address.toHex()}-${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
+  const order = new Order(id);
+
+  order.transactionHash = event.transaction.hash;
   order.taker = event.params.taker;
   order.takerGot = event.params.takerGot;
   order.takerGave = event.params.takerGave;
@@ -204,16 +155,9 @@ export function handleOrderComplete(event: OrderComplete): void {
 
   order.save();
 
-  removeOrderFromQueue();
 }
 
 export function handleOrderStart(event: OrderStart): void {
-  const id = `${event.address.toHex()}-${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
-  const order = new Order(id);
-
-  order.save();
-
-  addOrderToQueue(order);
 }
 
 export function handlePosthookFail(event: PosthookFail): void {}

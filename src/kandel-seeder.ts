@@ -14,6 +14,7 @@ export function handleNewKandel(event: NewKandel): void {
 
   const kandel = new KandelEntity(event.params.kandel);
 
+  kandel.transactionHash = event.transaction.hash;
   kandel.seeder = event.address;
   kandel.address = event.params.kandel;
   kandel.base = event.params.base;

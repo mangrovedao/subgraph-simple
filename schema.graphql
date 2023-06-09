@@ -12,8 +12,8 @@ type Market @entity {
 
 type Offer @entity {
   id: String!
-  offerId: BigInt!
   transactionHash: Bytes!
+  offerId: BigInt!
   wants: BigInt!
   initialWants: BigInt!
   gives: BigInt!
@@ -32,6 +32,7 @@ type Offer @entity {
 
 type Order @entity {
   id: String!
+  transactionHash: Bytes!
   taker: Bytes
   takerGot: BigInt
   takerGave: BigInt
@@ -41,6 +42,7 @@ type Order @entity {
 
 type Kandel @entity {
   id: Bytes!
+  transactionHash: Bytes!
   seeder: Bytes!
   address: Bytes!
 
