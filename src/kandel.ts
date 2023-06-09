@@ -20,14 +20,39 @@ import {
   SetReserveId,
   SetRouter
 } from "../generated/templates/Kandel/Kandel"
-import { Kandel as  KandelEntity } from "../generated/schema";
+import { KandelDepositWithdraw, Kandel as  KandelEntity } from "../generated/schema";
 
 export function handleCredit(event: Credit): void {
-  // Entities can be loaded from the store using a string ID; this ID
+  const deposit = new KandelDepositWithdraw(
+    `${event.transaction.hash.toHex()}-${event.logIndex}`
+  );
 
+  deposit.transactionHash = event.transaction.hash;
+  deposit.date = event.block.timestamp;
+  deposit.token = event.params.token;
+  deposit.amount = event.params.amount;
+  deposit.isDeposit = true;
+
+  deposit.kandel = event.address;
+
+  deposit.save();
 }
 
-export function handleDebit(event: Debit): void {}
+export function handleDebit(event: Debit): void {
+  const withdraw = new KandelDepositWithdraw(
+    `${event.transaction.hash.toHex()}-${event.logIndex}`
+  );
+
+  withdraw.transactionHash = event.transaction.hash;
+  withdraw.date = event.block.timestamp;
+  withdraw.token = event.params.token;
+  withdraw.amount = event.params.amount;
+  withdraw.isDeposit = false;
+
+  withdraw.kandel = event.address;
+
+  withdraw.save();
+}
 
 export function handleLogIncident(event: LogIncident): void {}
 

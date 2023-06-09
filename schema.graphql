@@ -41,6 +41,17 @@ type Order @entity {
   feePaid: BigInt
 }
 
+type KandelDepositWithdraw @entity {
+  id: String!
+  transactionHash: Bytes!
+  date: BigInt!
+  token: Bytes!
+  amount: BigInt!
+  isDeposit: Boolean!
+
+  kandel: Kandel!
+}
+
 type Kandel @entity {
   id: Bytes!
   transactionHash: Bytes!
@@ -55,6 +66,7 @@ type Kandel @entity {
   owner: Account!
 
   offers: [Offer!]! @derivedFrom(field: "kandel")
+  depositWithdraws: [KandelDepositWithdraw!]! @derivedFrom(field: "kandel")
 }
 
 type Contex @entity {
