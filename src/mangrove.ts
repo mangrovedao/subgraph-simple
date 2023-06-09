@@ -41,11 +41,13 @@ const getOrCreateAccount = (address: Address): Account => {
 
 const addOrderToQueue = (order: Order): void => {
   let context = Contex.load('context');
+  let _id = 0;
   if (!context) {
     context = new Contex('context');
     context.setI32('_id', 0);
+  } else {
+    _id = context.getI32('_id');
   }
-  let _id = context.getI32('_id');
 
   context.set(_id.toString(), Value.fromString(order.id));
   context.setI32('_id', _id + 1);
