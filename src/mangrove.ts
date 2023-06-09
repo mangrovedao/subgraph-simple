@@ -46,7 +46,12 @@ const addOrderToQueue = (order: Order): void => {
     context = new Contex('context');
     context.setI32('currentId', 0);
   } else {
-    currentId = context.getI32('currentId');
+    let valueCurrentId = context.get('currentId');
+    if (valueCurrentId) {
+      currentId = valueCurrentId.toI32();
+    } else {
+      currentId = 0;
+    }
   }
 
   context.set(currentId.toString(), Value.fromString(order.id));
