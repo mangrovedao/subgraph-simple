@@ -145,33 +145,9 @@ export function handleOfferSuccess(event: OfferSuccess): void {
     const newOfferId = `${offerId}-${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
     offer.unset(offerId);
     offer.id = newOfferId;
-
-    let orders = offer.orders!;
-    for (let i = 0 ; i < orders.length ; ++i) {
-      const order = Order.load(orders[i])!;
-      for (let j = 0 ; j < order.offers!.length ; ++j) {
-        const referencedOffer = Offer.load(order.offers![j])!;
-        if (referencedOffer.id === offerId) {
-          referencedOffer.id = newOfferId;
-        }
-      }
-    }
-
-    offer.orders = orders;
   }
 
   const order = getOrderFromQueue();
-
-  let offers = order.offers;
-  if (!offers) {
-    offers = new Array<string>();
-  }
-  offers.push(offer.id);
-  order.offers = offers;
-
-  let orders = offer.orders!;
-  orders.push(order.id);
-  offer.orders = orders;
 
   offer.save();
   order.save();
@@ -213,11 +189,7 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.isOpen = true;
   offer.isFailed = false;
   offer.isFilled = false
-  let orders = offer.orders;
-  if (!orders) {
-    offer.orders = new Array<string>();
-  }
- 
+
   offer.save();
 }
 
@@ -239,7 +211,6 @@ export function handleOrderStart(event: OrderStart): void {
   const id = `${event.address.toHex()}-${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
   const order = new Order(id);
 
-  order.offers = new Array<string>();
   order.save();
 
   addOrderToQueue(order);

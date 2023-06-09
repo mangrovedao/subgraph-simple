@@ -28,7 +28,6 @@ type Offer @entity {
 
   market: Market!
   maker: Account!
-  orders: [Order!]
 }
 
 type Order @entity {
@@ -38,8 +37,6 @@ type Order @entity {
   takerGave: BigInt
   penalty: BigInt
   feePaid: BigInt
-
-  offers: [Offer!]
 }
 
 type Kandel @entity {

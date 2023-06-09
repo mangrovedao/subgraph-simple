@@ -226,44 +226,6 @@ describe("Describe entity assertions", () => {
       handleOrderComplete(orderComplete2);
 
       assert.entityCount("Order", 2);
-
-      let offerId1 = getOfferId(token0, token1, id1)
-      offerId1 = `${offerId1}-${offerSuccess2.transaction.hash.toHex()}-${offerSuccess2.logIndex.toHex()}`;
-
-      const orderId1 = `${startEvent2.address.toHex()}-${startEvent2.transaction.hash.toHex()}-${startEvent2.logIndex.toHex()}`;
-
-      assert.fieldEquals(
-        'Offer',
-        offerId1,
-        'orders', 
-        `[${orderId1}]`,
-      );
-
-      let offerId2 = getOfferId(token0, token1, id2);
-      offerId2 = `${offerId2}-${offerSuccess2.transaction.hash.toHex()}-${offerSuccess2.logIndex.toHex()}`;
-
-      const orderId2 = `${startEvent1.address.toHex()}-${startEvent1.transaction.hash.toHex()}-${startEvent1.logIndex.toHex()}`;
-      assert.fieldEquals(
-        'Offer',
-        offerId2,
-        'orders', 
-        `[${orderId2}]`
-      );
-
-      assert.fieldEquals(
-        'Order',
-        orderId1,
-        'offers', 
-        `[${offerId1}]`
-      );
-
-      assert.fieldEquals(
-        'Order',
-        orderId2,
-        'offers', 
-        `[${offerId2}]`
-      );
-
     });
   });
 })
