@@ -34,7 +34,22 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
   }
 }
 
-export function handleOrderSummary(event: OrderSummary): void {}
+export function handleOrderSummary(event: OrderSummary): void {
+  if (event.params.restingOrder) {
+    const offerId = getOfferId(
+      event.params.outbound_tkn,
+      event.params.inbound_tkn,
+      event.params.restingOrderId,
+    );
+    const offer = Offer.load(offerId)!;
+
+    // update the offer to show that part of the order was filled
+    offer.initialWants = event.params.takerWants;
+    offer.initialGives = event.params.takerGives;
+
+    offer.save();
+  }
+}
 
 export function handleSetAdmin(event: SetAdmin): void {}
 

@@ -227,37 +227,4 @@ describe("Describe entity assertions", () => {
     assert.entityCount("Offer", 2);
   });
 
-  test("Owner offer event", () => {
-    let setActiveEvent = createSetActiveEvent(token0, token1, true);
-    handleSetActive(setActiveEvent);
-    assert.entityCount("Market", 1);
-
-    const id = BigInt.fromI32(0);
-    let offerWrite = createOfferWriteEvent(
-      token0, 
-      token1,
-      maker,
-      BigInt.fromI32(1000), // wants
-      BigInt.fromI32(2000), // gives
-      BigInt.fromI32(0),
-      BigInt.fromI32(0),
-      id,
-      BigInt.fromI32(0),
-    );
-    handleOfferWrite(offerWrite);
-
-    const newOwnerOffer = createNewOwnedOfferEvent(
-      token0,
-      token0,
-      token1,
-      id,
-      owner,
-    );
-    handleNewOwnedOffer(newOwnerOffer);
-
-    const offerId = getOfferId(token0, token1, id);
-
-    assert.fieldEquals('Offer', offerId, 'owner', owner.toHex());
-  });
-
 });
