@@ -78,10 +78,25 @@ describe("Describe entity assertions", () => {
       false
     );
     handleOfferRetract(offerRetract);
-    offerId = `${offerId}-${offerRetract.transaction.hash.toHex()}-${offerRetract.logIndex.toHex()}`;
 
-    assert.fieldEquals('Offer', offerId, 'isOpen', 'false');
-    assert.entityCount("Offer", 1);
+    offerWrite = createOfferWriteEvent(
+      token0, 
+      token1,
+      maker,
+      BigInt.fromI32(1000),
+      BigInt.fromI32(2000),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      id,
+      BigInt.fromI32(0),
+    );
+    handleOfferWrite(offerWrite);
+
+    const oldOfferId = `${offerId}-${offerWrite.transaction.hash.toHex()}-${offerWrite.logIndex.toHex()}`;
+    assert.fieldEquals('Offer', oldOfferId, 'isOpen', 'false');
+    assert.fieldEquals('Offer', offerId, 'isOpen', 'true');
+
+    assert.entityCount("Offer", 2);
   });
 
   test("Offer created, failed", () => {
@@ -111,15 +126,36 @@ describe("Describe entity assertions", () => {
       token1,
       id,
       taker,
-      BigInt.fromI32(2000),
-      BigInt.fromI32(1000),
+      BigInt.fromI32(2000), 
+      BigInt.fromI32(1000), 
       Bytes.fromUTF8("Failed"),
     );
     handleOfferFail(offerFail);
-    offerId = `${offerId}-${offerFail.transaction.hash.toHex()}-${offerFail.logIndex.toHex()}`;
 
-    assert.fieldEquals('Offer', offerId, 'isOpen', 'false');
-    assert.entityCount("Offer", 1);
+    offerWrite = createOfferWriteEvent(
+      token0, 
+      token1,
+      maker,
+      BigInt.fromI32(500), // wants
+      BigInt.fromI32(1000),// gives
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      id,
+      BigInt.fromI32(0),
+    );
+    handleOfferWrite(offerWrite);
+
+    const oldOfferId = `${offerId}-${offerWrite.transaction.hash.toHex()}-${offerWrite.logIndex.toHex()}`;
+
+    assert.fieldEquals('Offer', oldOfferId, 'isOpen', 'false');
+    assert.fieldEquals('Offer', oldOfferId, 'wants', '1000');
+    assert.fieldEquals('Offer', oldOfferId, 'gives', '2000');
+
+    assert.fieldEquals('Offer', offerId, 'isOpen', 'true');
+    assert.fieldEquals('Offer', offerId, 'wants', '500');
+    assert.fieldEquals('Offer', offerId, 'gives', '1000');
+
+    assert.entityCount("Offer", 2);
   });
 
   test("Offer created, partially filled, fully filled", () => {
@@ -156,13 +192,36 @@ describe("Describe entity assertions", () => {
     offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, BigInt.fromI32(1990), BigInt.fromI32(980));
     handleOfferSuccess(offerSuccess);
 
-    offerId = `${offerId}-${offerSuccess.transaction.hash.toHex()}-${offerSuccess.logIndex.toHex()}`;
     assert.fieldEquals('Offer', offerId, 'wants', '0');
     assert.fieldEquals('Offer', offerId, 'gives', '0');
     assert.fieldEquals('Offer', offerId, 'isOpen', 'false');
     assert.fieldEquals('Offer', offerId, 'isFilled', 'true');
 
-    assert.entityCount("Offer", 1);
+    offerWrite = createOfferWriteEvent(
+      token0, 
+      token1,
+      maker,
+      BigInt.fromI32(500), // wants
+      BigInt.fromI32(1000), // gives
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      id,
+      BigInt.fromI32(0),
+    );
+    handleOfferWrite(offerWrite);
+
+    const oldOfferId = `${offerId}-${offerSuccess.transaction.hash.toHex()}-${offerSuccess.logIndex.toHex()}`;
+    assert.fieldEquals('Offer', oldOfferId, 'wants', '0');
+    assert.fieldEquals('Offer', oldOfferId, 'gives', '0');
+    assert.fieldEquals('Offer', oldOfferId, 'isOpen', 'false');
+    assert.fieldEquals('Offer', oldOfferId, 'isFilled', 'true');
+
+    assert.fieldEquals('Offer', offerId, 'wants', '500');
+    assert.fieldEquals('Offer', offerId, 'gives', '1000');
+    assert.fieldEquals('Offer', offerId, 'isOpen', 'true');
+    assert.fieldEquals('Offer', offerId, 'isFilled', 'false');
+
+    assert.entityCount("Offer", 2);
   });
 
 });
