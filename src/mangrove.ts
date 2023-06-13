@@ -1,4 +1,4 @@
-import { Address, BigInt, Value } from "@graphprotocol/graph-ts"
+import { Address, BigInt, Value, ethereum, store } from "@graphprotocol/graph-ts"
 import {
   Mangrove,
   Approval,
@@ -26,6 +26,7 @@ import {
 } from "../generated/Mangrove/Mangrove"
 import { Market, Account, Order, Offer, Kandel } from "../generated/schema"
 import { getMarketId, getOfferId } from "./helpers";
+import { log } from "matchstick-as";
 
 const getOrCreateAccount = (address: Address): Account => {
   let account = Account.load(address);
@@ -37,6 +38,13 @@ const getOrCreateAccount = (address: Address): Account => {
   }
 
   return account;
+}
+
+const makeOfferIdUnique = (offer: Offer, event: ethereum.Event): void => {
+  const newOfferId = `${offer.id}-${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
+  store.remove('Offer', offer.id);
+
+  offer.id = newOfferId;
 }
 
 export function handleApproval(event: Approval): void {}
@@ -62,6 +70,7 @@ export function handleOfferFail(event: OfferFail): void {
 
   offer.failedReason = event.params.mgvData.toString();
 
+  makeOfferIdUnique(offer, event);
   offer.save();
 }
 
@@ -72,9 +81,9 @@ export function handleOfferRetract(event: OfferRetract): void {
     event.params.id,
   );
   const offer = Offer.load(offerId)!; 
-
   offer.isOpen = false;
 
+  makeOfferIdUnique(offer, event);
   offer.save();
 }
 
@@ -94,9 +103,7 @@ export function handleOfferSuccess(event: OfferSuccess): void {
     offer.isOpen = false;
     offer.isFilled = true;
 
-    const newOfferId = `${offerId}-${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
-    offer.unset(offerId);
-    offer.id = newOfferId;
+    makeOfferIdUnique(offer, event);
   }
 
   offer.save();
