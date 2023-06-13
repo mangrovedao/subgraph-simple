@@ -25,7 +25,6 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
   offer.owner = event.params.owner;
 
   offer.save();
-
 }
 
 export function handleOrderSummary(event: OrderSummary): void {}

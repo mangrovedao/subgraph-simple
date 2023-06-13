@@ -13,6 +13,8 @@ import { handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWri
 import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils"
 import { Market, Offer } from "../../generated/schema";
 import { getMarketId, getOfferId } from "../../src/helpers";
+import { handleNewOwnedOffer } from "../../src/mangrove-order";
+import { createNewOwnedOfferEvent } from "./mangrove-order-utils";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -21,6 +23,7 @@ let token0 = Address.fromString("0x0000000000000000000000000000000000000000");
 let token1 = Address.fromString("0x0000000000000000000000000000000000000001");
 let maker = Address.fromString("0x0000000000000000000000000000000000000002")
 let taker = Address.fromString("0x0000000000000000000000000000000000000003")
+let owner = Address.fromString("0x0000000000000000000000000000000000000004")
 
 describe("Describe entity assertions", () => {
   beforeAll(() => {
@@ -222,6 +225,39 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'isFilled', 'false');
 
     assert.entityCount("Offer", 2);
+  });
+
+  test("Offer created, partially filled, fully filled", () => {
+    let setActiveEvent = createSetActiveEvent(token0, token1, true);
+    handleSetActive(setActiveEvent);
+    assert.entityCount("Market", 1);
+
+    const id = BigInt.fromI32(0);
+    let offerWrite = createOfferWriteEvent(
+      token0, 
+      token1,
+      maker,
+      BigInt.fromI32(1000), // wants
+      BigInt.fromI32(2000), // gives
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      id,
+      BigInt.fromI32(0),
+    );
+    handleOfferWrite(offerWrite);
+
+    const newOwnerOffer = createNewOwnedOfferEvent(
+      token0,
+      token0,
+      token1,
+      id,
+      owner,
+    );
+    handleNewOwnedOffer(newOwnerOffer);
+
+    const offerId = getOfferId(token0, token1, id);
+
+    assert.fieldEquals('Offer', offerId, 'owner', owner.toHex());
   });
 
 });
