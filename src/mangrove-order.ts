@@ -21,13 +21,13 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
     event.params.inbound_tkn, 
     event.params.offerId
   );
-  const offer = Offer.loadInBlock(offerId);
+  const offer = Offer.load(offerId);
   if (!offer) {
     log.error("missing offer with id: {}", [offerId]);
     return;
   }
 
-  log.info("current offerId", [offerId]);
+  log.error("current offerId", [offerId]);
   const owner = getOrCreateAccount(event.params.owner);
   if (owner) {
     offer.owner = owner.id;
@@ -42,7 +42,7 @@ export function handleOrderSummary(event: OrderSummary): void {
       event.params.inbound_tkn,
       event.params.restingOrderId,
     );
-    const offer = Offer.loadInBlock(offerId);
+    const offer = Offer.load(offerId);
     if (!offer) {
       log.error("Missing offerId {}", [offerId]);
       return;
