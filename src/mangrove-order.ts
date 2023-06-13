@@ -43,7 +43,7 @@ export function handleOrderSummary(event: OrderSummary): void {
     );
     const offer = Offer.load(offerId);
     if (!offer) {
-      log.error("Missing offerId {}", [offerId]);
+      log.error("Missing offerId {} {}", [offerId, event.transaction.hash.toHex()]);
       return;
     }
 
