@@ -8,7 +8,7 @@ import {
   SetExpiry,
   SetRouter
 } from "../generated/MangroveOrder/MangroveOrder"
-import { Offer } from "../generated/schema"
+import { Account, Offer } from "../generated/schema"
 import { getOfferId } from "./helpers"
 
 export function handleLogIncident(event: LogIncident): void {}
@@ -21,12 +21,18 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
     event.params.inbound_tkn, 
     event.params.offerId
   );
-  const offer = Offer.load(offerId)!;
+  const offer = Offer.load(offerId);
+  if (!offer) {
+    log.error("missing offer with id: {}", [offerId]);
+    return;
+  }
 
-  log.debug("offerId {} {}", [offerId, event.params.owner.toHex()]);
-  offer.owner = event.params.owner;
-
-  offer.save();
+  const owner = Account.load(event.params.owner);
+  if (owner) {
+    log.info("Found account, {} {}", [owner.id.toHex(), offer.id]);
+    offer.owner = owner.id;
+    offer.save();
+  }
 }
 
 export function handleOrderSummary(event: OrderSummary): void {}
