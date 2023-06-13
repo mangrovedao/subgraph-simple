@@ -1,3 +1,4 @@
+import { log } from "matchstick-as";
 import {
   LogIncident,
   Mgv,
@@ -22,6 +23,7 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
   );
   const offer = Offer.load(offerId)!;
 
+  log.debug("offerId {} {}", [offerId, event.params.owner.toHex()]);
   offer.owner = event.params.owner;
 
   offer.save();
