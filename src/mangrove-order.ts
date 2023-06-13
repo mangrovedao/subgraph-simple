@@ -27,7 +27,6 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
     return;
   }
 
-  log.error("current offerId", [offerId]);
   const owner = getOrCreateAccount(event.params.owner);
   if (owner) {
     offer.owner = owner.id;
@@ -38,8 +37,8 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
 export function handleOrderSummary(event: OrderSummary): void {
   if (event.params.restingOrder) {
     const offerId = getOfferId(
+      event.params.inbound_tkn, // reverse inbound_tkn and outbound_tkn because we are in Order
       event.params.outbound_tkn,
-      event.params.inbound_tkn,
       event.params.restingOrderId,
     );
     const offer = Offer.load(offerId);
