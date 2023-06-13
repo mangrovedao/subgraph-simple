@@ -21,7 +21,7 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
     event.params.inbound_tkn, 
     event.params.offerId
   );
-  const offer = Offer.load(offerId);
+  const offer = Offer.loadInBlock(offerId);
   if (!offer) {
     log.error("missing offer with id: {}", [offerId]);
     return;
@@ -41,7 +41,11 @@ export function handleOrderSummary(event: OrderSummary): void {
       event.params.inbound_tkn,
       event.params.restingOrderId,
     );
-    const offer = Offer.load(offerId)!;
+    const offer = Offer.loadInBlock(offerId);
+    if (!offer) {
+      log.error("Missing offer {}", [offerId]);
+      return;
+    }
 
     // update the offer to show that part of the order was filled
     offer.initialWants = event.params.takerWants;
