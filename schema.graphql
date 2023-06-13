@@ -29,6 +29,7 @@ type Offer @entity {
   market: Market!
   maker: Account!
   kandel: Kandel
+  owner: Account
 }
 
 type Order @entity {

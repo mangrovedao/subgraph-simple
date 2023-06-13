@@ -178,3 +178,41 @@ dataSources:
         - event: NewKandel(indexed address,indexed address,indexed address,address)
           handler: handleNewKandel
       file: ./src/kandel-seeder.ts
+  - kind: ethereum
+    name: MangroveOrder
+    network: mumbai
+    source:
+      address: "0x756fAc8bb6fb96A3b005ad7b3337052aE69aAf65"
+      abi: MangroveOrder
+      startBlock: 35666000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - LogIncident
+        - Mgv
+        - NewOwnedOffer
+        - OrderSummary
+        - SetAdmin
+        - SetExpiry
+        - SetRouter
+      abis:
+        - name: MangroveOrder
+          file: ./abis/MangroveOrder.json
+      eventHandlers:
+        - event: LogIncident(address,indexed address,indexed address,indexed uint256,bytes32,bytes32)
+          handler: handleLogIncident
+        - event: Mgv(address)
+          handler: handleMgv
+        - event: NewOwnedOffer(address,indexed address,indexed address,indexed uint256,address)
+          handler: handleNewOwnedOffer
+        - event: OrderSummary(address,indexed address,indexed address,indexed address,bool,uint256,uint256,bool,bool,uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleOrderSummary
+        - event: SetAdmin(address)
+          handler: handleSetAdmin
+        - event: SetExpiry(indexed address,indexed address,uint256,uint256)
+          handler: handleSetExpiry
+        - event: SetRouter(address)
+          handler: handleSetRouter
+      file: ./src/mangrove-order.ts
