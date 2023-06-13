@@ -9,7 +9,7 @@ import {
   SetRouter
 } from "../generated/MangroveOrder/MangroveOrder"
 import { Account, Offer } from "../generated/schema"
-import { getOfferId } from "./helpers"
+import { getOfferId, getOrCreateAccount } from "./helpers"
 
 export function handleLogIncident(event: LogIncident): void {}
 
@@ -27,9 +27,8 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
     return;
   }
 
-  const owner = Account.load(event.params.owner);
+  const owner = getOrCreateAccount(event.params.owner);
   if (owner) {
-    log.info("Found account, {} {}", [owner.id.toHex(), offer.id]);
     offer.owner = owner.id;
     offer.save();
   }

@@ -25,18 +25,7 @@ import {
   SetUseOracle
 } from "../generated/Mangrove/Mangrove"
 import { Market, Account, Order, Offer, Kandel } from "../generated/schema"
-import { getMarketId, getOfferId } from "./helpers";
-const getOrCreateAccount = (address: Address): Account => {
-  let account = Account.load(address);
-
-  if (!account) {
-    account = new Account(address);
-    account.address = address;
-    account.save();
-  }
-
-  return account;
-}
+import { getMarketId, getOfferId, getOrCreateAccount } from "./helpers";
 
 export function handleApproval(event: Approval): void {}
 

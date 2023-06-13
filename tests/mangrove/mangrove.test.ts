@@ -227,7 +227,7 @@ describe("Describe entity assertions", () => {
     assert.entityCount("Offer", 2);
   });
 
-  test("Offer created, partially filled, fully filled", () => {
+  test("Owner offer event", () => {
     let setActiveEvent = createSetActiveEvent(token0, token1, true);
     handleSetActive(setActiveEvent);
     assert.entityCount("Market", 1);
