@@ -27,6 +27,7 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
     return;
   }
 
+  log.info("current offerId", [offerId]);
   const owner = getOrCreateAccount(event.params.owner);
   if (owner) {
     offer.owner = owner.id;
@@ -43,7 +44,7 @@ export function handleOrderSummary(event: OrderSummary): void {
     );
     const offer = Offer.loadInBlock(offerId);
     if (!offer) {
-      log.error("Missing offer {}", [offerId]);
+      log.error("Missing offerId {}", [offerId]);
       return;
     }
 
