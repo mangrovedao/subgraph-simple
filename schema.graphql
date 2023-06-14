@@ -35,7 +35,7 @@ type Offer @entity {
 type Order @entity {
   id: String!
   transactionHash: Bytes!
-  type: String!
+  type: String! # MARKET or LIMTI
 
   taker: Bytes
   takerGot: BigInt
