@@ -99,6 +99,9 @@ export function handleOfferWrite(event: OfferWrite): void {
   if (!offer) {
     offer = new Offer(offerId);
     offer.transactionHash = event.transaction.hash;
+    offer.initialWants = event.params.wants;
+    offer.initialGives = event.params.gives;
+
     const kandel = Kandel.load(event.params.maker);
     if (kandel) {
       offer.kandel = event.params.maker;
