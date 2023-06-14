@@ -10,6 +10,7 @@ import {
 } from "../generated/MangroveOrder/MangroveOrder"
 import { Offer } from "../generated/schema"
 import { getLastOrder, getOfferId, getOrCreateAccount } from "./helpers"
+import { BigInt } from "@graphprotocol/graph-ts";
 
 export function handleLogIncident(event: LogIncident): void {}
 
@@ -38,7 +39,7 @@ export function handleOrderSummary(event: OrderSummary): void {
   const order = getLastOrder();
   order.type = "LIMIT";
 
-  if (event.params.restingOrder) {
+  if (event.params.restingOrder && event.params.restingOrderId !== BigInt.fromI32(0)) {
     const offerId = getOfferId(
       event.params.inbound_tkn, // reverse inbound_tkn and outbound_tkn because we are in Order
       event.params.outbound_tkn,
