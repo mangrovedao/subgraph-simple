@@ -152,7 +152,6 @@ export function handleOrderComplete(event: OrderComplete): void {
   order.feePaid = event.params.feePaid;
 
   order.save();
-
 }
 
 export function handleOrderStart(event: OrderStart): void {
