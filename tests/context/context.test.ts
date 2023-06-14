@@ -8,7 +8,7 @@ import {
 } from "matchstick-as/assembly/index"
 import { Bytes } from "@graphprotocol/graph-ts"
 import { Order } from "../../generated/schema";
-import { addOrderToQueue, getOrderFromQueue } from "../../src/helpers";
+import { addOrderToQueue, getOrderFromQueue, removeOrderFromQueue } from "../../src/helpers";
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
@@ -38,6 +38,13 @@ describe("Describe entity assertions", () => {
     currentOrder = getOrderFromQueue();
 
     assert.assertTrue(currentOrder.id.toString() == order2.id.toString());
+
+    currentOrder = getOrderFromQueue();
+    removeOrderFromQueue();
+
+    currentOrder = getOrderFromQueue();
+    assert.assertTrue(currentOrder.id.toString() == order1.id.toString());
+    removeOrderFromQueue();
   });
 
 

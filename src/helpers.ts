@@ -60,13 +60,13 @@ export const getOrderFromQueue = (): Order => {
 
 export const removeOrderFromQueue = (): void => {
   let context = Contex.load('context')!;
-  let currentId = context.currentId!.toI32();
+  let currentId = context.currentId!.toI32() - 1;
 
   context.last = context.get(currentId.toString())!.toString();
 
   context.unset(currentId.toString());
 
-  currentId = currentId - 1;
+  currentId = currentId;
   context.currentId = BigInt.fromI32(currentId);
 
   context.save();
