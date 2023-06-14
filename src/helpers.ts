@@ -23,58 +23,43 @@ export const getOrCreateAccount = (address: Address): Account => {
 
 export const addOrderToQueue = (order: Order): void => {
   let context = Contex.load('context');
-  let currentId = 0;
   if (!context) {
     context = new Contex('context');
-    context.currentId = BigInt.fromI32(0);
-  } else {
-    let valueCurrentId = context.currentId;
-    if (valueCurrentId) {
-      currentId = valueCurrentId.toI32();
-    } else {
-      currentId = 0;
-    }
+    context.ids = ``;
   }
-
-  context.set(currentId.toString(), Value.fromString(order.id));
-
-  currentId = currentId + 1;
-  context.currentId = BigInt.fromI32(currentId);
-  context.last = order.id;
+  context.ids = `${context.ids}|${order.id}`
 
   context.save();
 }
 
 export const getOrderFromQueue = (): Order => {
   const context = Contex.load('context')!;
+  const ids = context.ids;
 
-  let currentId = context.currentId!.toI32();
-  currentId = currentId - 1;
-
-  const orderId = context.get(currentId.toString())!.toString();
-
-  const order = Order.load(orderId)!;
+  const idsArray = ids.split('|');
+  const order = Order.load(idsArray[idsArray.length - 1])!;
 
   return order;
 }
 
 export const removeOrderFromQueue = (): void => {
   let context = Contex.load('context')!;
-  let currentId = context.currentId!.toI32() - 1;
 
-  context.last = context.get(currentId.toString())!.toString();
-
-  context.unset(currentId.toString());
-
-  currentId = currentId;
-  context.currentId = BigInt.fromI32(currentId);
+  const ids = context.ids;
+  for (let i = ids.length - 1 ; i >= 0 ; --i) {
+    if (ids.at(i) == '|' || i == 0) {
+      context.ids = ids.slice(0, i);
+      context.last = ids.slice(i + 1);
+      break;
+    }
+  }
 
   context.save();
 }
 
 export const getLastOrder = (): Order => {
   const context = Contex.load('context')!;
-  const order = Order.load(context.last!)!;
 
+  const order = Order.load(context.last!)!;
   return order;
 }

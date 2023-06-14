@@ -82,6 +82,6 @@ type Kandel @entity {
 
 type Contex @entity {
   id: String!
-  currentId: BigInt
+  ids: String!
   last: Order
 }
