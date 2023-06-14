@@ -35,13 +35,14 @@ type Offer @entity {
 type Order @entity {
   id: String!
   transactionHash: Bytes!
+  type: String!
+
   taker: Bytes
   takerGot: BigInt
   takerGave: BigInt
   penalty: BigInt
   feePaid: BigInt
-  type: String
- 
+
   offer: Offer
 }
 

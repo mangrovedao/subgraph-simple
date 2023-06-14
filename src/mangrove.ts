@@ -1,4 +1,4 @@
-import { Address, BigInt, Value, ethereum } from "@graphprotocol/graph-ts"
+import { Address, BigInt, Bytes, Value, ethereum } from "@graphprotocol/graph-ts"
 import {
   Mangrove,
   Approval,
@@ -25,7 +25,7 @@ import {
   SetUseOracle
 } from "../generated/Mangrove/Mangrove"
 import { Market, Account, Order, Offer, Kandel } from "../generated/schema"
-import { getMarketId, getOfferId, getOrCreateAccount } from "./helpers";
+import { addOrderToQueue, getMarketId, getOfferId, getOrCreateAccount, getOrderFromQueue, removeOrderFromQueue } from "./helpers";
 
 export function handleApproval(event: Approval): void {}
 
@@ -141,10 +141,8 @@ export function handleOfferWrite(event: OfferWrite): void {
 }
 
 export function handleOrderComplete(event: OrderComplete): void {
-  const id = `${event.address.toHex()}-${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
-  const order = new Order(id);
+  const order = getOrderFromQueue();
 
-  order.transactionHash = event.transaction.hash;
   order.taker = event.params.taker;
   order.takerGot = event.params.takerGot;
   order.takerGave = event.params.takerGave;
@@ -152,9 +150,17 @@ export function handleOrderComplete(event: OrderComplete): void {
   order.feePaid = event.params.feePaid;
 
   order.save();
+
+  removeOrderFromQueue();
 }
 
 export function handleOrderStart(event: OrderStart): void {
+  const order = new Order(`${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`);
+  order.transactionHash = Bytes.fromUTF8(event.transaction.hash.toHex());
+  order.type = "MARKET";
+  order.save();
+
+  addOrderToQueue(order);
 }
 
 export function handlePosthookFail(event: PosthookFail): void {}

@@ -3,14 +3,12 @@ import {
   describe,
   test,
   clearStore,
-  beforeAll,
-  afterAll,
   beforeEach,
   afterEach
 } from "matchstick-as/assembly/index"
 import { Address, BigInt } from "@graphprotocol/graph-ts"
-import { handleOfferWrite, handleSetActive } from "../../src/mangrove";
-import { createOfferWriteEvent, createSetActiveEvent } from "./mangrove-utils";
+import { handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive } from "../../src/mangrove";
+import { createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils";
 import { createNewOwnedOfferEvent, createOrderSummaryEvent } from "./mangrove-order-utils";
 import { handleNewOwnedOffer, handleOrderSummary } from "../../src/mangrove-order";
 import { getOfferId } from "../../src/helpers";
@@ -36,7 +34,7 @@ describe("Describe entity assertions", () => {
     clearStore()
   });
 
-  test("new owner offer", () => {
+  test("New owned offer", () => {
     let setActiveEvent = createSetActiveEvent(token0, token1, true);
     handleSetActive(setActiveEvent);
     assert.entityCount("Market", 1);
@@ -69,7 +67,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'owner', owner.toHex());
   });
 
-  test("limit order with part of the order posted to the book", () => {
+  test("Limit order with part of the order posted to the book", () => {
     let setActiveEvent = createSetActiveEvent(token0, token1, true);
     handleSetActive(setActiveEvent);
     assert.entityCount("Market", 1);
@@ -81,6 +79,21 @@ describe("Describe entity assertions", () => {
 
     const totalGives = BigInt.fromI32(2000);
     const postGives = BigInt.fromI32(1000);
+
+    const orderStart = createOrderStartEvent();
+    handleOrderStart(orderStart);
+
+    const orderComplete = createOrderCompleteEvent(
+      token0,
+      token1,
+      taker,
+      totalGives.minus(postGives),
+      totalWants.minus(postWants),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+    );
+
+    handleOrderComplete(orderComplete);
 
     let offerWrite = createOfferWriteEvent(
       token0, 
@@ -131,6 +144,11 @@ describe("Describe entity assertions", () => {
 
     assert.fieldEquals('Offer', offerId, 'initialGives', totalGives.toString());
     assert.fieldEquals('Offer', offerId, 'gives', postGives.toString());
+
+    const orderId = `${orderStart.transaction.hash.toHex()}-${orderStart.logIndex.toHex()}`;
+
+    assert.fieldEquals('Order', orderId, 'offer', offerId);
+    assert.fieldEquals('Order', orderId, 'type', 'LIMIT');
   });
 
 });

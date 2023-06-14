@@ -71,3 +71,10 @@ export const removeOrderFromQueue = (): void => {
 
   context.save();
 }
+
+export const getLastOrder = (): Order => {
+  const context = Contex.load('context')!;
+  const order = Order.load(context.last!)!;
+
+  return order;
+}

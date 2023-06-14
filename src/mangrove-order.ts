@@ -8,8 +8,8 @@ import {
   SetExpiry,
   SetRouter
 } from "../generated/MangroveOrder/MangroveOrder"
-import { Account, Offer } from "../generated/schema"
-import { getOfferId, getOrCreateAccount } from "./helpers"
+import { Offer } from "../generated/schema"
+import { getLastOrder, getOfferId, getOrCreateAccount } from "./helpers"
 
 export function handleLogIncident(event: LogIncident): void {}
 
@@ -35,6 +35,9 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
 }
 
 export function handleOrderSummary(event: OrderSummary): void {
+  const order = getLastOrder();
+  order.type = "LIMIT";
+
   if (event.params.restingOrder) {
     const offerId = getOfferId(
       event.params.inbound_tkn, // reverse inbound_tkn and outbound_tkn because we are in Order
@@ -51,8 +54,12 @@ export function handleOrderSummary(event: OrderSummary): void {
     offer.initialWants = event.params.takerWants;
     offer.initialGives = event.params.takerGives;
 
+    order.offer = offer.id;
+
     offer.save();
   }
+
+  order.save();
 }
 
 export function handleSetAdmin(event: SetAdmin): void {}
