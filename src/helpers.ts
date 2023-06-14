@@ -21,7 +21,7 @@ export const getOrCreateAccount = (address: Address): Account => {
   return account;
 }
 
-export const addOrderToQueue = (order: Order): void => {
+export const addOrderToStack = (order: Order): void => {
   let context = Contex.load('context');
   if (!context) {
     context = new Contex('context');
@@ -32,7 +32,7 @@ export const addOrderToQueue = (order: Order): void => {
   context.save();
 }
 
-export const getOrderFromQueue = (): Order => {
+export const getOrderFromStack = (): Order => {
   const context = Contex.load('context')!;
   const ids = context.ids;
 
@@ -42,7 +42,7 @@ export const getOrderFromQueue = (): Order => {
   return order;
 }
 
-export const removeOrderFromQueue = (): void => {
+export const removeOrderFromStack = (): void => {
   let context = Contex.load('context')!;
 
   const ids = context.ids;

@@ -25,7 +25,7 @@ import {
   SetUseOracle
 } from "../generated/Mangrove/Mangrove"
 import { Market, Account, Order, Offer, Kandel } from "../generated/schema"
-import { addOrderToQueue, getMarketId, getOfferId, getOrCreateAccount, getOrderFromQueue, removeOrderFromQueue } from "./helpers";
+import { addOrderToStack, getMarketId, getOfferId, getOrCreateAccount, getOrderFromStack, removeOrderFromStack } from "./helpers";
 
 export function handleApproval(event: Approval): void {}
 
@@ -141,7 +141,7 @@ export function handleOfferWrite(event: OfferWrite): void {
 }
 
 export function handleOrderComplete(event: OrderComplete): void {
-  const order = getOrderFromQueue();
+  const order = getOrderFromStack();
 
   order.taker = event.params.taker;
   order.realTaker = event.params.taker; // for market order realTaker == event.params.taker
@@ -152,7 +152,7 @@ export function handleOrderComplete(event: OrderComplete): void {
 
   order.save();
 
-  removeOrderFromQueue();
+  removeOrderFromStack();
 }
 
 export function handleOrderStart(event: OrderStart): void {
@@ -161,7 +161,7 @@ export function handleOrderStart(event: OrderStart): void {
   order.type = "MARKET";
   order.save();
 
-  addOrderToQueue(order);
+  addOrderToStack(order);
 }
 
 export function handlePosthookFail(event: PosthookFail): void {}
