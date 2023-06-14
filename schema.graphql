@@ -24,6 +24,7 @@ type Offer @entity {
   isOpen: Boolean!
   isFailed: Boolean!
   isFilled: Boolean!
+  isRetracted: Boolean!
   failedReason: String
 
   market: Market!

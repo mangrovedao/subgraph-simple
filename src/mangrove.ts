@@ -60,7 +60,9 @@ export function handleOfferRetract(event: OfferRetract): void {
     event.params.id,
   );
   const offer = Offer.load(offerId)!; 
+
   offer.isOpen = false;
+  offer.isRetracted = true;
 
   offer.save();
 }
@@ -135,7 +137,8 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.prev = event.params.prev,
   offer.isOpen = true;
   offer.isFailed = false;
-  offer.isFilled = false
+  offer.isFilled = false;
+  offer.isRetracted = false;
 
   offer.save();
 }
