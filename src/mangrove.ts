@@ -112,6 +112,8 @@ export function handleOfferWrite(event: OfferWrite): void {
       offer.save()
 
       offer.id = offerId;
+      offer.initialWants = event.params.wants;
+      offer.initialGives = event.params.gives;
     }
   }
 
@@ -126,11 +128,9 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.market = market.id;
 
   offer.offerId = event.params.id;
-  offer.wants = event.params.wants,
-  offer.initialWants = event.params.wants;
 
+  offer.wants = event.params.wants,
   offer.gives = event.params.gives,
-  offer.initialGives = event.params.gives;
 
   offer.gasprice = event.params.gasprice,
   offer.gasreq = event.params.gasreq,
