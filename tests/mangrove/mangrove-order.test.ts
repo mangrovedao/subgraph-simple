@@ -106,8 +106,8 @@ describe("Describe entity assertions", () => {
 
     const orderSummaryEvent = createOrderSummaryEvent(
       mgv,
-      token0,
       token1,
+      token0,
       taker,
       false,
       totalWants, // takerWants,
