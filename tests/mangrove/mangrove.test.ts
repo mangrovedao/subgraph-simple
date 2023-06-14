@@ -58,6 +58,7 @@ describe("Describe entity assertions", () => {
     assert.entityCount("Market", 1);
 
     const id = BigInt.fromI32(0);
+    // maybe use named parameters?
     let offerWrite = createOfferWriteEvent(
       token0, 
       token1,
@@ -96,6 +97,7 @@ describe("Describe entity assertions", () => {
     handleOfferWrite(offerWrite);
 
     const oldOfferId = `${offerId}-${offerWrite.transaction.hash.toHex()}-${offerWrite.logIndex.toHex()}`;
+    // should check that the other fields are also saved correctly, for both offers
     assert.fieldEquals('Offer', oldOfferId, 'isOpen', 'false');
     assert.fieldEquals('Offer', offerId, 'isOpen', 'true');
 
@@ -191,6 +193,9 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'wants', '980');
     assert.fieldEquals('Offer', offerId, 'gives', '1990');
     assert.fieldEquals('Offer', offerId, 'isFilled', 'false');
+
+    // OfferSuccess closes the offer, not matter if it is fully filled or not.
+    // A new OfferWrite will be emitted if the offer gets re posted
 
     offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, BigInt.fromI32(1990), BigInt.fromI32(980));
     handleOfferSuccess(offerSuccess);

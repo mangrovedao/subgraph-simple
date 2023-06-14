@@ -35,6 +35,7 @@ describe("Describe entity assertions", () => {
   });
 
   test("New owned offer", () => {
+    // why do this again? Already done in beforeEach
     let setActiveEvent = createSetActiveEvent(token0, token1, true);
     handleSetActive(setActiveEvent);
     assert.entityCount("Market", 1);

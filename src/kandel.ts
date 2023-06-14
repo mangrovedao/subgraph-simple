@@ -24,6 +24,7 @@ import { KandelDepositWithdraw, Kandel as  KandelEntity } from "../generated/sch
 import { log } from "matchstick-as";
 
 export function handleCredit(event: Credit): void {
+  // helper to create the Id would be nice
   const deposit = new KandelDepositWithdraw(
     `${event.transaction.hash.toHex()}-${event.logIndex}`
   );
@@ -35,7 +36,8 @@ export function handleCredit(event: Credit): void {
   deposit.isDeposit = true;
 
   deposit.kandel = event.address;
-
+  
+  // checks if the kandel exists
   const kandel = KandelEntity.load(event.address)!;
 
   if (Address.fromBytes(kandel.base).equals(event.params.token)) {

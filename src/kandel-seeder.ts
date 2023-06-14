@@ -11,6 +11,7 @@ export function handleNewAaveKandel(event: NewAaveKandel): void {
 }
 
 export function handleNewKandel(event: NewKandel): void {
+  // what does this line do?
   Kandel.create(event.params.kandel);
 
   const kandel = new KandelEntity(event.params.kandel);

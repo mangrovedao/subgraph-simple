@@ -34,6 +34,7 @@ describe("Describe entity assertions", () => {
   });
 
   test("Kandel created and stored", () => {
+    // move check to beforeEach
     assert.entityCount('Kandel', 1);
   });
 
