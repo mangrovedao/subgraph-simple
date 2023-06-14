@@ -44,6 +44,7 @@ type Order @entity {
   feePaid: BigInt
 
   offer: Offer
+  realTaker: Bytes # for market order it's equal taker
 }
 
 type KandelDepositWithdraw @entity {

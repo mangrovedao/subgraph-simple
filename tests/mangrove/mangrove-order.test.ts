@@ -149,6 +149,7 @@ describe("Describe entity assertions", () => {
 
     assert.fieldEquals('Order', orderId, 'offer', offerId);
     assert.fieldEquals('Order', orderId, 'type', 'LIMIT');
+    assert.fieldEquals('Order', orderId, 'realTaker', taker.toHex());
   });
 
 });

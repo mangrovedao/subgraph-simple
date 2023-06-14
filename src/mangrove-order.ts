@@ -58,6 +58,7 @@ export function handleOrderSummary(event: OrderSummary): void {
 
     offer.save();
   }
+  order.realTaker = event.params.taker;
 
   order.save();
 }

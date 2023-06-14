@@ -144,6 +144,7 @@ export function handleOrderComplete(event: OrderComplete): void {
   const order = getOrderFromQueue();
 
   order.taker = event.params.taker;
+  order.realTaker = event.params.taker; // for market order realTaker == event.params.taker
   order.takerGot = event.params.takerGot;
   order.takerGave = event.params.takerGave;
   order.penalty = event.params.penalty;
