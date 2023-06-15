@@ -68,6 +68,10 @@ type Kandel @entity {
 
   base: Bytes! 
   quote: Bytes!
+  deployer: Account!
+  admin: Account!
+  reserveId: Account
+  router: Account
 
   totalBase: BigInt!
   depositedBase: BigInt!
@@ -77,10 +81,10 @@ type Kandel @entity {
 
   gasprice: BigInt
   gasreq: BigInt
-  
-  deployer: Account!
-  admin: Account!
 
+  spread: BigInt
+  ratio: BigInt
+  
   offers: [Offer!]!
   depositWithdraws: [KandelDepositWithdraw!]! @derivedFrom(field: "kandel")
 }

@@ -121,12 +121,31 @@ export function handleSetGasreq(event: SetGasreq): void {
   kandel.save();
 }
 
-export function handleSetGeometricParams(event: SetGeometricParams): void {}
+export function handleSetGeometricParams(event: SetGeometricParams): void {
+  const kandel = KandelEntity.load(event.address)!;
+
+  kandel.spread = event.params.spread;
+  kandel.ratio = event.params.ratio;
+
+  kandel.save();
+}
 
 export function handleSetIndexMapping(event: SetIndexMapping): void {}
 
 export function handleSetLength(event: SetLength): void {}
 
-export function handleSetReserveId(event: SetReserveId): void {}
+export function handleSetReserveId(event: SetReserveId): void {
+  const kandel = KandelEntity.load(event.address)!;
 
-export function handleSetRouter(event: SetRouter): void {}
+  kandel.reserveId = event.params.reserveId;
+
+  kandel.save();
+}
+
+export function handleSetRouter(event: SetRouter): void {
+  const kandel = KandelEntity.load(event.address)!;
+
+  kandel.router = event.params.router;
+
+  kandel.save();
+}

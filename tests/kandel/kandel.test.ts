@@ -9,8 +9,8 @@ import {
 } from "matchstick-as/assembly/index"
 import { createNewKandelEvent } from "./kandel-seeder-utils";
 import { handleNewKandel } from "../../src/kandel-seeder";
-import { createCreditEvent, createDebitEvent, createPairEvent, createSetAdminEvent, createSetGaspriceEvent, createSetGasreqEvent } from "./kandel-utils";
-import { handleCredit, handleDebit, handlePair, handleSetAdmin, handleSetGasprice, handleSetGasreq } from "../../src/kandel";
+import { createCreditEvent, createDebitEvent, createPairEvent, createSetAdminEvent, createSetGaspriceEvent, createSetGasreqEvent, createSetGeometricParamsEvent, createSetReserveIdEvent, createSetRouterEvent } from "./kandel-utils";
+import { handleCredit, handleDebit, handlePair, handleSetAdmin, handleSetGasprice, handleSetGasreq, handleSetGeometricParams, handleSetReserveId, handleSetRouter } from "../../src/kandel";
 import { createOfferWriteEvent, createSetActiveEvent } from "../mangrove/mangrove-utils";
 import { handleOfferWrite, handleSetActive } from "../../src/mangrove";
 import { getOfferId } from "../../src/helpers";
@@ -18,11 +18,13 @@ import { getOfferId } from "../../src/helpers";
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
-let token0 = Address.fromString("0x0000000000000000000000000000000000000000");
-let token1 = Address.fromString("0x0000000000000000000000000000000000000001");
-let owner = Address.fromString("0x0000000000000000000000000000000000000002")
-let kandel = Address.fromString("0x0000000000000000000000000000000000000004")
-let newOwner = Address.fromString("0x0000000000000000000000000000000000000005")
+const token0 = Address.fromString("0x0000000000000000000000000000000000000000");
+const token1 = Address.fromString("0x0000000000000000000000000000000000000001");
+const owner = Address.fromString("0x0000000000000000000000000000000000000002")
+const kandel = Address.fromString("0x0000000000000000000000000000000000000004")
+const newOwner = Address.fromString("0x0000000000000000000000000000000000000005")
+const router = Address.fromString("0x0000000000000000000000000000000000000006")
+const reserveId = Address.fromString("0x0000000000000000000000000000000000000007")
 
 describe("Describe entity assertions", () => {
   beforeEach(() => {
@@ -67,6 +69,37 @@ describe("Describe entity assertions", () => {
     handleSetGasreq(setGasReq);
 
     assert.fieldEquals('Kandel', kandel.toHexString(), 'gasreq', value.toString());
+  });
+
+  test("Kandel setGeometricParams", () => {
+    const spread = BigInt.fromI32(10);
+    const ratio = BigInt.fromI32(5);
+
+    const geometricParams = createSetGeometricParamsEvent(
+      spread,
+      ratio
+    );
+    geometricParams.address = kandel;
+    handleSetGeometricParams(geometricParams);
+
+    assert.fieldEquals('Kandel', kandel.toHexString(), 'spread', spread.toString());
+    assert.fieldEquals('Kandel', kandel.toHexString(), 'ratio', ratio.toString());
+  });
+
+  test("Kandel setReserveId", () => {
+    const setReserveId = createSetReserveIdEvent(reserveId);
+    setReserveId.address = kandel;
+    handleSetReserveId(setReserveId);
+
+    assert.fieldEquals('Kandel', kandel.toHexString(), 'reserveId', reserveId.toHexString());
+  });
+
+  test("Kandel setRouter", () => {
+    const setRouter = createSetRouterEvent(router);
+    setRouter.address = kandel;
+    handleSetRouter(setRouter);
+
+    assert.fieldEquals('Kandel', kandel.toHexString(), 'router', router.toHexString());
   });
 
   test("Kandel Credit", () => {
