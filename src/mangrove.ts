@@ -100,11 +100,7 @@ const createNewOffer = (event: OfferWrite): Offer => {
 
   const kandel = Kandel.load(event.params.maker);
   if (kandel) {
-    const offers = kandel.offers;
-    offers.push(offerId);
-    kandel.offers = offers;
-
-    kandel.save();
+    offer.kandel = kandel.id;
   }
 
   return offer;

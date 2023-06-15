@@ -30,7 +30,5 @@ export function handleNewKandel(event: NewKandel): void {
   kandel.deployer = event.params.owner;
   kandel.admin = event.params.owner;
 
-  kandel.offers = new Array<string>();
-
   kandel.save();
 }

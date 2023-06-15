@@ -148,7 +148,7 @@ describe("Describe entity assertions", () => {
     handleOfferWrite(offerWrite);
 
     const offerId = getOfferId(token0, token1, id);
-    assert.fieldEquals('Kandel', kandel.toHexString(), 'offers', `[${offerId}]`)
+    assert.fieldEquals('Offer', offerId, 'kandel', kandel.toHexString());
 
     const id2 = BigInt.fromI32(2);
     const offerWrite2 = createOfferWriteEvent(
@@ -165,6 +165,6 @@ describe("Describe entity assertions", () => {
     handleOfferWrite(offerWrite2);
 
     const offerId2 = getOfferId(token0, token1, id2);
-    assert.fieldEquals('Kandel', kandel.toHexString(), 'offers', `[${offerId}, ${offerId2}]`);
+    assert.fieldEquals('Offer', offerId2, 'kandel', kandel.toHexString());
   });
 })

@@ -31,6 +31,7 @@ type Offer @entity {
   market: Market!
   maker: Account!
   owner: Account
+  kandel: Kandel
 }
 
 type Order @entity {
@@ -85,7 +86,7 @@ type Kandel @entity {
   spread: BigInt
   ratio: BigInt
   
-  offers: [Offer!]!
+  offers: [Offer!]! @derivedFrom(field: "kandel")
   depositWithdraws: [KandelDepositWithdraw!]! @derivedFrom(field: "kandel")
 }
 
