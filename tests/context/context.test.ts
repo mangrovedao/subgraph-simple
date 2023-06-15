@@ -6,7 +6,7 @@ import {
   beforeEach,
   afterEach
 } from "matchstick-as/assembly/index"
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { Address, BigInt, Bytes, log } from "@graphprotocol/graph-ts"
 import { Order } from "../../generated/schema";
 import { addMarketOrderDataToStack, addOrderToStack, getLastOrder, getMarketOrderDataFromStack, getOrderFromStack, removeMarketOrderDataFromStack, removeOrderFromStack } from "../../src/helpers";
 import { createMarketOrderCall } from "../mangrove/mangrove-utils";
@@ -131,6 +131,5 @@ describe("Describe entity assertions", () => {
     data = getMarketOrderDataFromStack();
     assert.booleanEquals(true, data.nodata); 
   });
-
 
 });

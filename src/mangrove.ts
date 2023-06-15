@@ -27,6 +27,7 @@ import {
 } from "../generated/Mangrove/Mangrove"
 import { Market, Order, Offer, Kandel } from "../generated/schema"
 import { addMarketOrderDataToStack, addOrderToStack, getEventUniqueId, getMarketId, getMarketOrderDataFromStack, getOfferId, getOrCreateAccount, getOrderFromStack, removeMarketOrderDataFromStack, removeOrderFromStack } from "./helpers";
+import { log } from "matchstick-as";
 
 export function handleApproval(event: Approval): void {}
 
@@ -182,12 +183,12 @@ export function handleOrderStart(event: OrderStart): void {
 
   const marketOrderData = getMarketOrderDataFromStack();
 
-  if (!marketOrderData.nodata) {
+  if (marketOrderData.nodata) {
+    order.type = "LIMIT"
+  } else {
     order.type = "MARKET";
     order.marketOrderWants = marketOrderData.takerWants;
     order.marketOrderGives = marketOrderData.takerGives;
-  } else {
-    order.type = "LIMIT"
   }
 
   order.transactionHash = event.transaction.hash;
@@ -248,5 +249,7 @@ export function handleSetUseOracle(event: SetUseOracle): void {}
 
 export function handleMarketOrder(call: MarketOrderCall): void {
   const inputs = call.inputs;
+
+  log.error("{} {} {}", [call.transaction.hash.toHex(), inputs.takerGives.toString(), inputs.takerWants.toString()]);
   addMarketOrderDataToStack(inputs);
 }
