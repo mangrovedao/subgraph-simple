@@ -93,9 +93,9 @@ export const removeMarketOrderDataFromStack = (): void => {
 
   const marketOrders = context.marketOrders;
 
-  for (let i = marketOrders.length  - 1; i >= 0 ; --i) {
+  for (let i = marketOrders.length - 1; i >= 0 ; --i) {
     if (marketOrders.at(i) == '/' || i == 0)  {
-      context.marketOrders = marketOrders.slice(0, i - 1);
+      context.marketOrders = marketOrders.slice(0, i);
     }
   }
 
