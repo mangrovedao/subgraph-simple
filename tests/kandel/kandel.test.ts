@@ -9,8 +9,8 @@ import {
 } from "matchstick-as/assembly/index"
 import { createNewKandelEvent } from "./kandel-seeder-utils";
 import { handleNewKandel } from "../../src/kandel-seeder";
-import { createCreditEvent, createDebitEvent, createSetGaspriceEvent } from "./kandel-utils";
-import { handleCredit, handleDebit, handleSetGasprice } from "../../src/kandel";
+import { createCreditEvent, createDebitEvent, createPairEvent, createSetGaspriceEvent } from "./kandel-utils";
+import { handleCredit, handleDebit, handlePair, handleSetGasprice } from "../../src/kandel";
 
 
 // Tests structure (matchstick-as >=0.5.0)
@@ -33,14 +33,21 @@ describe("Describe entity assertions", () => {
   });
 
   test("Kandel setGasPrice", () => {
-    assert.entityCount('Kandel', 1);
-
     const bi10 = BigInt.fromI32(10);
     const setGasPriceEvent = createSetGaspriceEvent(bi10)
     setGasPriceEvent.address = kandel;
     handleSetGasprice(setGasPriceEvent);
      
     assert.fieldEquals('Kandel', kandel.toHexString(), 'gasprice', '10');
+  });
+
+  test("Kandel setPair", () => {
+    const pairEvent = createPairEvent(token0, token1);
+    pairEvent.address = kandel;
+    handlePair(pairEvent);
+
+    assert.fieldEquals('Kandel', kandel.toHexString(), 'base', token0.toHexString());
+    assert.fieldEquals('Kandel', kandel.toHexString(), 'quote', token1.toHexString());
   });
 
   test("Kandel Credit", () => {

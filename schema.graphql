@@ -63,17 +63,18 @@ type KandelDepositWithdraw @entity {
 type Kandel @entity {
   id: Bytes!
   transactionHash: Bytes!
+
   seeder: Bytes!
   address: Bytes!
 
-  base: Bytes!
-  depositedBase: BigInt!
-  depositedQuote: BigInt!
+  base: Bytes! 
+  quote: Bytes!
 
   totalBase: BigInt!
-  totalQuote: BigInt!
+  depositedBase: BigInt!
 
-  quote: Bytes!
+  totalQuote: BigInt!
+  depositedQuote: BigInt!
 
   gasprice: BigInt
   

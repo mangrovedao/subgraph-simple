@@ -79,9 +79,18 @@ export function handleDebit(event: Debit): void {
 
 export function handleLogIncident(event: LogIncident): void {}
 
-export function handleMgv(event: Mgv): void {}
+export function handleMgv(event: Mgv): void {
+  // nothing to do here as we have one subgraph by mangrove
+}
 
-export function handlePair(event: Pair): void {}
+export function handlePair(event: Pair): void {
+  const kandel = KandelEntity.load(event.address)!;
+
+  kandel.base = event.params.base;
+  kandel.quote = event.params.quote;
+
+  kandel.save();
+}
 
 export function handlePopulateEnd(event: PopulateEnd): void {}
 
