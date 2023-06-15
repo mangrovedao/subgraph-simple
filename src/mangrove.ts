@@ -48,7 +48,7 @@ export function handleOfferFail(event: OfferFail): void {
   offer.isOpen = false;
   offer.isFailed = false;
 
-  offer.failedReason = event.params.mgvData.toString();
+  offer.failedReason = event.params.mgvData;
 
   offer.save();
 }
@@ -167,7 +167,19 @@ export function handleOrderStart(event: OrderStart): void {
   addOrderToStack(order);
 }
 
-export function handlePosthookFail(event: PosthookFail): void {}
+export function handlePosthookFail(event: PosthookFail): void {
+  const offerId = getOfferId(
+    event.params.outbound_tkn,
+    event.params.inbound_tkn,
+    event.params.offerId,
+  );
+
+  const offer = Offer.load(offerId)!;
+
+  offer.posthookFailReason = event.params.posthookData;
+
+  offer.save();
+}
 
 export function handleSetActive(event: SetActive): void {
   const marketId = getMarketId(

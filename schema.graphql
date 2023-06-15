@@ -25,7 +25,8 @@ type Offer @entity {
   isFailed: Boolean!
   isFilled: Boolean!
   isRetracted: Boolean!
-  failedReason: String
+  failedReason: Bytes
+  posthookFailReason: Bytes
 
   market: Market!
   maker: Account!
