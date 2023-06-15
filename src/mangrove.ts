@@ -80,9 +80,9 @@ export function handleOfferSuccess(event: OfferSuccess): void {
 
   const BN_0 = BigInt.fromI32(0);
   if (offer.wants == BN_0 && offer.gives == BN_0) {
-    offer.isOpen = false;
     offer.isFilled = true;
   }
+  offer.isOpen = false;
 
   offer.save();
 }
