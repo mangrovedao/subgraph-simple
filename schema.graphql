@@ -30,7 +30,6 @@ type Offer @entity {
 
   market: Market!
   maker: Account!
-  kandel: Kandel
   owner: Account
 }
 
@@ -81,7 +80,7 @@ type Kandel @entity {
   deployer: Account!
   admin: Account!
 
-  offers: [Offer!]! @derivedFrom(field: "kandel")
+  offers: [Offer!]!
   depositWithdraws: [KandelDepositWithdraw!]! @derivedFrom(field: "kandel")
 }
 
