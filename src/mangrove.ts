@@ -36,7 +36,6 @@ export function handleCredit(event: Credit): void {}
 
 export function handleDebit(event: Debit): void {}
 
-// Are we going to support multiple Mangrove instances? And on multiple chains?
 export function handleKill(event: Kill): void {}
 
 export function handleNewMgv(event: NewMgv): void {}
@@ -64,7 +63,6 @@ export function handleOfferRetract(event: OfferRetract): void {
     event.params.id,
   );
   const offer = Offer.load(offerId)!; 
-  // Maybe a IsRetracted boolean would good, in order to know why the offer is closed
   offer.isOpen = false;
   offer.isRetracted = true;
 
@@ -83,7 +81,6 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   offer.gives = offer.gives.minus(event.params.takerWants);
 
   const BN_0 = BigInt.fromI32(0);
-  // the Offer is always "offline" when the is successfully taken, no matter what quantity is left
   if (offer.wants == BN_0 && offer.gives == BN_0) {
     offer.isFilled = true;
   }
@@ -119,8 +116,8 @@ export function handleOfferWrite(event: OfferWrite): void {
   );
   let offer = Offer.load(offerId);
   if (!offer) {
-      // I would create a new Offer object, in order to, not confuse it with the original offer
-      // Is there any way of knowing the previous offer id?
+      // Is there any way of knowing the previous version of the offer?
+      // Maybe we don't need it, if we just save the correct new state, and what triggered this new state.
     offer = createNewOffer(event);
   }
 
@@ -151,7 +148,6 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.save();
 }
 
-// maybe call it stack instead of queue?
 export function handleOrderComplete(event: OrderComplete): void {
   const order = getOrderFromStack();
 
@@ -169,7 +165,6 @@ export function handleOrderComplete(event: OrderComplete): void {
 }
 
 export function handleOrderStart(event: OrderStart): void {
-  // Would be nice with a helper to create the order id
   const order = new Order(getEventUniqueId(event));
   order.transactionHash = Bytes.fromUTF8(event.transaction.hash.toHex());
   order.type = "MARKET";
@@ -178,7 +173,6 @@ export function handleOrderStart(event: OrderStart): void {
   addOrderToStack(order);
 }
 
-// this is somehting the user would very much like to know
 export function handlePosthookFail(event: PosthookFail): void {
   const offerId = getOfferId(
     event.params.outbound_tkn,

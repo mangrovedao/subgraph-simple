@@ -24,7 +24,6 @@ import { KandelDepositWithdraw, Kandel as  KandelEntity } from "../generated/sch
 import { getEventUniqueId } from "./helpers";
 
 export function handleCredit(event: Credit): void {
-  // helper to create the Id would be nice
   const deposit = new KandelDepositWithdraw(
     getEventUniqueId(event),
   );

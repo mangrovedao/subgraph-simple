@@ -14,7 +14,6 @@ import { BigInt } from "@graphprotocol/graph-ts";
 
 export function handleLogIncident(event: LogIncident): void {}
 
-// I think we cound potentially have multiple MangroveOrder instances and we should maybe be able to tell what offers and orders were created by which instance
 export function handleMgv(event: Mgv): void {}
 
 export function handleNewOwnedOffer(event: NewOwnedOffer): void {

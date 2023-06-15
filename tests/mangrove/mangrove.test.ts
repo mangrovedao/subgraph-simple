@@ -192,9 +192,6 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'gives', '1990');
     assert.fieldEquals('Offer', offerId, 'isFilled', 'false');
 
-    // OfferSuccess closes the offer, not matter if it is fully filled or not.
-    // A new OfferWrite will be emitted if the offer gets re posted
-
     offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, BigInt.fromI32(1990), BigInt.fromI32(980));
     handleOfferSuccess(offerSuccess);
 
