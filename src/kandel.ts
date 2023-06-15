@@ -113,7 +113,13 @@ export function handleSetGasprice(event: SetGasprice): void {
   kandel.save();
 }
 
-export function handleSetGasreq(event: SetGasreq): void {}
+export function handleSetGasreq(event: SetGasreq): void {
+  const kandel = KandelEntity.load(event.address)!
+
+  kandel.gasreq = event.params.value;
+
+  kandel.save();
+}
 
 export function handleSetGeometricParams(event: SetGeometricParams): void {}
 

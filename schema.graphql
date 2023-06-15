@@ -76,6 +76,7 @@ type Kandel @entity {
   depositedQuote: BigInt!
 
   gasprice: BigInt
+  gasreq: BigInt
   
   deployer: Account!
   admin: Account!

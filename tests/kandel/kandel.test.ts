@@ -9,8 +9,8 @@ import {
 } from "matchstick-as/assembly/index"
 import { createNewKandelEvent } from "./kandel-seeder-utils";
 import { handleNewKandel } from "../../src/kandel-seeder";
-import { createCreditEvent, createDebitEvent, createPairEvent, createSetAdminEvent, createSetGaspriceEvent } from "./kandel-utils";
-import { handleCredit, handleDebit, handlePair, handleSetAdmin, handleSetGasprice } from "../../src/kandel";
+import { createCreditEvent, createDebitEvent, createPairEvent, createSetAdminEvent, createSetGaspriceEvent, createSetGasreqEvent } from "./kandel-utils";
+import { handleCredit, handleDebit, handlePair, handleSetAdmin, handleSetGasprice, handleSetGasreq } from "../../src/kandel";
 import { createOfferWriteEvent, createSetActiveEvent } from "../mangrove/mangrove-utils";
 import { handleOfferWrite, handleSetActive } from "../../src/mangrove";
 import { getOfferId } from "../../src/helpers";
@@ -58,6 +58,15 @@ describe("Describe entity assertions", () => {
 
     assert.fieldEquals('Kandel', kandel.toHexString(), 'admin', newOwner.toHexString());
     assert.fieldEquals('Kandel', kandel.toHexString(), 'deployer', owner.toHexString());
+  });
+
+  test("Kandel setGasReq", () => {
+    const value = BigInt.fromI32(10);
+    const setGasReq = createSetGasreqEvent(value);
+    setGasReq.address = kandel;
+    handleSetGasreq(setGasReq);
+
+    assert.fieldEquals('Kandel', kandel.toHexString(), 'gasreq', value.toString());
   });
 
   test("Kandel Credit", () => {
