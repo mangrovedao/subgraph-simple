@@ -45,6 +45,9 @@ type Order @entity {
   penalty: BigInt
   feePaid: BigInt
 
+  marketOrderWants: BigInt
+  marketOrderGives: BigInt
+
   offer: Offer
   realTaker: Bytes # for market order it's equal taker
 }
@@ -95,4 +98,6 @@ type Contex @entity {
   id: String!
   ids: String!
   last: Order
+
+  marketOrders: String!
 }

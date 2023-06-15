@@ -109,6 +109,9 @@ dataSources:
       abis:
         - name: Mangrove
           file: ./abis/Mangrove.json
+      callHandlers:
+        - function: marketOrder(address,address,uint256,uint256,bool)
+          handler: handleMarketOrder
       eventHandlers:
         - event: Approval(indexed address,indexed address,address,address,uint256)
           handler: handleApproval

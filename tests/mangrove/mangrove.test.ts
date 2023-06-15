@@ -9,10 +9,10 @@ import {
   afterEach
 } from "matchstick-as/assembly/index"
 import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
-import { handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderStart, handleSetActive } from "../../src/mangrove"
-import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils"
+import { handleMarketOrder, handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderStart, handleSetActive } from "../../src/mangrove"
+import { createMarketOrderCall, createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils"
 import { Market } from "../../generated/schema";
-import { getMarketId, getOfferId } from "../../src/helpers";
+import { getEventUniqueId, getMarketId, getOfferId } from "../../src/helpers";
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
@@ -214,6 +214,32 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'isFilled', 'false');
 
     assert.entityCount("Offer", 1);
+  });
+
+  test("Market order", () => {
+    let setActiveEvent = createSetActiveEvent(token0, token1, true);
+    handleSetActive(setActiveEvent);
+
+    const takerWants = BigInt.fromI32(10);
+    const takerGives = BigInt.fromI32(20);
+
+    const createMarketOrder = createMarketOrderCall(
+      token0,
+      token1,
+      takerWants,
+      takerGives,
+    );
+
+    handleMarketOrder(createMarketOrder);
+
+    const orderStart = createOrderStartEvent();
+    handleOrderStart(orderStart);
+
+    const orderStartId = getEventUniqueId(orderStart);
+
+    assert.fieldEquals('Order', orderStartId, 'type', 'MARKET');
+    assert.fieldEquals('Order', orderStartId, 'marketOrderGives', takerGives.toString());
+    assert.fieldEquals('Order', orderStartId, 'marketOrderWants', takerWants.toString());
   });
 
 });

@@ -22,10 +22,11 @@ import {
   SetGovernance,
   SetMonitor,
   SetNotify,
-  SetUseOracle
+  SetUseOracle,
+  MarketOrderCall
 } from "../generated/Mangrove/Mangrove"
 import { Market, Order, Offer, Kandel } from "../generated/schema"
-import { addOrderToStack, getEventUniqueId, getMarketId, getOfferId, getOrCreateAccount, getOrderFromStack, removeOrderFromStack } from "./helpers";
+import { addMarketOrderDataToStack, addOrderToStack, getEventUniqueId, getMarketId, getMarketOrderDataFromStack, getOfferId, getOrCreateAccount, getOrderFromStack, removeOrderFromStack } from "./helpers";
 
 export function handleApproval(event: Approval): void {}
 
@@ -177,8 +178,18 @@ export function handleOrderComplete(event: OrderComplete): void {
 
 export function handleOrderStart(event: OrderStart): void {
   const order = new Order(getEventUniqueId(event));
+
+  const marketOrderData = getMarketOrderDataFromStack();
+
+  if (!marketOrderData.nodata) {
+    order.type = "MARKET";
+    order.marketOrderWants = marketOrderData.takerWants;
+    order.marketOrderGives = marketOrderData.takerGives;
+  } else {
+    order.type = "LIMIT"
+  }
+
   order.transactionHash = Bytes.fromUTF8(event.transaction.hash.toHex());
-  order.type = "MARKET";
   order.save();
 
   addOrderToStack(order);
@@ -233,3 +244,8 @@ export function handleSetMonitor(event: SetMonitor): void {}
 export function handleSetNotify(event: SetNotify): void {}
 
 export function handleSetUseOracle(event: SetUseOracle): void {}
+
+export function handleMarketOrder(call: MarketOrderCall): void {
+  const inputs = call.inputs;
+  addMarketOrderDataToStack(inputs);
+}

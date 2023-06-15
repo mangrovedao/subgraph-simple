@@ -1,10 +1,11 @@
-import { newMockEvent } from "matchstick-as"
+import { newMockCall, newMockEvent } from "matchstick-as"
 import { ethereum, Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
 import {
   Approval,
   Credit,
   Debit,
   Kill,
+  MarketOrderCall,
   NewMgv,
   OfferFail,
   OfferRetract,
@@ -580,4 +581,31 @@ export function createSetUseOracleEvent(value: boolean): SetUseOracle {
   )
 
   return setUseOracleEvent
+}
+
+export function createMarketOrderCall(
+  outbound_tkn: Address,
+  inbound_tkn: Address,
+  takerWants: BigInt, 
+  takerGives: BigInt
+): MarketOrderCall {
+  const marketOrderCall = changetype<MarketOrderCall>(newMockCall());
+
+  marketOrderCall.inputValues.push(
+    new ethereum.EventParam("outbound_tkn", ethereum.Value.fromAddress(outbound_tkn)),
+  );
+
+  marketOrderCall.inputValues.push(
+    new ethereum.EventParam("inbound_tkn", ethereum.Value.fromAddress(inbound_tkn)),
+  );
+
+  marketOrderCall.inputValues.push(
+    new ethereum.EventParam("takerWants", ethereum.Value.fromUnsignedBigInt(takerWants)),
+  );
+
+  marketOrderCall.inputValues.push(
+    new ethereum.EventParam("takerGives", ethereum.Value.fromUnsignedBigInt(takerGives)),
+  );
+
+  return marketOrderCall;
 }
