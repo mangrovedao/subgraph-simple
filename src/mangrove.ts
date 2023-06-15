@@ -189,7 +189,7 @@ export function handleOrderStart(event: OrderStart): void {
     order.type = "LIMIT"
   }
 
-  order.transactionHash = Bytes.fromUTF8(event.transaction.hash.toHex());
+  order.transactionHash = event.transaction.hash;
   order.save();
 
   addOrderToStack(order);
