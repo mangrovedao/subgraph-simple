@@ -95,7 +95,13 @@ export function handleRetractEnd(event: RetractEnd): void {}
 
 export function handleRetractStart(event: RetractStart): void {}
 
-export function handleSetAdmin(event: SetAdmin): void {}
+export function handleSetAdmin(event: SetAdmin): void {
+  const kandel = KandelEntity.load(event.address)!;
+
+  kandel.admin = event.params.admin;
+
+  kandel.save();
+}
 
 export function handleSetCompoundRates(event: SetCompoundRates): void {}
 

@@ -78,7 +78,8 @@ type Kandel @entity {
 
   gasprice: BigInt
   
-  owner: Account!
+  deployer: Account!
+  admin: Account!
 
   offers: [Offer!]! @derivedFrom(field: "kandel")
   depositWithdraws: [KandelDepositWithdraw!]! @derivedFrom(field: "kandel")

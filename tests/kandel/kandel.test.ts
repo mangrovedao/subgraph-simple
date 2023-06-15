@@ -9,8 +9,8 @@ import {
 } from "matchstick-as/assembly/index"
 import { createNewKandelEvent } from "./kandel-seeder-utils";
 import { handleNewKandel } from "../../src/kandel-seeder";
-import { createCreditEvent, createDebitEvent, createPairEvent, createSetGaspriceEvent } from "./kandel-utils";
-import { handleCredit, handleDebit, handlePair, handleSetGasprice } from "../../src/kandel";
+import { createCreditEvent, createDebitEvent, createPairEvent, createSetAdminEvent, createSetGaspriceEvent } from "./kandel-utils";
+import { handleCredit, handleDebit, handlePair, handleSetAdmin, handleSetGasprice } from "../../src/kandel";
 
 
 // Tests structure (matchstick-as >=0.5.0)
@@ -20,6 +20,7 @@ let token0 = Address.fromString("0x0000000000000000000000000000000000000000");
 let token1 = Address.fromString("0x0000000000000000000000000000000000000001");
 let owner = Address.fromString("0x0000000000000000000000000000000000000002")
 let kandel = Address.fromString("0x0000000000000000000000000000000000000004")
+let newOwner = Address.fromString("0x0000000000000000000000000000000000000005")
 
 describe("Describe entity assertions", () => {
   beforeEach(() => {
@@ -39,6 +40,18 @@ describe("Describe entity assertions", () => {
     handleSetGasprice(setGasPriceEvent);
      
     assert.fieldEquals('Kandel', kandel.toHexString(), 'gasprice', '10');
+  });
+
+  test("Kandel setAdmin", () => {
+    assert.fieldEquals('Kandel', kandel.toHexString(), 'deployer', owner.toHexString());
+    assert.fieldEquals('Kandel', kandel.toHexString(), 'admin', owner.toHexString());
+
+    const setAdmin = createSetAdminEvent(newOwner);
+    setAdmin.address = kandel;
+    handleSetAdmin(setAdmin);
+
+    assert.fieldEquals('Kandel', kandel.toHexString(), 'admin', newOwner.toHexString());
+    assert.fieldEquals('Kandel', kandel.toHexString(), 'deployer', owner.toHexString());
   });
 
   test("Kandel Credit", () => {
