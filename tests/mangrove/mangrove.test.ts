@@ -12,7 +12,7 @@ import { Address, BigInt, Bytes, log } from "@graphprotocol/graph-ts"
 import { handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive } from "../../src/mangrove"
 import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils"
 import { Market, Offer } from "../../generated/schema";
-import { getMarketId, getOfferId } from "../../src/helpers";
+import { getEventUniqueId, getMarketId, getOfferId } from "../../src/helpers";
 import { handleNewOwnedOffer } from "../../src/mangrove-order";
 import { createNewOwnedOfferEvent } from "./mangrove-order-utils";
 
@@ -83,6 +83,8 @@ describe("Describe entity assertions", () => {
     );
     handleOfferRetract(offerRetract);
 
+    assert.fieldEquals('Offer', offerId, 'isOpen', 'false');
+
     offerWrite = createOfferWriteEvent(
       token0, 
       token1,
@@ -96,12 +98,10 @@ describe("Describe entity assertions", () => {
     );
     handleOfferWrite(offerWrite);
 
-    const oldOfferId = `${offerId}-${offerWrite.transaction.hash.toHex()}-${offerWrite.logIndex.toHex()}`;
     // should check that the other fields are also saved correctly, for both offers
-    assert.fieldEquals('Offer', oldOfferId, 'isOpen', 'false');
     assert.fieldEquals('Offer', offerId, 'isOpen', 'true');
 
-    assert.entityCount("Offer", 2);
+    assert.entityCount("Offer", 1);
   });
 
   test("Offer created, failed", () => {
@@ -137,6 +137,10 @@ describe("Describe entity assertions", () => {
     );
     handleOfferFail(offerFail);
 
+    assert.fieldEquals('Offer', offerId, 'isOpen', 'false');
+    assert.fieldEquals('Offer', offerId, 'wants', '1000');
+    assert.fieldEquals('Offer', offerId, 'gives', '2000');
+
     offerWrite = createOfferWriteEvent(
       token0, 
       token1,
@@ -150,17 +154,11 @@ describe("Describe entity assertions", () => {
     );
     handleOfferWrite(offerWrite);
 
-    const oldOfferId = `${offerId}-${offerWrite.transaction.hash.toHex()}-${offerWrite.logIndex.toHex()}`;
-
-    assert.fieldEquals('Offer', oldOfferId, 'isOpen', 'false');
-    assert.fieldEquals('Offer', oldOfferId, 'wants', '1000');
-    assert.fieldEquals('Offer', oldOfferId, 'gives', '2000');
-
     assert.fieldEquals('Offer', offerId, 'isOpen', 'true');
     assert.fieldEquals('Offer', offerId, 'wants', '500');
     assert.fieldEquals('Offer', offerId, 'gives', '1000');
 
-    assert.entityCount("Offer", 2);
+    assert.entityCount("Offer", 1);
   });
 
   test("Offer created, partially filled, fully filled", () => {
@@ -218,18 +216,12 @@ describe("Describe entity assertions", () => {
     );
     handleOfferWrite(offerWrite);
 
-    const oldOfferId = `${offerId}-${offerSuccess.transaction.hash.toHex()}-${offerSuccess.logIndex.toHex()}`;
-    assert.fieldEquals('Offer', oldOfferId, 'wants', '0');
-    assert.fieldEquals('Offer', oldOfferId, 'gives', '0');
-    assert.fieldEquals('Offer', oldOfferId, 'isOpen', 'false');
-    assert.fieldEquals('Offer', oldOfferId, 'isFilled', 'true');
-
     assert.fieldEquals('Offer', offerId, 'wants', '500');
     assert.fieldEquals('Offer', offerId, 'gives', '1000');
     assert.fieldEquals('Offer', offerId, 'isOpen', 'true');
     assert.fieldEquals('Offer', offerId, 'isFilled', 'false');
 
-    assert.entityCount("Offer", 2);
+    assert.entityCount("Offer", 1);
   });
 
 });

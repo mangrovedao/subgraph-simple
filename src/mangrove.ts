@@ -24,8 +24,8 @@ import {
   SetNotify,
   SetUseOracle
 } from "../generated/Mangrove/Mangrove"
-import { Market, Account, Order, Offer, Kandel } from "../generated/schema"
-import { addOrderToQueue, getMarketId, getOfferId, getOrCreateAccount, getOrderFromQueue, removeOrderFromQueue } from "./helpers";
+import { Market, Order, Offer, Kandel } from "../generated/schema"
+import { addOrderToStack, getEventUniqueId, getMarketId, getOfferId, getOrCreateAccount, getOrderFromStack, removeOrderFromStack } from "./helpers";
 
 // Can you get all approvals from calling the contract on chain?
 // I think it is reasonable that the user want to know what approvals they have given
@@ -52,7 +52,7 @@ export function handleOfferFail(event: OfferFail): void {
   offer.isOpen = false;
   offer.isFailed = false;
 
-  offer.failedReason = event.params.mgvData.toString();
+  offer.failedReason = event.params.mgvData;
 
   offer.save();
 }
@@ -66,6 +66,7 @@ export function handleOfferRetract(event: OfferRetract): void {
   const offer = Offer.load(offerId)!; 
   // Maybe a IsRetracted boolean would good, in order to know why the offer is closed
   offer.isOpen = false;
+  offer.isRetracted = true;
 
   offer.save();
 }
@@ -84,11 +85,30 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   const BN_0 = BigInt.fromI32(0);
   // the Offer is always "offline" when the is successfully taken, no matter what quantity is left
   if (offer.wants == BN_0 && offer.gives == BN_0) {
-    offer.isOpen = false;
     offer.isFilled = true;
   }
+  offer.isOpen = false;
 
   offer.save();
+}
+
+const createNewOffer = (event: OfferWrite): Offer => {
+  const offerId = getOfferId(
+    event.params.outbound_tkn, 
+    event.params.inbound_tkn,
+    event.params.id,
+  );
+  const offer = new Offer(offerId);
+  offer.transactionHash = event.transaction.hash;
+  offer.initialWants = event.params.wants;
+  offer.initialGives = event.params.gives;
+
+  const kandel = Kandel.load(event.params.maker);
+  if (kandel) {
+    offer.kandel = event.params.maker;
+  }
+
+  return offer;
 }
 
 export function handleOfferWrite(event: OfferWrite): void {
@@ -97,28 +117,11 @@ export function handleOfferWrite(event: OfferWrite): void {
     event.params.inbound_tkn,
     event.params.id,
   );
-
   let offer = Offer.load(offerId);
-
   if (!offer) {
-    offer = new Offer(offerId);
-    offer.transactionHash = event.transaction.hash;
-    const kandel = Kandel.load(event.params.maker);
-    if (kandel) {
-      offer.kandel = event.params.maker;
-    }
-  } else {
-    if (offer.isFilled || offer.isFailed || !offer.isOpen) {
-      // if the offer wirte match an offer id that is re used then create a new offer entity to 
-      // keep track historic data
-      const newOfferId = `${offer.id}-${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
       // I would create a new Offer object, in order to, not confuse it with the original offer
       // Is there any way of knowing the previous offer id?
-      offer.id = newOfferId;
-      offer.save()
-
-      offer.id = offerId;
-    }
+    offer = createNewOffer(event);
   }
 
   const owner = getOrCreateAccount(event.params.maker);
@@ -133,27 +136,24 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.market = market.id;
 
   offer.offerId = event.params.id;
-  offer.wants = event.params.wants,
-  // Why set initialWants and initialGives, every time an offer is written?
-  // Shouldn't it be set only when the offer is created?
-  offer.initialWants = event.params.wants;
 
+  offer.wants = event.params.wants,
   offer.gives = event.params.gives,
-  offer.initialGives = event.params.gives;
 
   offer.gasprice = event.params.gasprice,
   offer.gasreq = event.params.gasreq,
   offer.prev = event.params.prev,
   offer.isOpen = true;
   offer.isFailed = false;
-  offer.isFilled = false
+  offer.isFilled = false;
+  offer.isRetracted = false;
 
   offer.save();
 }
 
 // maybe call it stack instead of queue?
 export function handleOrderComplete(event: OrderComplete): void {
-  const order = getOrderFromQueue();
+  const order = getOrderFromStack();
 
   order.taker = event.params.taker;
   // Not sure if we want to mix model for MarketOrder and MangroveOrder. Doing it like then we could potentially end up with a very large entity
@@ -165,21 +165,33 @@ export function handleOrderComplete(event: OrderComplete): void {
 
   order.save();
 
-  removeOrderFromQueue();
+  removeOrderFromStack();
 }
 
 export function handleOrderStart(event: OrderStart): void {
   // Would be nice with a helper to create the order id
-  const order = new Order(`${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`);
+  const order = new Order(getEventUniqueId(event));
   order.transactionHash = Bytes.fromUTF8(event.transaction.hash.toHex());
   order.type = "MARKET";
   order.save();
 
-  addOrderToQueue(order);
+  addOrderToStack(order);
 }
 
 // this is somehting the user would very much like to know
-export function handlePosthookFail(event: PosthookFail): void {}
+export function handlePosthookFail(event: PosthookFail): void {
+  const offerId = getOfferId(
+    event.params.outbound_tkn,
+    event.params.inbound_tkn,
+    event.params.offerId,
+  );
+
+  const offer = Offer.load(offerId)!;
+
+  offer.posthookFailReason = event.params.posthookData;
+
+  offer.save();
+}
 
 export function handleSetActive(event: SetActive): void {
   const marketId = getMarketId(

@@ -1,4 +1,4 @@
-import { Address, BigInt, Value } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Value, ethereum } from "@graphprotocol/graph-ts";
 import { Account, Contex, Order } from "../generated/schema";
 
 export const getMarketId = (outbound_tkn: Address, inbound_tkn: Address): string  => {
@@ -21,7 +21,7 @@ export const getOrCreateAccount = (address: Address): Account => {
   return account;
 }
 
-export const addOrderToQueue = (order: Order): void => {
+export const addOrderToStack = (order: Order): void => {
   let context = Contex.load('context');
   if (!context) {
     context = new Contex('context');
@@ -32,7 +32,7 @@ export const addOrderToQueue = (order: Order): void => {
   context.save();
 }
 
-export const getOrderFromQueue = (): Order => {
+export const getOrderFromStack = (): Order => {
   const context = Contex.load('context')!;
   const ids = context.ids;
 
@@ -42,7 +42,7 @@ export const getOrderFromQueue = (): Order => {
   return order;
 }
 
-export const removeOrderFromQueue = (): void => {
+export const removeOrderFromStack = (): void => {
   let context = Contex.load('context')!;
 
   const ids = context.ids;
@@ -62,4 +62,8 @@ export const getLastOrder = (): Order => {
 
   const order = Order.load(context.last!)!;
   return order;
+}
+
+export const getEventUniqueId = (event: ethereum.Event): string => {
+  return `${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
 }

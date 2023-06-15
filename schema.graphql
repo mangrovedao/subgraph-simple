@@ -24,9 +24,11 @@ type Offer @entity {
   isOpen: Boolean!
   isFailed: Boolean!
   isFilled: Boolean!
-  failedReason: String
   # Price, do we want to calcuate it in the UI, Query or save it here?
   # deprovision, we need to keep track, if an offer has been deprovisioned or not
+  isRetracted: Boolean!
+  failedReason: Bytes
+  posthookFailReason: Bytes
 
   market: Market!
   maker: Account!

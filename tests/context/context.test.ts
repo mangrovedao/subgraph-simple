@@ -8,7 +8,7 @@ import {
 } from "matchstick-as/assembly/index"
 import { Bytes } from "@graphprotocol/graph-ts"
 import { Order } from "../../generated/schema";
-import { addOrderToQueue, getLastOrder, getOrderFromQueue, removeOrderFromQueue } from "../../src/helpers";
+import { addOrderToStack, getLastOrder, getOrderFromStack, removeOrderFromStack } from "../../src/helpers";
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
@@ -32,22 +32,22 @@ describe("Describe entity assertions", () => {
     order1.save();
     order2.save();
 
-    addOrderToQueue(order1);
-    let currentOrder = getOrderFromQueue();
+    addOrderToStack(order1);
+    let currentOrder = getOrderFromStack();
 
     assert.assertTrue(order1.id.toString() == currentOrder.id.toString());
 
-    addOrderToQueue(order2);
-    currentOrder = getOrderFromQueue();
+    addOrderToStack(order2);
+    currentOrder = getOrderFromStack();
 
     assert.assertTrue(currentOrder.id.toString() == order2.id.toString());
 
-    currentOrder = getOrderFromQueue();
-    removeOrderFromQueue();
+    currentOrder = getOrderFromStack();
+    removeOrderFromStack();
 
-    currentOrder = getOrderFromQueue();
+    currentOrder = getOrderFromStack();
     assert.assertTrue(currentOrder.id.toString() == order1.id.toString());
-    removeOrderFromQueue();
+    removeOrderFromStack();
 
     const lastOrder = getLastOrder();
     assert.assertTrue(lastOrder.id.toString() == order1.id.toString());
