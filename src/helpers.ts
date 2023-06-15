@@ -96,6 +96,7 @@ export const removeMarketOrderDataFromStack = (): void => {
   for (let i = marketOrders.length - 1; i >= 0 ; --i) {
     if (marketOrders.at(i) == '/' || i == 0)  {
       context.marketOrders = marketOrders.slice(0, i);
+      break;
     }
   }
 
