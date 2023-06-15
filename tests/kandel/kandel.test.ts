@@ -4,8 +4,6 @@ import {
   describe,
   test,
   clearStore,
-  beforeAll,
-  afterAll,
   beforeEach,
   afterEach
 } from "matchstick-as/assembly/index"
@@ -27,14 +25,11 @@ describe("Describe entity assertions", () => {
   beforeEach(() => {
     const newKandelEvent = createNewKandelEvent(owner, token0, token1, kandel);
     handleNewKandel(newKandelEvent);
+    assert.entityCount('Kandel', 1);
   });
 
   afterEach(() => {
     clearStore()
-  });
-
-  test("Kandel created and stored", () => {
-    assert.entityCount('Kandel', 1);
   });
 
   test("Kandel setGasPrice", () => {

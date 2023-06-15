@@ -25,7 +25,7 @@ const mgv = Address.fromString("0x0000000000000000000000000000000000000005");
 
 describe("Describe entity assertions", () => {
   beforeEach(() => {
-    let setActiveEvent = createSetActiveEvent(token0, token1, true);
+    const setActiveEvent = createSetActiveEvent(token0, token1, true);
     handleSetActive(setActiveEvent);
     assert.entityCount("Market", 1);
   })
@@ -35,10 +35,6 @@ describe("Describe entity assertions", () => {
   });
 
   test("New owned offer", () => {
-    let setActiveEvent = createSetActiveEvent(token0, token1, true);
-    handleSetActive(setActiveEvent);
-    assert.entityCount("Market", 1);
-
     const id = BigInt.fromI32(0);
     let offerWrite = createOfferWriteEvent(
       token0, 
