@@ -8,14 +8,11 @@ import {
   beforeEach,
   afterEach
 } from "matchstick-as/assembly/index"
-import { Address, BigInt, Bytes, log } from "@graphprotocol/graph-ts"
-import { handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive } from "../../src/mangrove"
-import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils"
-import { Market, Offer } from "../../generated/schema";
-import { getEventUniqueId, getMarketId, getOfferId } from "../../src/helpers";
-import { handleNewOwnedOffer } from "../../src/mangrove-order";
-import { createNewOwnedOfferEvent } from "./mangrove-order-utils";
-
+import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderStart, handleSetActive } from "../../src/mangrove"
+import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils"
+import { Market } from "../../generated/schema";
+import { getMarketId, getOfferId } from "../../src/helpers";
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
@@ -40,7 +37,7 @@ describe("Describe entity assertions", () => {
     assert.entityCount("Market", 1);
 
     const marketId = getMarketId(token0, token1)
-    let market = Market.load(marketId);
+    const market = Market.load(marketId);
     assert.assertNotNull(market);
 
     assert.fieldEquals('Market', marketId, 'active', 'true');

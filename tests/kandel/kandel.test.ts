@@ -11,7 +11,9 @@ import { createNewKandelEvent } from "./kandel-seeder-utils";
 import { handleNewKandel } from "../../src/kandel-seeder";
 import { createCreditEvent, createDebitEvent, createPairEvent, createSetAdminEvent, createSetGaspriceEvent } from "./kandel-utils";
 import { handleCredit, handleDebit, handlePair, handleSetAdmin, handleSetGasprice } from "../../src/kandel";
-
+import { createOfferWriteEvent, createSetActiveEvent } from "../mangrove/mangrove-utils";
+import { handleOfferWrite, handleSetActive } from "../../src/mangrove";
+import { getOfferId } from "../../src/helpers";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -27,6 +29,10 @@ describe("Describe entity assertions", () => {
     const newKandelEvent = createNewKandelEvent(owner, token0, token1, kandel);
     handleNewKandel(newKandelEvent);
     assert.entityCount('Kandel', 1);
+
+    const setActiveEvent = createSetActiveEvent(token0, token1, true);
+    handleSetActive(setActiveEvent);
+    assert.entityCount("Market", 1);
   });
 
   afterEach(() => {
@@ -55,8 +61,6 @@ describe("Describe entity assertions", () => {
   });
 
   test("Kandel Credit", () => {
-    assert.entityCount('Kandel', 1);
-
     const creditEvent = createCreditEvent(token0, BigInt.fromI32(10));
     creditEvent.address = kandel;
     handleCredit(creditEvent);
@@ -84,5 +88,41 @@ describe("Describe entity assertions", () => {
 
     assert.fieldEquals('Kandel', kandel.toHexString(), 'totalQuote', '0');
     assert.fieldEquals('Kandel', kandel.toHexString(), 'depositedQuote', '0');
+  });
+
+  test("Kandel offers", () => {
+    const id = BigInt.fromI32(0);
+    const offerWrite = createOfferWriteEvent(
+      token0, 
+      token1,
+      kandel,
+      BigInt.fromI32(1000),
+      BigInt.fromI32(2000),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      id,
+      BigInt.fromI32(0),
+    );
+    handleOfferWrite(offerWrite);
+
+    const offerId = getOfferId(token0, token1, id);
+    assert.fieldEquals('Kandel', kandel.toHexString(), 'offers', `[${offerId}]`)
+
+    const id2 = BigInt.fromI32(2);
+    const offerWrite2 = createOfferWriteEvent(
+      token0, 
+      token1,
+      kandel,
+      BigInt.fromI32(500),
+      BigInt.fromI32(100),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      id2,
+      BigInt.fromI32(0),
+    );
+    handleOfferWrite(offerWrite2);
+
+    const offerId2 = getOfferId(token0, token1, id2);
+    assert.fieldEquals('Kandel', kandel.toHexString(), 'offers', `[${offerId}, ${offerId2}]`);
   });
 })
