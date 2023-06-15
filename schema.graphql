@@ -85,6 +85,7 @@ type Kandel @entity {
 
   spread: BigInt
   ratio: BigInt
+  length: BigInt
   
   offers: [Offer!]! @derivedFrom(field: "kandel")
   depositWithdraws: [KandelDepositWithdraw!]! @derivedFrom(field: "kandel")

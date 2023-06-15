@@ -130,9 +130,17 @@ export function handleSetGeometricParams(event: SetGeometricParams): void {
   kandel.save();
 }
 
-export function handleSetIndexMapping(event: SetIndexMapping): void {}
+export function handleSetIndexMapping(event: SetIndexMapping): void {
 
-export function handleSetLength(event: SetLength): void {}
+}
+
+export function handleSetLength(event: SetLength): void {
+  const kandel = KandelEntity.load(event.address)!;
+
+  kandel.length = event.params.value;
+
+  kandel.save();
+}
 
 export function handleSetReserveId(event: SetReserveId): void {
   const kandel = KandelEntity.load(event.address)!;

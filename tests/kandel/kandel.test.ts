@@ -9,8 +9,8 @@ import {
 } from "matchstick-as/assembly/index"
 import { createNewKandelEvent } from "./kandel-seeder-utils";
 import { handleNewKandel } from "../../src/kandel-seeder";
-import { createCreditEvent, createDebitEvent, createPairEvent, createSetAdminEvent, createSetGaspriceEvent, createSetGasreqEvent, createSetGeometricParamsEvent, createSetReserveIdEvent, createSetRouterEvent } from "./kandel-utils";
-import { handleCredit, handleDebit, handlePair, handleSetAdmin, handleSetGasprice, handleSetGasreq, handleSetGeometricParams, handleSetReserveId, handleSetRouter } from "../../src/kandel";
+import { createCreditEvent, createDebitEvent, createPairEvent, createSetAdminEvent, createSetGaspriceEvent, createSetGasreqEvent, createSetGeometricParamsEvent, createSetLengthEvent, createSetReserveIdEvent, createSetRouterEvent } from "./kandel-utils";
+import { handleCredit, handleDebit, handlePair, handleSetAdmin, handleSetGasprice, handleSetGasreq, handleSetGeometricParams, handleSetLength, handleSetReserveId, handleSetRouter } from "../../src/kandel";
 import { createOfferSuccessEvent, createOfferWriteEvent, createSetActiveEvent } from "../mangrove/mangrove-utils";
 import { handleOfferSuccess, handleOfferWrite, handleSetActive } from "../../src/mangrove";
 import { getOfferId } from "../../src/helpers";
@@ -104,6 +104,15 @@ describe("Describe entity assertions", () => {
     handleSetRouter(setRouter);
 
     assert.fieldEquals("Kandel", kandel.toHexString(), "router", router.toHexString());
+  });
+
+  test("Kandel setRouter", () => {
+    const value = BigInt.fromI32(32);
+    const setLength = createSetLengthEvent(value);
+    setLength.address = kandel;
+    handleSetLength(setLength);
+
+    assert.fieldEquals("Kandel", kandel.toHexString(), "length", value.toString());
   });
 
   test("Kandel Credit", () => {
