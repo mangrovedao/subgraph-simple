@@ -26,7 +26,7 @@ import {
   MarketOrderCall
 } from "../generated/Mangrove/Mangrove"
 import { Market, Order, Offer, Kandel } from "../generated/schema"
-import { addMarketOrderDataToStack, addOrderToStack, getEventUniqueId, getMarketId, getMarketOrderDataFromStack, getOfferId, getOrCreateAccount, getOrderFromStack, removeOrderFromStack } from "./helpers";
+import { addMarketOrderDataToStack, addOrderToStack, getEventUniqueId, getMarketId, getMarketOrderDataFromStack, getOfferId, getOrCreateAccount, getOrderFromStack, removeMarketOrderDataFromStack, removeOrderFromStack } from "./helpers";
 
 export function handleApproval(event: Approval): void {}
 
@@ -174,6 +174,7 @@ export function handleOrderComplete(event: OrderComplete): void {
   order.save();
 
   removeOrderFromStack();
+  removeMarketOrderDataFromStack();
 }
 
 export function handleOrderStart(event: OrderStart): void {

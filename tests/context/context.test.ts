@@ -6,11 +6,15 @@ import {
   beforeEach,
   afterEach
 } from "matchstick-as/assembly/index"
-import { Bytes } from "@graphprotocol/graph-ts"
+import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { Order } from "../../generated/schema";
-import { addOrderToStack, getLastOrder, getOrderFromStack, removeOrderFromStack } from "../../src/helpers";
+import { addMarketOrderDataToStack, addOrderToStack, getLastOrder, getMarketOrderDataFromStack, getOrderFromStack, removeMarketOrderDataFromStack, removeOrderFromStack } from "../../src/helpers";
+import { createMarketOrderCall } from "../mangrove/mangrove-utils";
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
+
+let token0 = Address.fromString("0x0000000000000000000000000000000000000000");
+let token1 = Address.fromString("0x0000000000000000000000000000000000000001");
 
 describe("Describe entity assertions", () => {
   beforeEach(() => {
@@ -51,6 +55,81 @@ describe("Describe entity assertions", () => {
 
     const lastOrder = getLastOrder();
     assert.assertTrue(lastOrder.id.toString() == order1.id.toString());
+  });
+
+  test("Market Order stack", () => {
+    const takerWants = BigInt.fromI32(100);
+    const takerGives = BigInt.fromI32(200);
+
+    const marketOrderData = createMarketOrderCall(
+      token0,
+      token1,
+      takerWants,
+      takerGives,
+    );
+
+    addMarketOrderDataToStack(marketOrderData.inputs);
+
+    let data = getMarketOrderDataFromStack();
+
+    assert.booleanEquals(false, data.nodata); 
+
+    assert.stringEquals(
+      data.takerGives.toString(), 
+      takerGives.toString()
+    );
+
+    assert.stringEquals(
+      data.takerWants.toString(), 
+      takerWants.toString()
+    );
+
+    const takerWants2 = BigInt.fromI32(150);
+    const takerGives2 = BigInt.fromI32(300);
+
+    const marketOrderData2 = createMarketOrderCall(
+      token0,
+      token1,
+      takerWants2,
+      takerGives2,
+    );
+
+    addMarketOrderDataToStack(marketOrderData2.inputs);
+
+    data = getMarketOrderDataFromStack();
+
+    assert.booleanEquals(false, data.nodata); 
+
+    assert.stringEquals(
+      data.takerGives.toString(), 
+      takerGives2.toString()
+    );
+
+    assert.stringEquals(
+      data.takerWants.toString(), 
+      takerWants2.toString()
+    );
+
+    removeMarketOrderDataFromStack();
+
+    data = getMarketOrderDataFromStack();
+
+    assert.booleanEquals(false, data.nodata); 
+
+    assert.stringEquals(
+      data.takerGives.toString(), 
+      takerGives.toString()
+    );
+
+    assert.stringEquals(
+      data.takerWants.toString(), 
+      takerWants.toString()
+    );
+
+    removeMarketOrderDataFromStack();
+
+    data = getMarketOrderDataFromStack();
+    assert.booleanEquals(true, data.nodata); 
   });
 
 
