@@ -24,8 +24,8 @@ import {
   SetNotify,
   SetUseOracle
 } from "../generated/Mangrove/Mangrove"
-import { Market, Account, Order, Offer, Kandel } from "../generated/schema"
-import { addOrderToStack, getMarketId, getOfferId, getOrCreateAccount, getOrderFromStack, removeOrderFromStack } from "./helpers";
+import { Market, Order, Offer, Kandel } from "../generated/schema"
+import { addOrderToStack, getEventUniqueId, getMarketId, getOfferId, getOrCreateAccount, getOrderFromStack, removeOrderFromStack } from "./helpers";
 
 export function handleApproval(event: Approval): void {}
 
@@ -110,7 +110,7 @@ export function handleOfferWrite(event: OfferWrite): void {
     if (offer.isFilled || offer.isFailed || !offer.isOpen) {
       // if the offer wirte match an offer id that is re used then create a new offer entity to 
       // keep track historic data
-      const newOfferId = `${offer.id}-${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
+      const newOfferId = `${offer.id}-${getEventUniqueId(event)}`;
       offer.id = newOfferId;
       offer.save()
 
@@ -162,7 +162,7 @@ export function handleOrderComplete(event: OrderComplete): void {
 }
 
 export function handleOrderStart(event: OrderStart): void {
-  const order = new Order(`${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`);
+  const order = new Order(getEventUniqueId(event));
   order.transactionHash = Bytes.fromUTF8(event.transaction.hash.toHex());
   order.type = "MARKET";
   order.save();

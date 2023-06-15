@@ -12,7 +12,7 @@ import { Address, BigInt, Bytes, log } from "@graphprotocol/graph-ts"
 import { handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive } from "../../src/mangrove"
 import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils"
 import { Market, Offer } from "../../generated/schema";
-import { getMarketId, getOfferId } from "../../src/helpers";
+import { getEventUniqueId, getMarketId, getOfferId } from "../../src/helpers";
 import { handleNewOwnedOffer } from "../../src/mangrove-order";
 import { createNewOwnedOfferEvent } from "./mangrove-order-utils";
 
@@ -95,7 +95,7 @@ describe("Describe entity assertions", () => {
     );
     handleOfferWrite(offerWrite);
 
-    const oldOfferId = `${offerId}-${offerWrite.transaction.hash.toHex()}-${offerWrite.logIndex.toHex()}`;
+    const oldOfferId = `${offerId}-${getEventUniqueId(offerWrite)}`;
     assert.fieldEquals('Offer', oldOfferId, 'isOpen', 'false');
     assert.fieldEquals('Offer', offerId, 'isOpen', 'true');
 
@@ -148,7 +148,7 @@ describe("Describe entity assertions", () => {
     );
     handleOfferWrite(offerWrite);
 
-    const oldOfferId = `${offerId}-${offerWrite.transaction.hash.toHex()}-${offerWrite.logIndex.toHex()}`;
+    const oldOfferId = `${offerId}-${getEventUniqueId(offerWrite)}`;
 
     assert.fieldEquals('Offer', oldOfferId, 'isOpen', 'false');
     assert.fieldEquals('Offer', oldOfferId, 'wants', '1000');
@@ -213,7 +213,7 @@ describe("Describe entity assertions", () => {
     );
     handleOfferWrite(offerWrite);
 
-    const oldOfferId = `${offerId}-${offerSuccess.transaction.hash.toHex()}-${offerSuccess.logIndex.toHex()}`;
+    const oldOfferId = `${offerId}-${getEventUniqueId(offerSuccess)}`;
     assert.fieldEquals('Offer', oldOfferId, 'wants', '0');
     assert.fieldEquals('Offer', oldOfferId, 'gives', '0');
     assert.fieldEquals('Offer', oldOfferId, 'isOpen', 'false');

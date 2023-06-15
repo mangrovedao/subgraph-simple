@@ -11,7 +11,7 @@ import { handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActiv
 import { createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils";
 import { createNewOwnedOfferEvent, createOrderSummaryEvent } from "./mangrove-order-utils";
 import { handleNewOwnedOffer, handleOrderSummary } from "../../src/mangrove-order";
-import { getOfferId } from "../../src/helpers";
+import { getEventUniqueId, getOfferId } from "../../src/helpers";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -145,7 +145,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'initialGives', totalGives.toString());
     assert.fieldEquals('Offer', offerId, 'gives', postGives.toString());
 
-    const orderId = `${orderStart.transaction.hash.toHex()}-${orderStart.logIndex.toHex()}`;
+    const orderId = getEventUniqueId(orderStart);
 
     assert.fieldEquals('Order', orderId, 'offer', offerId);
     assert.fieldEquals('Order', orderId, 'type', 'LIMIT');

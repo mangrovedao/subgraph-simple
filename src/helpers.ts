@@ -1,4 +1,4 @@
-import { Address, BigInt, Value } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Value, ethereum } from "@graphprotocol/graph-ts";
 import { Account, Contex, Order } from "../generated/schema";
 
 export const getMarketId = (outbound_tkn: Address, inbound_tkn: Address): string  => {
@@ -62,4 +62,8 @@ export const getLastOrder = (): Order => {
 
   const order = Order.load(context.last!)!;
   return order;
+}
+
+export const getEventUniqueId = (event: ethereum.Event): string => {
+  return `${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
 }

@@ -21,11 +21,11 @@ import {
   SetRouter
 } from "../generated/templates/Kandel/Kandel"
 import { KandelDepositWithdraw, Kandel as  KandelEntity } from "../generated/schema";
-import { log } from "matchstick-as";
+import { getEventUniqueId } from "./helpers";
 
 export function handleCredit(event: Credit): void {
   const deposit = new KandelDepositWithdraw(
-    `${event.transaction.hash.toHex()}-${event.logIndex}`
+    getEventUniqueId(event),
   );
 
   deposit.transactionHash = event.transaction.hash;
@@ -52,7 +52,7 @@ export function handleCredit(event: Credit): void {
 
 export function handleDebit(event: Debit): void {
   const withdraw = new KandelDepositWithdraw(
-    `${event.transaction.hash.toHex()}-${event.logIndex}`
+    getEventUniqueId(event),
   );
 
   withdraw.transactionHash = event.transaction.hash;
