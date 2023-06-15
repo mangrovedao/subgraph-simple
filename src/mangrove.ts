@@ -78,6 +78,23 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   offer.wants = offer.wants.minus(event.params.takerGives);
   offer.gives = offer.gives.minus(event.params.takerWants);
 
+  if (offer.kandel) {
+    const kandel = Kandel.load(offer.kandel!)!;
+    const market = Market.load(offer.market)!;
+
+    if (market.outbound_tkn == kandel.base) {
+      // takerWants == outbound_tkn
+      kandel.totalBase = kandel.totalBase.minus(event.params.takerWants);
+      kandel.totalQuote = kandel.totalQuote.plus(event.params.takerGives);
+    } else {
+      // takerWants == inbound_tkn
+      kandel.totalBase = kandel.totalBase.plus(event.params.takerGives);
+      kandel.totalQuote = kandel.totalQuote.minus(event.params.takerWants);
+    }
+
+    kandel.save();
+  }
+
   const BN_0 = BigInt.fromI32(0);
   if (offer.wants == BN_0 && offer.gives == BN_0) {
     offer.isFilled = true;
