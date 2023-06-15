@@ -87,37 +87,34 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   offer.save();
 }
 
+const createNewOffer = (event: OfferWrite): Offer => {
+  const offerId = getOfferId(
+    event.params.outbound_tkn, 
+    event.params.inbound_tkn,
+    event.params.id,
+  );
+  const offer = new Offer(offerId);
+  offer.transactionHash = event.transaction.hash;
+  offer.initialWants = event.params.wants;
+  offer.initialGives = event.params.gives;
+
+  const kandel = Kandel.load(event.params.maker);
+  if (kandel) {
+    offer.kandel = event.params.maker;
+  }
+
+  return offer;
+}
+
 export function handleOfferWrite(event: OfferWrite): void {
   const offerId = getOfferId(
     event.params.outbound_tkn, 
     event.params.inbound_tkn,
     event.params.id,
   );
-
   let offer = Offer.load(offerId);
-
   if (!offer) {
-    offer = new Offer(offerId);
-    offer.transactionHash = event.transaction.hash;
-    offer.initialWants = event.params.wants;
-    offer.initialGives = event.params.gives;
-
-    const kandel = Kandel.load(event.params.maker);
-    if (kandel) {
-      offer.kandel = event.params.maker;
-    }
-  } else {
-    if (offer.isFilled || offer.isFailed || !offer.isOpen) {
-      // if the offer wirte match an offer id that is re used then create a new offer entity to 
-      // keep track historic data
-      const newOfferId = `${offer.id}-${getEventUniqueId(event)}`;
-      offer.id = newOfferId;
-      offer.save()
-
-      offer.id = offerId;
-      offer.initialWants = event.params.wants;
-      offer.initialGives = event.params.gives;
-    }
+    offer = createNewOffer(event);
   }
 
   const owner = getOrCreateAccount(event.params.maker);
