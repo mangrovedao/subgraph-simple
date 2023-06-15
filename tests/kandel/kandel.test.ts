@@ -41,15 +41,6 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Kandel', kandel.toHexString(), 'gasprice', '10');
   });
 
-  test("Kandel setPair", () => {
-    const pairEvent = createPairEvent(token0, token1);
-    pairEvent.address = kandel;
-    handlePair(pairEvent);
-
-    assert.fieldEquals('Kandel', kandel.toHexString(), 'base', token0.toHexString());
-    assert.fieldEquals('Kandel', kandel.toHexString(), 'quote', token1.toHexString());
-  });
-
   test("Kandel Credit", () => {
     assert.entityCount('Kandel', 1);
 

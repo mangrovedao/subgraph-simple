@@ -84,12 +84,7 @@ export function handleMgv(event: Mgv): void {
 }
 
 export function handlePair(event: Pair): void {
-  const kandel = KandelEntity.load(event.address)!;
-
-  kandel.base = event.params.base;
-  kandel.quote = event.params.quote;
-
-  kandel.save();
+  // nothing to do we already have this information inside NewKandle
 }
 
 export function handlePopulateEnd(event: PopulateEnd): void {}
