@@ -7,7 +7,7 @@ import {
   describe,
   test
 } from "matchstick-as/assembly/index";
-import { Kandel, Market, Offer } from "../../generated/schema";
+import { Kandel, LimitOrder, Market, Offer, Order } from "../../generated/schema";
 import { createOffer, getEventUniqueId, getGasbaseId, getMarketId, getOfferId } from "../../src/helpers";
 import { createNewOffer, handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handlePosthookFail, handleSetActive, handleSetGasbase } from "../../src/mangrove";
 import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createPosthookFailEvent, createSetActiveEvent, createSetGasbaseEvent } from "./mangrove-utils";
@@ -95,6 +95,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'maker', maker.toHexString());
     assert.assertTrue(offer.kandel === null)
     assert.assertTrue(offer.owner === null)
+    assert.fieldEquals('Offer', offerId, 'creationDate', '1')
+    assert.fieldEquals('Offer', offerId, 'latestUpdateDate', '1')
     
 
   })
@@ -132,6 +134,8 @@ describe("Describe entity assertions", () => {
       Bytes.fromUTF8('posthook fail reason'),
       true,
       maker,
+      BigInt.fromI32(100),
+      BigInt.fromI32(100),
     )
 
     let offerWrite = createOfferWriteEvent(
@@ -168,6 +172,8 @@ describe("Describe entity assertions", () => {
     let updatedOffer = Offer.load(offerId)!;
     assert.assertTrue(updatedOffer.kandel === null)
     assert.assertTrue(updatedOffer.owner === null)
+    assert.fieldEquals('Offer', offerId, 'creationDate', '100')
+    assert.fieldEquals('Offer', offerId, 'latestUpdateDate', '1')
     assert.entityCount("Offer", 1);
   });
 
@@ -244,6 +250,8 @@ describe("Describe entity assertions", () => {
       Bytes.fromUTF8('posthook fail reason'),
       false,
       maker,
+      BigInt.fromI32(100),
+      BigInt.fromI32(100),
     )
 
     let offerFail = createOfferFailEvent(
@@ -277,6 +285,8 @@ describe("Describe entity assertions", () => {
     let updatedOffer = Offer.load(offerId)!;
     assert.assertTrue(updatedOffer.kandel === null)
     assert.assertTrue(updatedOffer.owner === null)
+    assert.fieldEquals('Offer', offerId, 'creationDate', '100')
+    assert.fieldEquals('Offer', offerId, 'latestUpdateDate', '1')
     assert.entityCount("Offer", 1);
   });
 
@@ -304,6 +314,8 @@ describe("Describe entity assertions", () => {
       Bytes.fromUTF8('posthook fail reason'),
       false,
       maker,
+      BigInt.fromI32(100),
+      BigInt.fromI32(100),
     )
 
 
@@ -331,14 +343,38 @@ describe("Describe entity assertions", () => {
     let updatedOffer = Offer.load(offerId)!;
     assert.assertTrue(updatedOffer.kandel === null)
     assert.assertTrue(updatedOffer.owner === null)
+    assert.fieldEquals('Offer', offerId, 'creationDate', '100')
+    assert.fieldEquals('Offer', offerId, 'latestUpdateDate', '1')
     assert.entityCount("Offer", 1);
   });
 
 
-  test("Offer, handleOfferSuccess, fully fill", () => {
+  test("Offer, handleOfferSuccess, fully fill + has limit order", () => {
 
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(token0, token1, id);
+
+    const limitOrder = new LimitOrder(offerId)
+    limitOrder.wants = BigInt.fromI32(1000);
+    limitOrder.gives = BigInt.fromI32(500);
+    limitOrder.realTaker = taker;
+    limitOrder.expiryDate = BigInt.fromI32(0);
+    limitOrder.fillOrKill = false;
+    limitOrder.fillWants = false;
+    limitOrder.restingOrder = true;
+    limitOrder.offer = offerId;
+    limitOrder.creationDate = BigInt.fromI32(100);
+    limitOrder.latestUpdateDate = BigInt.fromI32(0);
+    limitOrder.save();
+
+    const orderId ="orderId"
+    const order = new Order(orderId);
+    order.transactionHash = Bytes.fromUTF8("0x0");
+    order.limitOrder = limitOrder.id;
+    order.takerGot = BigInt.fromI32(100);
+    order.takerGave = BigInt.fromI32(50);
+    order.save();
+
 
     createOffer(
       id,
@@ -359,7 +395,8 @@ describe("Describe entity assertions", () => {
       Bytes.fromUTF8('posthook fail reason'),
       false,
       maker,
-
+      BigInt.fromI32(100),
+      BigInt.fromI32(100),
     )
 
     let offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, BigInt.fromI32(20), BigInt.fromI32(40));
@@ -386,7 +423,14 @@ describe("Describe entity assertions", () => {
     let updatedOffer = Offer.load(offerId)!;
     assert.assertTrue(updatedOffer.kandel === null)
     assert.assertTrue(updatedOffer.owner === null)
+    assert.fieldEquals('Offer', offerId, 'creationDate', '100')
+    assert.fieldEquals('Offer', offerId, 'latestUpdateDate', '1')
     assert.entityCount("Offer", 1);
+
+    assert.fieldEquals('Order', order.id, 'takerGot', '140');
+    assert.fieldEquals('Order', order.id, 'takerGave', '70');
+    assert.fieldEquals('LimitOrder', offerId, 'latestUpdateDate', '1');
+
   });
 
   test("Offer, handleOfferRetract", () => {
@@ -412,6 +456,8 @@ describe("Describe entity assertions", () => {
       Bytes.fromUTF8('posthook fail reason'),
       false,
       maker,
+      BigInt.fromI32(100),
+      BigInt.fromI32(100),
     )
 
     let offerRetract = createOfferRetractEvent(token0, token1, id, true);
@@ -438,11 +484,13 @@ describe("Describe entity assertions", () => {
     let updatedOffer = Offer.load(offerId)!;
     assert.assertTrue(updatedOffer.kandel === null)
     assert.assertTrue(updatedOffer.owner === null)
+    assert.fieldEquals('Offer', offerId, 'creationDate', '100')
+    assert.fieldEquals('Offer', offerId, 'latestUpdateDate', '1')
     assert.entityCount("Offer", 1);
   })
 
 
-  test("Offer, habdlePosthookFail", () => {
+  test("Offer, handlePosthookFail", () => {
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(token0, token1, id);
 
@@ -465,6 +513,8 @@ describe("Describe entity assertions", () => {
       Bytes.fromUTF8('posthook fail reason'),
       false,
       maker,
+      BigInt.fromI32(100),
+      BigInt.fromI32(100),
     )
 
     let posthookFailed = createPosthookFailEvent(token0, token1, id, Bytes.fromUTF8("Failed")    );
@@ -491,6 +541,8 @@ describe("Describe entity assertions", () => {
     let updatedOffer = Offer.load(offerId)!;
     assert.assertTrue(updatedOffer.kandel === null)
     assert.assertTrue(updatedOffer.owner === null)
+    assert.fieldEquals('Offer', offerId, 'creationDate', '100')
+    assert.fieldEquals('Offer', offerId, 'latestUpdateDate', '1')
     assert.entityCount("Offer", 1);
   })
 

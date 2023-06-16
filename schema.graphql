@@ -13,6 +13,8 @@ type Market @entity {
 type Offer @entity {
   id: String!
   transactionHash: Bytes!
+  creationDate: BigInt!
+  latestUpdateDate: BigInt!
   offerId: BigInt!
   wants: BigInt!
   gives: BigInt!
@@ -49,6 +51,8 @@ type Order @entity {
 
 type LimitOrder @entity {
   id: String!
+  creationDate: BigInt!
+  latestUpdateDate: BigInt!
   wants: BigInt!
   gives: BigInt!
   expiryDate: BigInt
@@ -58,7 +62,7 @@ type LimitOrder @entity {
   realTaker: Bytes 
   offer: Offer
 
-  order: Order! @derivedFrom(field: "limitOrder")
+  order: [Order!]! @derivedFrom(field: "limitOrder")
 
 }
 

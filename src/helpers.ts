@@ -101,6 +101,8 @@ export const createOffer =(
   posthookFailReason: Bytes,
   deprovisioned: boolean,
   maker: Address,
+  creationDate: BigInt,
+  latestUpdateDate: BigInt
 ): Offer => {
   let id= getOfferId(outbound_tkn, inbound_tkn, offerId)
   let offer = new Offer(id);
@@ -121,6 +123,8 @@ export const createOffer =(
   offer.deprovisioned = deprovisioned;
   offer.market = getMarketId(outbound_tkn, inbound_tkn);
   offer.maker = maker;
+  offer.creationDate = creationDate;
+  offer.latestUpdateDate = latestUpdateDate;
   offer.save();
   return offer;
 }
@@ -148,7 +152,9 @@ export const createDummyOffer = (
     Bytes.fromHexString('0x00'),
     Bytes.fromHexString('0x00'),
     false,
-    Address.fromString("0x0000000000000000000000000000000100000004")
+    Address.fromString("0x0000000000000000000000000000000100000004"),
+    BigInt.fromI32(0),
+    BigInt.fromI32(0)
   )
 }
 

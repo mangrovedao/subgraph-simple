@@ -116,6 +116,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('LimitOrder', offerId, 'restingOrder', 'true');
     assert.fieldEquals('LimitOrder', offerId, 'offer', offerId);
     assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
+    assert.fieldEquals('LimitOrder', offerId, 'creationDate', '1');
+    assert.fieldEquals('LimitOrder', offerId, 'latestUpdateDate', '1');
 
   });
 
@@ -174,6 +176,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('LimitOrder', limitOrderId, 'fillWants', 'true');
     assert.fieldEquals('LimitOrder', limitOrderId, 'restingOrder', 'false');
     assert.fieldEquals('LimitOrder', limitOrderId, 'realTaker', taker.toHex());
+    assert.fieldEquals('LimitOrder', limitOrderId, 'creationDate', '1');
+    assert.fieldEquals('LimitOrder', limitOrderId, 'latestUpdateDate', '1');
     const limitOrder = LimitOrder.load(limitOrderId)!
     assert.assertTrue(limitOrder.offer === null)
   });
@@ -191,12 +195,16 @@ describe("Describe entity assertions", () => {
     limitOrder.fillWants = false;
     limitOrder.restingOrder = true;
     limitOrder.offer = offerId;
+    limitOrder.creationDate = BigInt.fromI32(0);
+    limitOrder.latestUpdateDate = BigInt.fromI32(0);
     limitOrder.save();
 
     const setExpiryEvent = createSetExpiryEvent(token0, token1, BigInt.fromI32(1), BigInt.fromI32(1000));
     handleSetExpiry(setExpiryEvent);
 
     assert.fieldEquals('LimitOrder', offerId, 'expiryDate', '1000');
+    assert.fieldEquals('LimitOrder', offerId, 'latestUpdateDate', '1');
+
 
   })
 

@@ -61,6 +61,8 @@ export function handleOrderSummary(event: OrderSummary): void {
   limitOrder.fillOrKill = event.params.fillOrKill;
   limitOrder.fillWants = event.params.fillWants;
   limitOrder.restingOrder = event.params.restingOrder;
+  limitOrder.creationDate = event.block.timestamp;
+  limitOrder.latestUpdateDate = event.block.timestamp;
   order.limitOrder = limitOrder.id;
 
   order.save();
@@ -81,6 +83,7 @@ export function handleSetExpiry(event: SetExpiry): void {
     return;
   }
   limitOrder.expiryDate = event.params.date;
+  limitOrder.latestUpdateDate= event.block.timestamp;
   limitOrder.save();
 }
 

@@ -24,7 +24,7 @@ import {
   SetNotify,
   SetUseOracle
 } from "../generated/Mangrove/Mangrove"
-import { Market, Order, Offer, Kandel, GasBase } from "../generated/schema"
+import { Market, Order, Offer, Kandel, GasBase, LimitOrder } from "../generated/schema"
 import { addOrderToStack, getEventUniqueId, getGasbaseId, getMarketId, getOfferId, getOrCreateAccount, getOrderFromStack, removeOrderFromStack } from "./helpers";
 
 export function handleApproval(event: Approval): void {}
@@ -52,6 +52,7 @@ export function handleOfferFail(event: OfferFail): void {
   offer.posthookFailReason = null;
 
   offer.failedReason = event.params.mgvData;
+  offer.latestUpdateDate = event.block.timestamp;
 
   offer.save();
 }
@@ -71,6 +72,7 @@ export function handleOfferRetract(event: OfferRetract): void {
   offer.posthookFailReason = null;
   offer.failedReason = null;
   offer.deprovisioned = event.params.deprovision;
+  offer.latestUpdateDate = event.block.timestamp;
 
   offer.save();
 }
@@ -99,6 +101,8 @@ export function handleOfferSuccess(event: OfferSuccess): void {
     
     kandel.save();
   }
+
+  updateLimitOrder(offerId, event);
   
   offer.isFilled = offer.wants == event.params.takerGives && offer.gives == event.params.takerWants;
   offer.isOpen = false;
@@ -106,7 +110,7 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   offer.isRetracted = false;
   offer.posthookFailReason = null;
   offer.failedReason = null;
-  
+  offer.latestUpdateDate = event.block.timestamp;
 
   offer.save();
 }
@@ -128,6 +132,23 @@ export const createNewOffer = (event: OfferWrite): Offer => {
   return offer;
 }
 
+export function updateLimitOrder(offerId: string, event: OfferSuccess): void {
+  const limitOrder = LimitOrder.load(offerId);
+  if (limitOrder) {
+    for( let i=0; i<limitOrder.order.length; i++) {
+      const orderId = limitOrder.order[i];
+      const order = Order.load(orderId);
+      if (order) {
+        order.takerGot = order.takerGot !== null ? event.params.takerGives.plus(order.takerGot!) : event.params.takerGives;
+        order.takerGave = order.takerGave !== null ? event.params.takerWants.plus(order.takerGave!) : event.params.takerWants;
+        order.save();
+      }
+    }
+    limitOrder.latestUpdateDate = event.block.timestamp;
+    limitOrder.save();
+  }
+}
+
 export function handleOfferWrite(event: OfferWrite): void {
   const offerId = getOfferId(
     event.params.outbound_tkn, 
@@ -137,7 +158,9 @@ export function handleOfferWrite(event: OfferWrite): void {
   let offer = Offer.load(offerId);
   if (!offer) {
     offer = createNewOffer(event);
+    offer.creationDate = event.block.timestamp;
   }
+  offer.latestUpdateDate = event.block.timestamp;
 
   const owner = getOrCreateAccount(event.params.maker);
   offer.maker = owner.id;
@@ -208,6 +231,7 @@ export function handlePosthookFail(event: PosthookFail): void {
   const offer = Offer.load(offerId)!;
 
   offer.posthookFailReason = event.params.posthookData;
+  offer.latestUpdateDate = event.block.timestamp;
 
   offer.save();
 }
