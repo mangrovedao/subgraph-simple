@@ -26,7 +26,8 @@ import {
   MarketOrderCall
 } from "../generated/Mangrove/Mangrove"
 import { Market, Order, Offer, Kandel } from "../generated/schema"
-import { addMarketOrderDataToStack, addOrderToStack, getEventUniqueId, getMarketId, getMarketOrderDataFromStack, getOfferId, getOrCreateAccount, getOrderFromStack, getOrdersCount, removeMarketOrderDataFromStack, removeOrderFromStack } from "./helpers";
+import { addMarketOrderDataToStack, addOrderToStack, getContext, getEventUniqueId, getMarketId, getMarketOrderDataFromStack, getOfferId, getOrCreateAccount, getOrderFromStack, getOrdersCount, removeMarketOrderDataFromStack, removeOrderFromStack } from "./helpers";
+import { log } from "matchstick-as";
 
 export function handleApproval(event: Approval): void {}
 
@@ -176,6 +177,7 @@ export function handleOrderComplete(event: OrderComplete): void {
   removeOrderFromStack();
 
   if (!marketOrderData.nodata && marketOrderData.orderCount == orderCount) {
+    log.error("{} {} {} {}", [event.transaction.hash.toHex(), marketOrderData.takerGives.toString(), marketOrderData.takerWants.toString(), getContext().marketOrders])
     order.marketOrderWants = marketOrderData.takerWants;
     order.marketOrderGives = marketOrderData.takerGives;
     removeMarketOrderDataFromStack();
