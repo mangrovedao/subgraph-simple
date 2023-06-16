@@ -91,6 +91,10 @@ export const getEventUniqueId = (event: ethereum.Event): string => {
 export const addMarketOrderDataToStack = (order: MarketOrderCall__Inputs): void => { 
   const context = getContext();
 
+  if (context.orderCount.toI32() == 0) {
+    context.marketOrders = '';
+  }
+
   const marketOrderDataEncoded = `${order.takerGives}-${order.takerWants}-${context.orderCount}`;
   context.marketOrders = `${context.marketOrders}/${marketOrderDataEncoded}`;
 
