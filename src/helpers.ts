@@ -1,5 +1,9 @@
-import { Address, BigInt, Value, ethereum } from "@graphprotocol/graph-ts";
-import { Account, Context, Order } from "../generated/schema";
+import { Address, BigInt, Bytes, Value, ethereum } from "@graphprotocol/graph-ts";
+import { Account, Context, Offer, Order } from "../generated/schema";
+
+export const getGasbaseId = (outbound_tkn: Address, inbound_tkn: Address): string  => {
+  return `${outbound_tkn.toHex()}-${inbound_tkn.toHex()}`;
+};
 
 export const getMarketId = (outbound_tkn: Address, inbound_tkn: Address): string  => {
   return `${outbound_tkn.toHex()}-${inbound_tkn.toHex()}`;
@@ -20,6 +24,7 @@ export const getOrCreateAccount = (address: Address): Account => {
 
   return account;
 }
+
 
 export const getContext = (): Context => {
   let context = Context.load('context');
@@ -76,3 +81,80 @@ export const getLastOrder = (): Order => {
 export const getEventUniqueId = (event: ethereum.Event): string => {
   return `${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
 }
+
+export const createOffer =(
+  offerId: BigInt,
+  inbound_tkn: Address,
+  outbound_tkn: Address,
+  transactionHash: Bytes,
+  wants: BigInt,
+  gives: BigInt,
+  gasprice: BigInt,
+  gasreq: BigInt,
+  gasBase: BigInt,
+  prev: BigInt,
+  isOpen: boolean,
+  isFailed: boolean,
+  isFilled: boolean,
+  isRetracted: boolean,
+  failedReason: Bytes | null,
+  posthookFailReason: Bytes,
+  deprovisioned: boolean,
+  maker: Address,
+  creationDate: BigInt,
+  latestUpdateDate: BigInt
+): Offer => {
+  let id= getOfferId(outbound_tkn, inbound_tkn, offerId)
+  let offer = new Offer(id);
+  offer.offerId = offerId;
+  offer.transactionHash = transactionHash;
+  offer.wants = wants;
+  offer.gives = gives;
+  offer.gasprice = gasprice;
+  offer.gasreq = gasreq;
+  offer.gasBase = gasBase;
+  offer.prev = prev;
+  offer.isOpen = isOpen;
+  offer.isFailed = isFailed;
+  offer.isFilled = isFilled;
+  offer.isRetracted = isRetracted;
+  offer.failedReason = failedReason;
+  offer.posthookFailReason = posthookFailReason;
+  offer.deprovisioned = deprovisioned;
+  offer.market = getMarketId(outbound_tkn, inbound_tkn);
+  offer.maker = maker;
+  offer.creationDate = creationDate;
+  offer.latestUpdateDate = latestUpdateDate;
+  offer.save();
+  return offer;
+}
+
+export const createDummyOffer = (
+  offerId: BigInt,
+  inbound_tkn: Address,
+  outbound_tkn: Address
+): Offer => {
+  return createOffer(
+    offerId,
+    inbound_tkn,
+    outbound_tkn,
+    Bytes.fromHexString('0x00'),
+    BigInt.fromI32(0),
+    BigInt.fromI32(0),
+    BigInt.fromI32(0),
+    BigInt.fromI32(0),
+    BigInt.fromI32(0),
+    BigInt.fromI32(0),
+    false,
+    false,
+    false,
+    false,
+    Bytes.fromHexString('0x00'),
+    Bytes.fromHexString('0x00'),
+    false,
+    Address.fromString("0x0000000000000000000000000000000100000004"),
+    BigInt.fromI32(0),
+    BigInt.fromI32(0)
+  )
+}
+

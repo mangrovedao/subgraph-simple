@@ -6,12 +6,13 @@ import {
   beforeEach,
   afterEach
 } from "matchstick-as/assembly/index"
-import { Address, BigInt } from "@graphprotocol/graph-ts"
-import { handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive } from "../../src/mangrove";
-import { createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils";
-import { createNewOwnedOfferEvent, createOrderSummaryEvent } from "./mangrove-order-utils";
-import { handleNewOwnedOffer, handleOrderSummary } from "../../src/mangrove-order";
-import { getEventUniqueId, getOfferId } from "../../src/helpers";
+import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive, handleSetGasbase } from "../../src/mangrove";
+import { createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent, createSetGasbaseEvent } from "./mangrove-utils";
+import { createNewOwnedOfferEvent, createOrderSummaryEvent, createSetExpiryEvent } from "./mangrove-order-utils";
+import { handleNewOwnedOffer, handleOrderSummary, handleSetExpiry } from "../../src/mangrove-order";
+import { createDummyOffer, createOffer, getEventUniqueId, getOfferId } from "../../src/helpers";
+import { Context, LimitOrder, Offer, Order } from "../../generated/schema";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -34,23 +35,16 @@ describe("Describe entity assertions", () => {
     clearStore()
   });
 
-  test("New owned offer", () => {
-    const id = BigInt.fromI32(0);
-    let offerWrite = createOfferWriteEvent(
-      token0, 
-      token1,
-      maker,
-      BigInt.fromI32(1000), // wants
-      BigInt.fromI32(2000), // gives
-      BigInt.fromI32(0),
-      BigInt.fromI32(0),
+  test("Offer, handleNewOwnedOffer, offer exists", () => {
+    const id = BigInt.fromI32(1);
+    createDummyOffer(
       id,
-      BigInt.fromI32(0),
-    );
-    handleOfferWrite(offerWrite);
+      token1,
+      token0,
+    )
 
     const newOwnerOffer = createNewOwnedOfferEvent(
-      token0,
+      mgv,
       token0,
       token1,
       id,
@@ -63,55 +57,34 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'owner', owner.toHex());
   });
 
-  test("Limit order with part of the order posted to the book", () => {
+  //TODO: would like to test negative case, where the offer does not exist. How?
+
+  test("LimitOrder, handleOrderSummary, posting resting order", () => {
     let setActiveEvent = createSetActiveEvent(token0, token1, true);
     handleSetActive(setActiveEvent);
     assert.entityCount("Market", 1);
-
-    const id = BigInt.fromI32(0);
-
-    const totalWants = BigInt.fromI32(1000); 
-    const postWants = BigInt.fromI32(500);
-
-    const totalGives = BigInt.fromI32(2000);
-    const postGives = BigInt.fromI32(1000);
-
-    const orderStart = createOrderStartEvent();
-    handleOrderStart(orderStart);
-
-    const orderComplete = createOrderCompleteEvent(
-      token0,
-      token1,
-      taker,
-      totalGives.minus(postGives),
-      totalWants.minus(postWants),
-      BigInt.fromI32(0),
-      BigInt.fromI32(0),
-    );
-
-    handleOrderComplete(orderComplete);
-
-    let offerWrite = createOfferWriteEvent(
-      token0, 
-      token1,
-      maker,
-      postWants, // wants
-      postGives, // gives
-      BigInt.fromI32(0),
-      BigInt.fromI32(0),
+    
+    const id = BigInt.fromI32(1);
+    createDummyOffer(
       id,
-      BigInt.fromI32(0),
-    );
-    handleOfferWrite(offerWrite);
-
-    const newOwnerOffer = createNewOwnedOfferEvent(
-      mgv,
-      token0,
       token1,
-      id,
-      owner,
-    );
-    handleNewOwnedOffer(newOwnerOffer);
+      token0,
+    )
+    const orderId ="orderId"
+    const order = new Order(orderId);
+    order.transactionHash = Bytes.fromUTF8("0x0");
+    order.save();
+    
+    const context = new Context('context')
+    context.ids = ""
+    context.last = order.id;
+    context.save();
+    
+    const takerWants = BigInt.fromI32(1000); 
+    const takerGave = BigInt.fromI32(500);
+    const takerGives = BigInt.fromI32(2000);
+    const takerGot = BigInt.fromI32(1000);
+    const expiryDate = BigInt.fromI32(1686754719);
 
     const orderSummaryEvent = createOrderSummaryEvent(
       mgv,
@@ -119,13 +92,13 @@ describe("Describe entity assertions", () => {
       token0,
       taker,
       false,
-      totalWants, // takerWants,
-      totalGives, // takerGives
+      takerWants, // takerWants,
+      takerGives, // takerGives
       false,
-      true,
-      BigInt.fromI32(1686754719),
-      postGives, // takerGot
-      postWants, // takerGave
+      true, 
+      expiryDate,
+      takerGot, // takerGot
+      takerGave, // takerGave
       BigInt.fromI32(0),
       BigInt.fromI32(0),
       id,
@@ -133,19 +106,108 @@ describe("Describe entity assertions", () => {
     handleOrderSummary(orderSummaryEvent);
 
     const offerId = getOfferId(token0, token1, id);
-    assert.fieldEquals('Offer', offerId, 'owner', owner.toHex());
+    assert.fieldEquals('Order', orderId, 'limitOrder', offerId);
+    assert.fieldEquals('LimitOrder', offerId, 'wants', takerWants.toString());
+    assert.fieldEquals('LimitOrder', offerId, 'gives', takerGives.toString());
+    assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
+    assert.fieldEquals('LimitOrder', offerId, 'expiryDate', expiryDate.toI32().toString());
+    assert.fieldEquals('LimitOrder', offerId, 'fillOrKill', 'false');
+    assert.fieldEquals('LimitOrder', offerId, 'fillWants', 'false');
+    assert.fieldEquals('LimitOrder', offerId, 'restingOrder', 'true');
+    assert.fieldEquals('LimitOrder', offerId, 'offer', offerId);
+    assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
+    assert.fieldEquals('LimitOrder', offerId, 'creationDate', '1');
+    assert.fieldEquals('LimitOrder', offerId, 'latestUpdateDate', '1');
 
-    assert.fieldEquals('Offer', offerId, 'initialWants', totalWants.toString());
-    assert.fieldEquals('Offer', offerId, 'wants', postWants.toString());
-
-    assert.fieldEquals('Offer', offerId, 'initialGives', totalGives.toString());
-    assert.fieldEquals('Offer', offerId, 'gives', postGives.toString());
-
-    const orderId = getEventUniqueId(orderStart);
-
-    assert.fieldEquals('Order', orderId, 'offer', offerId);
-    assert.fieldEquals('Order', orderId, 'type', 'LIMIT');
-    assert.fieldEquals('Order', orderId, 'realTaker', taker.toHex());
   });
+
+  //TODO: would like to test negative path, where the offer does not exist. How?
+
+  test("LimitOrder, handleOrderSummary, not posting resting order", () => {
+    let setActiveEvent = createSetActiveEvent(token0, token1, true);
+    handleSetActive(setActiveEvent);
+    assert.entityCount("Market", 1);
+    
+    const id = BigInt.fromI32(0);
+
+    const orderId ="orderId"
+    const order = new Order(orderId);
+    order.transactionHash = Bytes.fromUTF8("0x0");
+    order.save();
+    
+    const context = new Context('context')
+    context.ids = ""
+    context.last = order.id;
+    context.save();
+    
+    const takerWants = BigInt.fromI32(1000); 
+    const takerGave = BigInt.fromI32(500);
+    const takerGives = BigInt.fromI32(2000);
+    const takerGot = BigInt.fromI32(1000);
+    const expiryDate = BigInt.fromI32(0);
+
+    const orderSummaryEvent = createOrderSummaryEvent(
+      mgv,
+      token1,
+      token0,
+      taker,
+      true,
+      takerWants, // takerWants,
+      takerGives, // takerGives
+      true,
+      false, 
+      expiryDate,
+      takerGot, // takerGot
+      takerGave, // takerGave
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      id,
+    );
+    handleOrderSummary(orderSummaryEvent);
+    
+    const limitOrderId = getEventUniqueId(orderSummaryEvent);
+    const offerId = getOfferId(token0, token1, id);
+    assert.fieldEquals('Order', orderId, 'limitOrder', limitOrderId);
+    assert.fieldEquals('LimitOrder', limitOrderId, 'wants', takerWants.toString());
+    assert.fieldEquals('LimitOrder', limitOrderId, 'gives', takerGives.toString());
+    assert.fieldEquals('LimitOrder', limitOrderId, 'realTaker', taker.toHex());
+    assert.fieldEquals('LimitOrder', limitOrderId, 'expiryDate', expiryDate.toI32().toString());
+    assert.fieldEquals('LimitOrder', limitOrderId, 'fillOrKill', 'true');
+    assert.fieldEquals('LimitOrder', limitOrderId, 'fillWants', 'true');
+    assert.fieldEquals('LimitOrder', limitOrderId, 'restingOrder', 'false');
+    assert.fieldEquals('LimitOrder', limitOrderId, 'realTaker', taker.toHex());
+    assert.fieldEquals('LimitOrder', limitOrderId, 'creationDate', '1');
+    assert.fieldEquals('LimitOrder', limitOrderId, 'latestUpdateDate', '1');
+    const limitOrder = LimitOrder.load(limitOrderId)!
+    assert.assertTrue(limitOrder.offer === null)
+  });
+
+  
+
+  test("LimitOrder, handleSetExpiry, setting expiry date", () => {
+    const offerId = getOfferId(token0, token1, BigInt.fromI32(1));
+    const limitOrder = new LimitOrder(offerId)
+    limitOrder.wants = BigInt.fromI32(1000);
+    limitOrder.gives = BigInt.fromI32(500);
+    limitOrder.realTaker = taker;
+    limitOrder.expiryDate = BigInt.fromI32(0);
+    limitOrder.fillOrKill = false;
+    limitOrder.fillWants = false;
+    limitOrder.restingOrder = true;
+    limitOrder.offer = offerId;
+    limitOrder.creationDate = BigInt.fromI32(0);
+    limitOrder.latestUpdateDate = BigInt.fromI32(0);
+    limitOrder.save();
+
+    const setExpiryEvent = createSetExpiryEvent(token0, token1, BigInt.fromI32(1), BigInt.fromI32(1000));
+    handleSetExpiry(setExpiryEvent);
+
+    assert.fieldEquals('LimitOrder', offerId, 'expiryDate', '1000');
+    assert.fieldEquals('LimitOrder', offerId, 'latestUpdateDate', '1');
+
+
+  })
+
+  //TODO: would like to test negative path, where the LimitOrder does not exist. How?
 
 });
