@@ -199,7 +199,8 @@ describe("Describe entity assertions", () => {
     kandel.depositedQuote = BigInt.fromI32(0);
     kandel.totalBase = BigInt.fromI32(0);
     kandel.totalQuote = BigInt.fromI32(0);
-    kandel.owner = Bytes.fromUTF8('owner');
+    kandel.deployer = Bytes.fromUTF8('owner');
+    kandel.admin = Bytes.fromUTF8('admin');
     kandel.save()
     const id = BigInt.fromI32(0);
     let offerWrite = createOfferWriteEvent(
@@ -215,7 +216,7 @@ describe("Describe entity assertions", () => {
     );
     const offer = createNewOffer(offerWrite)
     assert.entityCount("Offer", 0);
-    assert.assertTrue( offer.kandel === maker)
+    assert.assertTrue( offer.kandel!.toHexString() == kandel.id.toHexString())
   })
 
   test("Offer, handleOfferFail", () => {

@@ -11,8 +11,8 @@ import { createNewKandelEvent } from "./kandel-seeder-utils";
 import { handleNewKandel } from "../../src/kandel-seeder";
 import { createCreditEvent, createDebitEvent, createPairEvent, createSetAdminEvent, createSetGaspriceEvent, createSetGasreqEvent, createSetGeometricParamsEvent, createSetLengthEvent, createSetReserveIdEvent, createSetRouterEvent } from "./kandel-utils";
 import { handleCredit, handleDebit, handlePair, handleSetAdmin, handleSetGasprice, handleSetGasreq, handleSetGeometricParams, handleSetLength, handleSetReserveId, handleSetRouter } from "../../src/kandel";
-import { createOfferSuccessEvent, createOfferWriteEvent, createSetActiveEvent } from "../mangrove/mangrove-utils";
-import { handleOfferSuccess, handleOfferWrite, handleSetActive } from "../../src/mangrove";
+import { createOfferSuccessEvent, createOfferWriteEvent, createSetActiveEvent, createSetGasbaseEvent } from "../mangrove/mangrove-utils";
+import { handleOfferSuccess, handleOfferWrite, handleSetActive, handleSetGasbase } from "../../src/mangrove";
 import { getOfferId } from "../../src/helpers";
 
 // Tests structure (matchstick-as >=0.5.0)
@@ -146,6 +146,11 @@ describe("Describe entity assertions", () => {
   });
 
   test("Kandel offers", () => {
+
+    const gasbaseEvent =  createSetGasbaseEvent(token0, token1, BigInt.fromI32(1000));
+    handleSetGasbase(gasbaseEvent);
+    assert.entityCount('GasBase', 1)
+
     const id = BigInt.fromI32(0);
     const offerWrite = createOfferWriteEvent(
       token0, 
@@ -182,6 +187,14 @@ describe("Describe entity assertions", () => {
   });
 
   test("Kandel offer success", () => {
+    const gasbaseEvent1 =  createSetGasbaseEvent(token0, token1, BigInt.fromI32(1000));
+    handleSetGasbase(gasbaseEvent1);
+    assert.entityCount('GasBase', 1)
+
+    const gasbaseEvent2 =  createSetGasbaseEvent(token1, token0, BigInt.fromI32(1000));
+    handleSetGasbase(gasbaseEvent2);
+    assert.entityCount('GasBase', 2)
+
     const id = BigInt.fromI32(0);
 
     let totalBase = BigInt.fromI32(1000);
