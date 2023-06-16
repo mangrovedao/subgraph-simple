@@ -26,8 +26,7 @@ import {
   MarketOrderCall
 } from "../generated/Mangrove/Mangrove"
 import { Market, Order, Offer, Kandel } from "../generated/schema"
-import { addMarketOrderDataToStack, addOrderToStack, getEventUniqueId, getMarketId, getMarketOrderDataFromStack, getOfferId, getOrCreateAccount, getOrderFromStack, removeMarketOrderDataFromStack, removeOrderFromStack } from "./helpers";
-import { log } from "matchstick-as";
+import { addMarketOrderDataToStack, addOrderToStack, getEventUniqueId, getMarketId, getMarketOrderDataFromStack, getOfferId, getOrCreateAccount, getOrderFromStack, getOrdersCount, removeMarketOrderDataFromStack, removeOrderFromStack } from "./helpers";
 
 export function handleApproval(event: Approval): void {}
 
@@ -172,25 +171,23 @@ export function handleOrderComplete(event: OrderComplete): void {
   order.penalty = event.params.penalty;
   order.feePaid = event.params.feePaid;
 
-  order.save();
-
+  const marketOrderData = getMarketOrderDataFromStack();
+  const orderCount = getOrdersCount() - 1;
   removeOrderFromStack();
-  removeMarketOrderDataFromStack();
+
+  if (!marketOrderData.nodata && marketOrderData.orderCount == orderCount) {
+    order.marketOrderWants = marketOrderData.takerWants;
+    order.marketOrderGives = marketOrderData.takerGives;
+    removeMarketOrderDataFromStack();
+  }
+
+  order.save();;
 }
 
 export function handleOrderStart(event: OrderStart): void {
   const order = new Order(getEventUniqueId(event));
 
-  const marketOrderData = getMarketOrderDataFromStack();
-
-  if (marketOrderData.nodata) {
-    order.type = "LIMIT"
-  } else {
-    order.type = "MARKET";
-    order.marketOrderWants = marketOrderData.takerWants;
-    order.marketOrderGives = marketOrderData.takerGives;
-  }
-
+  order.type = "MARKET";
   order.transactionHash = event.transaction.hash;
   order.save();
 
@@ -250,6 +247,5 @@ export function handleSetUseOracle(event: SetUseOracle): void {}
 export function handleMarketOrder(call: MarketOrderCall): void {
   const inputs = call.inputs;
 
-  log.error("{} {} {}", [call.transaction.hash.toHex(), inputs.takerGives.toString(), inputs.takerWants.toString()]);
   addMarketOrderDataToStack(inputs);
 }

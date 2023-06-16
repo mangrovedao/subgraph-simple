@@ -1,5 +1,5 @@
 import { Address, BigInt, Value, ethereum } from "@graphprotocol/graph-ts";
-import { Account, Contex, Order } from "../generated/schema";
+import { Account, Context, Order } from "../generated/schema";
 import { MarketOrderCall__Inputs } from "../generated/Mangrove/Mangrove";
 
 export const getMarketId = (outbound_tkn: Address, inbound_tkn: Address): string  => {
@@ -22,12 +22,13 @@ export const getOrCreateAccount = (address: Address): Account => {
   return account;
 }
 
-export const getContext = (): Contex => {
-  let context = Contex.load('context');
+export const getContext = (): Context => {
+  let context = Context.load('context');
   if (!context) {
-    context = new Contex('context');
+    context = new Context('context');
     context.ids = "";
     context.marketOrders = "";
+    context.orderCount = BigInt.fromI32(0)
 
     context.save();
   }
@@ -38,8 +39,14 @@ export const getContext = (): Contex => {
 export const addOrderToStack = (order: Order): void => {
   const context = getContext();
   context.ids = `${context.ids}|${order.id}`
+  context.orderCount = context.orderCount.plus(BigInt.fromI32(1));
 
   context.save();
+}
+export const getOrdersCount = (): number => {
+  const context = getContext();
+
+  return context.orderCount.toI32();
 }
 
 export const getOrderFromStack = (): Order => {
@@ -64,6 +71,8 @@ export const removeOrderFromStack = (): void => {
     }
   }
 
+  context.orderCount = context.orderCount.minus(BigInt.fromI32(1));
+
   context.save();
 }
 
@@ -82,7 +91,7 @@ export const getEventUniqueId = (event: ethereum.Event): string => {
 export const addMarketOrderDataToStack = (order: MarketOrderCall__Inputs): void => { 
   const context = getContext();
 
-  const marketOrderDataEncoded = `${order.takerGives}-${order.takerWants}`;
+  const marketOrderDataEncoded = `${order.takerGives}-${order.takerWants}-${context.orderCount}`;
   context.marketOrders = `${context.marketOrders}/${marketOrderDataEncoded}`;
 
   context.save();
@@ -94,7 +103,7 @@ export const removeMarketOrderDataFromStack = (): void => {
   const marketOrders = context.marketOrders;
 
   for (let i = marketOrders.length - 1; i >= 0 ; --i) {
-    if (marketOrders.at(i) == '/' || i == 0)  {
+    if (marketOrders.at(i) == '/')  {
       context.marketOrders = marketOrders.slice(0, i);
       break;
     }
@@ -108,12 +117,14 @@ export class Data {
   nodata: boolean;
   takerGives: BigInt;
   takerWants: BigInt;
+  orderCount: number;
 
   constructor(str: string, nodata: boolean) {
     this.nodata = nodata;
 
     this.takerGives = BigInt.fromI32(0);
     this.takerWants = BigInt.fromI32(0);
+    this.orderCount = 0;
 
     if (str.length !== 0)  {
       const data = str.split('-');
@@ -122,6 +133,7 @@ export class Data {
 
       this.takerGives = BigInt.fromString(takerGivesStr);
       this.takerWants = BigInt.fromString(takerWantsStr);
+      this.orderCount = BigInt.fromString(data.at(2)).toI32();
     }
   }
 }

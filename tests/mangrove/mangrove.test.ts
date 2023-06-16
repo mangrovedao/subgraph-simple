@@ -8,10 +8,10 @@ import {
   beforeEach,
   afterEach
 } from "matchstick-as/assembly/index"
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
-import { handleMarketOrder, handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderStart, handleSetActive } from "../../src/mangrove"
-import { createMarketOrderCall, createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils"
-import { Market } from "../../generated/schema";
+import { Address, BigInt, Bytes, log } from "@graphprotocol/graph-ts"
+import { handleMarketOrder, handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive } from "../../src/mangrove"
+import { createMarketOrderCall, createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils"
+import { Market, Order } from "../../generated/schema";
 import { getEventUniqueId, getMarketId, getOfferId } from "../../src/helpers";
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -237,9 +237,89 @@ describe("Describe entity assertions", () => {
 
     const orderStartId = getEventUniqueId(orderStart);
 
+    const takerGot = BigInt.fromI32(9);
+    const takerGave = BigInt.fromI32(19);
+
+    const orderComplete = createOrderCompleteEvent(
+      token0,
+      token1,
+      taker,
+      takerGot,
+      takerGave,
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+    );
+
+    handleOrderComplete(orderComplete);
+
     assert.fieldEquals('Order', orderStartId, 'type', 'MARKET');
     assert.fieldEquals('Order', orderStartId, 'marketOrderGives', takerGives.toString());
     assert.fieldEquals('Order', orderStartId, 'marketOrderWants', takerWants.toString());
+  });
+
+  test("Market order with nested orders", () => {
+    let setActiveEvent = createSetActiveEvent(token0, token1, true);
+    handleSetActive(setActiveEvent);
+
+    const takerWants = BigInt.fromI32(10);
+    const takerGives = BigInt.fromI32(20);
+
+    const createMarketOrder = createMarketOrderCall(
+      token0,
+      token1,
+      takerWants,
+      takerGives,
+    );
+
+    handleMarketOrder(createMarketOrder);
+
+    const orderStart = createOrderStartEvent();
+    handleOrderStart(orderStart);
+
+    const orderStart2 = createOrderStartEvent();
+    orderStart2.logIndex = orderStart2.logIndex.plus(BigInt.fromI32(1))
+    handleOrderStart(orderStart2);
+
+    const takerGot = BigInt.fromI32(9);
+    const takerGave = BigInt.fromI32(19);
+
+    const orderComplete = createOrderCompleteEvent(
+      token0,
+      token1,
+      taker,
+      takerGot,
+      takerGave,
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+    );
+
+    const orderComplete2 = createOrderCompleteEvent(
+      token0,
+      token1,
+      taker,
+      takerGot,
+      takerGave,
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+    );
+
+    handleOrderComplete(orderComplete2);
+
+    handleOrderComplete(orderComplete);
+
+    const orderStartId = getEventUniqueId(orderStart);
+    assert.fieldEquals('Order', orderStartId, 'type', 'MARKET');
+    assert.fieldEquals('Order', orderStartId, 'marketOrderGives', takerGives.toString());
+    assert.fieldEquals('Order', orderStartId, 'marketOrderWants', takerWants.toString());
+
+    const orderStartId2 = getEventUniqueId(orderStart2);
+
+    const order2 = Order.load(orderStartId2)!;
+
+    if (!order2.marketOrderWants && !order2.marketOrderGives) {
+      return;
+    } 
+    assert.assertTrue(false);
   });
 
 });

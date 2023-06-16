@@ -8,7 +8,7 @@ import {
 } from "matchstick-as/assembly/index"
 import { Address, BigInt, Bytes, log } from "@graphprotocol/graph-ts"
 import { Order } from "../../generated/schema";
-import { addMarketOrderDataToStack, addOrderToStack, getLastOrder, getMarketOrderDataFromStack, getOrderFromStack, removeMarketOrderDataFromStack, removeOrderFromStack } from "../../src/helpers";
+import { addMarketOrderDataToStack, addOrderToStack, getLastOrder, getMarketOrderDataFromStack, getOrderFromStack, getOrdersCount, removeMarketOrderDataFromStack, removeOrderFromStack } from "../../src/helpers";
 import { createMarketOrderCall } from "../mangrove/mangrove-utils";
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -36,25 +36,64 @@ describe("Describe entity assertions", () => {
     order1.save();
     order2.save();
 
+
+    assert.assertTrue(getOrdersCount() == 0);
     addOrderToStack(order1);
+    assert.assertTrue(getOrdersCount() == 1);
     let currentOrder = getOrderFromStack();
 
     assert.assertTrue(order1.id.toString() == currentOrder.id.toString());
 
     addOrderToStack(order2);
+    assert.assertTrue(getOrdersCount() == 2);
     currentOrder = getOrderFromStack();
 
     assert.assertTrue(currentOrder.id.toString() == order2.id.toString());
 
     currentOrder = getOrderFromStack();
     removeOrderFromStack();
+    assert.assertTrue(getOrdersCount() == 1);
 
     currentOrder = getOrderFromStack();
     assert.assertTrue(currentOrder.id.toString() == order1.id.toString());
     removeOrderFromStack();
+    assert.assertTrue(getOrdersCount() == 0);
 
     const lastOrder = getLastOrder();
     assert.assertTrue(lastOrder.id.toString() == order1.id.toString());
+  });
+
+  test("Market Order stack 1", () => {
+    const takerWants = BigInt.fromI32(100);
+    const takerGives = BigInt.fromI32(200);
+
+    const marketOrderData = createMarketOrderCall(
+      token0,
+      token1,
+      takerWants,
+      takerGives,
+    );
+
+    addMarketOrderDataToStack(marketOrderData.inputs);
+
+    let data = getMarketOrderDataFromStack();
+
+    assert.booleanEquals(false, data.nodata); 
+
+    assert.stringEquals(
+      data.takerGives.toString(), 
+      takerGives.toString()
+    );
+
+    assert.stringEquals(
+      data.takerWants.toString(), 
+      takerWants.toString()
+    );
+
+    removeMarketOrderDataFromStack();
+  
+    data = getMarketOrderDataFromStack();
+    assert.booleanEquals(true, data.nodata); 
   });
 
   test("Market Order stack", () => {
