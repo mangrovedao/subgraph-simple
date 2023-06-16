@@ -241,10 +241,11 @@ export function handleSetGasbase(event: SetGasbase): void {
   let gasBase = GasBase.load(gasbaseId);
   if (!gasBase) {
     gasBase = new GasBase(gasbaseId);
+    gasBase.inbound_tkn = event.params.inbound_tkn;
+    gasBase.outbound_tkn = event.params.outbound_tkn;
   }
   gasBase.gasbase = event.params.offer_gasbase;
-  gasBase.inbound_tkn = event.params.inbound_tkn;
-  gasBase.outbound_tkn = event.params.outbound_tkn;
+
   gasBase.save();
 }
 

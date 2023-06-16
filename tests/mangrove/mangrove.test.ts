@@ -8,9 +8,9 @@ import {
   test
 } from "matchstick-as/assembly/index";
 import { Kandel, Market, Offer } from "../../generated/schema";
-import { getEventUniqueId, getMarketId, getOfferId } from "../../src/helpers";
-import { createNewOffer, handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive, handleSetGasbase } from "../../src/mangrove";
-import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent, createSetGasbaseEvent } from "./mangrove-utils";
+import { getEventUniqueId, getGasbaseId, getMarketId, getOfferId } from "../../src/helpers";
+import { createNewOffer, handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handlePosthookFail, handleSetActive, handleSetGasbase } from "../../src/mangrove";
+import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createPosthookFailEvent, createSetActiveEvent, createSetGasbaseEvent } from "./mangrove-utils";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -383,7 +383,6 @@ describe("Describe entity assertions", () => {
     assert.entityCount("Offer", 1);
   });
 
-  // test handleOfferRetract
   test("Offer, handleOfferRetract", () => {
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(token0, token1, id);
@@ -434,6 +433,59 @@ describe("Describe entity assertions", () => {
     assert.assertTrue(updatedOffer.owner === null)
     assert.entityCount("Offer", 1);
   })
+
+
+  test("Offer, habdlePosthookFail", () => {
+    const id = BigInt.fromI32(1);
+    let offerId = getOfferId(token0, token1, id);
+    let offer = new Offer(offerId);
+    offer.offerId = BigInt.fromI32(1);
+    offer.transactionHash = Bytes.fromHexString('0x000123');
+    offer.wants = BigInt.fromI32(40);
+    offer.gives = BigInt.fromI32(20);
+    offer.gasprice = BigInt.fromI32(10);
+    offer.gasreq = BigInt.fromI32(20);
+    offer.gasBase = BigInt.fromI32(30);
+    offer.prev = BigInt.fromI32(40);
+    offer.isOpen = false;
+    offer.isFailed = false;
+    offer.isFilled = false;
+    offer.isRetracted = false;
+    offer.failedReason = null;
+    offer.posthookFailReason = Bytes.fromUTF8('posthook fail reason');
+    offer.deprovisioned = false;
+    offer.market = getMarketId(token0, token1);
+    offer.maker = maker;
+    offer.save();
+
+
+    let posthookFailed = createPosthookFailEvent(token0, token1, id, Bytes.fromUTF8("Failed")    );
+    handlePosthookFail(posthookFailed);
+
+    assert.fieldEquals('Offer', offerId, 'offerId', '1');
+    //TODO: do we want to update the transaction hash?
+    assert.fieldEquals('Offer', offerId, 'transactionHash', '0x000123')
+    // TODO: de we want to update the wants and gives?
+    assert.fieldEquals('Offer', offerId, 'wants', '40');
+    assert.fieldEquals('Offer', offerId, 'gives', '20');
+    assert.fieldEquals('Offer', offerId, 'gasprice', '10');
+    assert.fieldEquals('Offer', offerId, 'gasreq', '20');
+    assert.fieldEquals('Offer', offerId, 'gasBase', '30');
+    assert.fieldEquals('Offer', offerId, 'prev', '40');
+    assert.fieldEquals('Offer', offerId, 'isOpen', 'false');
+    assert.fieldEquals('Offer', offerId, 'isFailed', 'false');
+    assert.fieldEquals('Offer', offerId, 'isFilled', 'false');
+    assert.fieldEquals('Offer', offerId, 'isRetracted', 'false');
+    assert.fieldEquals('Offer', offerId, 'failedReason', 'null');
+    assert.fieldEquals('Offer', offerId, 'posthookFailReason', Bytes.fromUTF8("Failed").toHexString());
+    assert.fieldEquals('Offer', offerId, 'market', getMarketId(token0, token1));
+    assert.fieldEquals('Offer', offerId, 'maker', maker.toHexString());
+    let updatedOffer = Offer.load(offerId)!;
+    assert.assertTrue(updatedOffer.kandel === null)
+    assert.assertTrue(updatedOffer.owner === null)
+    assert.entityCount("Offer", 1);
+  })
+
  
   test('Order, handleOrderSuccess', () => {
     const orderStart =  createOrderStartEvent()
@@ -462,6 +514,31 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Order', orderId, 'feePaid', '2');
 
     assert.fieldEquals('Context', 'context', 'ids',  `` );
+  })
+
+  test('GasBase, handleSetGasBase, new gasbase', () => {
+    const setGasBase = createSetGasbaseEvent(token0, token1, BigInt.fromI32(20))
+    handleSetGasbase(setGasBase)
+    assert.entityCount('GasBase', 1)
+
+    const gasbaseId = getGasbaseId(token0, token1);
+    assert.fieldEquals('GasBase', gasbaseId, 'gasbase', '20');
+    assert.fieldEquals('GasBase', gasbaseId, 'inbound_tkn', token1.toHexString());
+    assert.fieldEquals('GasBase', gasbaseId, 'outbound_tkn', token0.toHexString());
+  })
+
+  test('GasBase, handleSetGasBase, update gasbase', () => {
+    const setGasBase1 = createSetGasbaseEvent(token0, token1, BigInt.fromI32(20))
+    handleSetGasbase(setGasBase1)
+    assert.entityCount('GasBase', 1)
+
+    const setGasBase2 = createSetGasbaseEvent(token0, token1, BigInt.fromI32(40))
+    handleSetGasbase(setGasBase2)
+
+    const gasbaseId = getGasbaseId(token0, token1);
+    assert.fieldEquals('GasBase', gasbaseId, 'gasbase', '40');
+    assert.entityCount('GasBase', 1)
+
   })
 
 });
