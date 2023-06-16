@@ -197,6 +197,7 @@ describe("Describe entity assertions", () => {
     limitOrder.offer = offerId;
     limitOrder.creationDate = BigInt.fromI32(0);
     limitOrder.latestUpdateDate = BigInt.fromI32(0);
+    limitOrder.order = "order";
     limitOrder.save();
 
     const setExpiryEvent = createSetExpiryEvent(token0, token1, BigInt.fromI32(1), BigInt.fromI32(1000));

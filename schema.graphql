@@ -62,7 +62,7 @@ type LimitOrder @entity {
   realTaker: Bytes 
   offer: Offer
 
-  order: [Order!]! @derivedFrom(field: "limitOrder")
+  order: Order! 
 
 }
 

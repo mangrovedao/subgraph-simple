@@ -354,6 +354,14 @@ describe("Describe entity assertions", () => {
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(token0, token1, id);
 
+    const orderId ="orderId"
+    const order = new Order(orderId);
+    order.transactionHash = Bytes.fromUTF8("0x0");
+    order.takerGot = BigInt.fromI32(100);
+    order.takerGave = BigInt.fromI32(50);
+    order.save();
+
+
     const limitOrder = new LimitOrder(offerId)
     limitOrder.wants = BigInt.fromI32(1000);
     limitOrder.gives = BigInt.fromI32(500);
@@ -365,15 +373,9 @@ describe("Describe entity assertions", () => {
     limitOrder.offer = offerId;
     limitOrder.creationDate = BigInt.fromI32(100);
     limitOrder.latestUpdateDate = BigInt.fromI32(0);
+    limitOrder.order = orderId;
     limitOrder.save();
 
-    const orderId ="orderId"
-    const order = new Order(orderId);
-    order.transactionHash = Bytes.fromUTF8("0x0");
-    order.limitOrder = limitOrder.id;
-    order.takerGot = BigInt.fromI32(100);
-    order.takerGave = BigInt.fromI32(50);
-    order.save();
 
 
     createOffer(

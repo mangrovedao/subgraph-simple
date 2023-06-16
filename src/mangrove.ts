@@ -135,15 +135,13 @@ export const createNewOffer = (event: OfferWrite): Offer => {
 export function updateLimitOrder(offerId: string, event: OfferSuccess): void {
   const limitOrder = LimitOrder.load(offerId);
   if (limitOrder) {
-    for( let i=0; i<limitOrder.order.length; i++) {
-      const orderId = limitOrder.order[i];
-      const order = Order.load(orderId);
-      if (order) {
-        order.takerGot = order.takerGot !== null ? event.params.takerGives.plus(order.takerGot!) : event.params.takerGives;
-        order.takerGave = order.takerGave !== null ? event.params.takerWants.plus(order.takerGave!) : event.params.takerWants;
-        order.save();
-      }
-    }
+        const orderId = limitOrder.order;
+        const order = Order.load(orderId);
+        if (order) {
+          order.takerGot = order.takerGot !== null ? event.params.takerGives.plus(order.takerGot!) : event.params.takerGives;
+          order.takerGave = order.takerGave !== null ? event.params.takerWants.plus(order.takerGave!) : event.params.takerWants;
+          order.save();
+        }
     limitOrder.latestUpdateDate = event.block.timestamp;
     limitOrder.save();
   }
