@@ -91,7 +91,7 @@ type Kandel @entity {
   depositWithdraws: [KandelDepositWithdraw!]! @derivedFrom(field: "kandel")
 }
 
-type Contex @entity {
+type Context @entity {
   id: String!
   ids: String!
   last: Order

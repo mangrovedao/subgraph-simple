@@ -1,5 +1,5 @@
 import { Address, BigInt, Value, ethereum } from "@graphprotocol/graph-ts";
-import { Account, Contex, Order } from "../generated/schema";
+import { Account, Context, Order } from "../generated/schema";
 
 export const getMarketId = (outbound_tkn: Address, inbound_tkn: Address): string  => {
   return `${outbound_tkn.toHex()}-${inbound_tkn.toHex()}`;
@@ -21,19 +21,28 @@ export const getOrCreateAccount = (address: Address): Account => {
   return account;
 }
 
-export const addOrderToStack = (order: Order): void => {
-  let context = Contex.load('context');
+export const getContext = (): Context => {
+  let context = Context.load('context');
   if (!context) {
-    context = new Contex('context');
+    context = new Context('context');
     context.ids = ``;
+
+    context.save();
   }
+
+  return context;
+}
+
+export const addOrderToStack = (order: Order): void => {
+  const context = getContext();
+
   context.ids = `${context.ids}|${order.id}`
 
   context.save();
 }
 
 export const getOrderFromStack = (): Order => {
-  const context = Contex.load('context')!;
+  const context = getContext();
   const ids = context.ids;
 
   const idsArray = ids.split('|');
@@ -43,7 +52,7 @@ export const getOrderFromStack = (): Order => {
 }
 
 export const removeOrderFromStack = (): void => {
-  let context = Contex.load('context')!;
+  const context = getContext();
 
   const ids = context.ids;
   for (let i = ids.length - 1 ; i >= 0 ; --i) {
@@ -58,7 +67,7 @@ export const removeOrderFromStack = (): void => {
 }
 
 export const getLastOrder = (): Order => {
-  const context = Contex.load('context')!;
+  const context = getContext();
 
   const order = Order.load(context.last!)!;
   return order;
