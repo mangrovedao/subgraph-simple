@@ -23,11 +23,9 @@ describe("Describe entity assertions", () => {
   test("Test order queue", () => {
     const order1 = new Order("order1");
     order1.transactionHash = Bytes.fromUTF8("0x0");
-    order1.type = "LIMIT";
 
     const order2 = new Order("order2");
     order2.transactionHash = Bytes.fromUTF8("0x1");
-    order2.type = "MARKET";
 
     order1.save();
     order2.save();

@@ -2,3 +2,4 @@ node_modules/
 tests/.bin
 build/
 generated/
+tests/.latest.json
