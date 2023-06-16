@@ -27,7 +27,8 @@ export function handleNewKandel(event: NewKandel): void {
   kandel.totalBase = BigInt.fromI32(0);
   kandel.totalQuote = BigInt.fromI32(0);
 
-  kandel.owner = event.params.owner;
+  kandel.deployer = event.params.owner;
+  kandel.admin = event.params.owner;
 
   kandel.save();
 }

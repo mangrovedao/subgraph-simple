@@ -30,8 +30,8 @@ type Offer @entity {
 
   market: Market!
   maker: Account!
-  kandel: Kandel
   owner: Account
+  kandel: Kandel
 }
 
 type Order @entity {
@@ -76,22 +76,30 @@ type KandelDepositWithdraw @entity {
 type Kandel @entity {
   id: Bytes!
   transactionHash: Bytes!
+
   seeder: Bytes!
   address: Bytes!
 
-  base: Bytes!
-  depositedBase: BigInt!
-  depositedQuote: BigInt!
+  base: Bytes! 
+  quote: Bytes!
+  deployer: Account!
+  admin: Account!
+  reserveId: Account
+  router: Account
 
   totalBase: BigInt!
-  totalQuote: BigInt!
+  depositedBase: BigInt!
 
-  quote: Bytes!
+  totalQuote: BigInt!
+  depositedQuote: BigInt!
 
   gasprice: BigInt
-  
-  owner: Account!
+  gasreq: BigInt
 
+  spread: BigInt
+  ratio: BigInt
+  length: BigInt
+  
   offers: [Offer!]! @derivedFrom(field: "kandel")
   depositWithdraws: [KandelDepositWithdraw!]! @derivedFrom(field: "kandel")
 }

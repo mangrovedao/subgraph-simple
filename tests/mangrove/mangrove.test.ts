@@ -1,21 +1,16 @@
+import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {
+  afterEach,
   assert,
-  describe,
-  test,
-  clearStore,
   beforeAll,
-  afterAll,
-  beforeEach,
-  afterEach
-} from "matchstick-as/assembly/index"
-import { Address, BigInt, Bytes, log } from "@graphprotocol/graph-ts"
-import { createNewOffer, handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive, handleSetGasbase } from "../../src/mangrove"
-import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent, createSetGasbaseEvent } from "./mangrove-utils"
-import { Kandel, Market, Offer, Context } from "../../generated/schema";
+  clearStore,
+  describe,
+  test
+} from "matchstick-as/assembly/index";
+import { Kandel, Market, Offer } from "../../generated/schema";
 import { getEventUniqueId, getMarketId, getOfferId } from "../../src/helpers";
-import { handleNewOwnedOffer } from "../../src/mangrove-order";
-import { createNewOwnedOfferEvent } from "./mangrove-order-utils";
-
+import { createNewOffer, handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive, handleSetGasbase } from "../../src/mangrove";
+import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent, createSetGasbaseEvent } from "./mangrove-utils";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -41,7 +36,7 @@ describe("Describe entity assertions", () => {
     assert.entityCount("Market", 1);
 
     const marketId = getMarketId(token0, token1)
-    let market = Market.load(marketId);
+    const market = Market.load(marketId);
     assert.assertNotNull(market);
 
     assert.fieldEquals('Market', marketId, 'active', 'true');

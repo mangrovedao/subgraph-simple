@@ -79,9 +79,13 @@ export function handleDebit(event: Debit): void {
 
 export function handleLogIncident(event: LogIncident): void {}
 
-export function handleMgv(event: Mgv): void {}
+export function handleMgv(event: Mgv): void {
+  // nothing to do here as we have one subgraph by mangrove
+}
 
-export function handlePair(event: Pair): void {}
+export function handlePair(event: Pair): void {
+  // nothing to do we already have this information inside NewKandle
+}
 
 export function handlePopulateEnd(event: PopulateEnd): void {}
 
@@ -91,7 +95,13 @@ export function handleRetractEnd(event: RetractEnd): void {}
 
 export function handleRetractStart(event: RetractStart): void {}
 
-export function handleSetAdmin(event: SetAdmin): void {}
+export function handleSetAdmin(event: SetAdmin): void {
+  const kandel = KandelEntity.load(event.address)!;
+
+  kandel.admin = event.params.admin;
+
+  kandel.save();
+}
 
 export function handleSetCompoundRates(event: SetCompoundRates): void {}
 
@@ -103,14 +113,47 @@ export function handleSetGasprice(event: SetGasprice): void {
   kandel.save();
 }
 
-export function handleSetGasreq(event: SetGasreq): void {}
+export function handleSetGasreq(event: SetGasreq): void {
+  const kandel = KandelEntity.load(event.address)!
 
-export function handleSetGeometricParams(event: SetGeometricParams): void {}
+  kandel.gasreq = event.params.value;
 
-export function handleSetIndexMapping(event: SetIndexMapping): void {}
+  kandel.save();
+}
 
-export function handleSetLength(event: SetLength): void {}
+export function handleSetGeometricParams(event: SetGeometricParams): void {
+  const kandel = KandelEntity.load(event.address)!;
 
-export function handleSetReserveId(event: SetReserveId): void {}
+  kandel.spread = event.params.spread;
+  kandel.ratio = event.params.ratio;
 
-export function handleSetRouter(event: SetRouter): void {}
+  kandel.save();
+}
+
+export function handleSetIndexMapping(event: SetIndexMapping): void {
+
+}
+
+export function handleSetLength(event: SetLength): void {
+  const kandel = KandelEntity.load(event.address)!;
+
+  kandel.length = event.params.value;
+
+  kandel.save();
+}
+
+export function handleSetReserveId(event: SetReserveId): void {
+  const kandel = KandelEntity.load(event.address)!;
+
+  kandel.reserveId = event.params.reserveId;
+
+  kandel.save();
+}
+
+export function handleSetRouter(event: SetRouter): void {
+  const kandel = KandelEntity.load(event.address)!;
+
+  kandel.router = event.params.router;
+
+  kandel.save();
+}
