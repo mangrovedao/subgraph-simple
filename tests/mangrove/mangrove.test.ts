@@ -8,7 +8,7 @@ import {
   test
 } from "matchstick-as/assembly/index";
 import { Kandel, Market, Offer } from "../../generated/schema";
-import { getEventUniqueId, getGasbaseId, getMarketId, getOfferId } from "../../src/helpers";
+import { createOffer, getEventUniqueId, getGasbaseId, getMarketId, getOfferId } from "../../src/helpers";
 import { createNewOffer, handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handlePosthookFail, handleSetActive, handleSetGasbase } from "../../src/mangrove";
 import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createPosthookFailEvent, createSetActiveEvent, createSetGasbaseEvent } from "./mangrove-utils";
 
@@ -112,26 +112,27 @@ describe("Describe entity assertions", () => {
 
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(token0, token1, id);
-    let offer = new Offer(offerId);
-    offer.offerId = BigInt.fromI32(1);
-    offer.transactionHash = Bytes.fromHexString('0x000123');
-    offer.wants = BigInt.fromI32(1234);
-    offer.gives = BigInt.fromI32(5678);
-    offer.gasprice = BigInt.fromI32(10);
-    offer.gasreq = BigInt.fromI32(20);
-    offer.gasBase = BigInt.fromI32(30);
-    offer.prev = BigInt.fromI32(40);
-    offer.isOpen = false;
-    offer.isFailed = true;
-    offer.isFilled = true;
-    offer.isRetracted = true;
-    offer.failedReason = Bytes.fromUTF8('failed reason');
-    offer.posthookFailReason = Bytes.fromUTF8('posthook fail reason');
-    offer.deprovisioned = true;
-    offer.market = getMarketId(token0, token1);
-    offer.maker = maker;
-    offer.save();
 
+    createOffer(
+      id,
+      token1,
+      token0,
+      Bytes.fromHexString('0x000123'),
+      BigInt.fromI32(1234),
+      BigInt.fromI32(5678),
+      BigInt.fromI32(10),
+      BigInt.fromI32(20),
+      BigInt.fromI32(30),
+      BigInt.fromI32(40),
+      false,
+      true,
+      true,
+      true,
+      Bytes.fromUTF8('failed reason'),
+      Bytes.fromUTF8('posthook fail reason'),
+      true,
+      maker,
+    )
 
     let offerWrite = createOfferWriteEvent(
       token0, 
@@ -223,26 +224,27 @@ describe("Describe entity assertions", () => {
 
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(token0, token1, id);
-    let offer = new Offer(offerId);
-    offer.offerId = BigInt.fromI32(1);
-    offer.transactionHash = Bytes.fromHexString('0x000123');
-    offer.wants = BigInt.fromI32(1234);
-    offer.gives = BigInt.fromI32(5678);
-    offer.gasprice = BigInt.fromI32(10);
-    offer.gasreq = BigInt.fromI32(20);
-    offer.gasBase = BigInt.fromI32(30);
-    offer.prev = BigInt.fromI32(40);
-    offer.isOpen = true;
-    offer.isFailed = true;
-    offer.isFilled = true;
-    offer.isRetracted = true;
-    offer.failedReason = Bytes.fromUTF8('failed reason');
-    offer.posthookFailReason = Bytes.fromUTF8('posthook fail reason');
-    offer.deprovisioned = false;
-    offer.market = getMarketId(token0, token1);
-    offer.maker = maker;
-    offer.save();
 
+    createOffer(
+      id,
+      token1,
+      token0,
+      Bytes.fromHexString('0x000123'),
+      BigInt.fromI32(1234),
+      BigInt.fromI32(5678),
+      BigInt.fromI32(10),
+      BigInt.fromI32(20),
+      BigInt.fromI32(30),
+      BigInt.fromI32(40),
+      true,
+      false,
+      false,
+      false,
+      Bytes.fromUTF8('failed reason'),
+      Bytes.fromUTF8('posthook fail reason'),
+      false,
+      maker,
+    )
 
     let offerFail = createOfferFailEvent(
       token0,
@@ -282,25 +284,27 @@ describe("Describe entity assertions", () => {
 
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(token0, token1, id);
-    let offer = new Offer(offerId);
-    offer.offerId = BigInt.fromI32(1);
-    offer.transactionHash = Bytes.fromHexString('0x000123');
-    offer.wants = BigInt.fromI32(40);
-    offer.gives = BigInt.fromI32(20);
-    offer.gasprice = BigInt.fromI32(10);
-    offer.gasreq = BigInt.fromI32(20);
-    offer.gasBase = BigInt.fromI32(30);
-    offer.prev = BigInt.fromI32(40);
-    offer.isOpen = true;
-    offer.isFailed = true;
-    offer.isFilled = true;
-    offer.isRetracted = true;
-    offer.failedReason = Bytes.fromUTF8('failed reason');
-    offer.posthookFailReason = Bytes.fromUTF8('posthook fail reason');
-    offer.deprovisioned = false;
-    offer.market = getMarketId(token0, token1);
-    offer.maker = maker;
-    offer.save();
+
+    createOffer(
+      id,
+      token1,
+      token0,
+      Bytes.fromHexString('0x000123'),
+      BigInt.fromI32(40),
+      BigInt.fromI32(20),
+      BigInt.fromI32(10),
+      BigInt.fromI32(20),
+      BigInt.fromI32(30),
+      BigInt.fromI32(40),
+      true,
+      false,
+      false,
+      false,
+      Bytes.fromUTF8('failed reason'),
+      Bytes.fromUTF8('posthook fail reason'),
+      false,
+      maker,
+    )
 
 
     let offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, BigInt.fromI32(10), BigInt.fromI32(20));
@@ -335,26 +339,28 @@ describe("Describe entity assertions", () => {
 
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(token0, token1, id);
-    let offer = new Offer(offerId);
-    offer.offerId = BigInt.fromI32(1);
-    offer.transactionHash = Bytes.fromHexString('0x000123');
-    offer.wants = BigInt.fromI32(40);
-    offer.gives = BigInt.fromI32(20);
-    offer.gasprice = BigInt.fromI32(10);
-    offer.gasreq = BigInt.fromI32(20);
-    offer.gasBase = BigInt.fromI32(30);
-    offer.prev = BigInt.fromI32(40);
-    offer.isOpen = true;
-    offer.isFailed = true;
-    offer.isFilled = false;
-    offer.isRetracted = true;
-    offer.failedReason = Bytes.fromUTF8('failed reason');
-    offer.posthookFailReason = Bytes.fromUTF8('posthook fail reason');
-    offer.deprovisioned = false;
-    offer.market = getMarketId(token0, token1);
-    offer.maker = maker;
-    offer.save();
 
+    createOffer(
+      id,
+      token1,
+      token0,
+      Bytes.fromHexString('0x000123'),
+      BigInt.fromI32(40),
+      BigInt.fromI32(20),
+      BigInt.fromI32(10),
+      BigInt.fromI32(20),
+      BigInt.fromI32(30),
+      BigInt.fromI32(40),
+      true,
+      true,
+      false,
+      true,
+      Bytes.fromUTF8('failed reason'),
+      Bytes.fromUTF8('posthook fail reason'),
+      false,
+      maker,
+
+    )
 
     let offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, BigInt.fromI32(20), BigInt.fromI32(40));
     handleOfferSuccess(offerSuccess);
@@ -386,26 +392,27 @@ describe("Describe entity assertions", () => {
   test("Offer, handleOfferRetract", () => {
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(token0, token1, id);
-    let offer = new Offer(offerId);
-    offer.offerId = BigInt.fromI32(1);
-    offer.transactionHash = Bytes.fromHexString('0x000123');
-    offer.wants = BigInt.fromI32(40);
-    offer.gives = BigInt.fromI32(20);
-    offer.gasprice = BigInt.fromI32(10);
-    offer.gasreq = BigInt.fromI32(20);
-    offer.gasBase = BigInt.fromI32(30);
-    offer.prev = BigInt.fromI32(40);
-    offer.isOpen = true;
-    offer.isFailed = true;
-    offer.isFilled = true;
-    offer.isRetracted = false;
-    offer.failedReason = Bytes.fromUTF8('failed reason');
-    offer.posthookFailReason = Bytes.fromUTF8('posthook fail reason');
-    offer.deprovisioned = false;
-    offer.market = getMarketId(token0, token1);
-    offer.maker = maker;
-    offer.save();
 
+    createOffer(
+      id,
+      token1,
+      token0,
+      Bytes.fromHexString('0x000123'),
+      BigInt.fromI32(40),
+      BigInt.fromI32(20),
+      BigInt.fromI32(10),
+      BigInt.fromI32(20),
+      BigInt.fromI32(30),
+      BigInt.fromI32(40),
+      true,
+      true,
+      true,
+      false,
+      Bytes.fromUTF8('failed reason'),
+      Bytes.fromUTF8('posthook fail reason'),
+      false,
+      maker,
+    )
 
     let offerRetract = createOfferRetractEvent(token0, token1, id, true);
     handleOfferRetract(offerRetract);
@@ -438,26 +445,27 @@ describe("Describe entity assertions", () => {
   test("Offer, habdlePosthookFail", () => {
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(token0, token1, id);
-    let offer = new Offer(offerId);
-    offer.offerId = BigInt.fromI32(1);
-    offer.transactionHash = Bytes.fromHexString('0x000123');
-    offer.wants = BigInt.fromI32(40);
-    offer.gives = BigInt.fromI32(20);
-    offer.gasprice = BigInt.fromI32(10);
-    offer.gasreq = BigInt.fromI32(20);
-    offer.gasBase = BigInt.fromI32(30);
-    offer.prev = BigInt.fromI32(40);
-    offer.isOpen = false;
-    offer.isFailed = false;
-    offer.isFilled = false;
-    offer.isRetracted = false;
-    offer.failedReason = null;
-    offer.posthookFailReason = Bytes.fromUTF8('posthook fail reason');
-    offer.deprovisioned = false;
-    offer.market = getMarketId(token0, token1);
-    offer.maker = maker;
-    offer.save();
 
+    createOffer(
+      id,
+      token1,
+      token0,
+      Bytes.fromHexString('0x000123'),
+      BigInt.fromI32(40),
+      BigInt.fromI32(20),
+      BigInt.fromI32(10),
+      BigInt.fromI32(20),
+      BigInt.fromI32(30),
+      BigInt.fromI32(40),
+      false,
+      false,
+      false,
+      false,
+      null,
+      Bytes.fromUTF8('posthook fail reason'),
+      false,
+      maker,
+    )
 
     let posthookFailed = createPosthookFailEvent(token0, token1, id, Bytes.fromUTF8("Failed")    );
     handlePosthookFail(posthookFailed);
@@ -542,3 +550,5 @@ describe("Describe entity assertions", () => {
   })
 
 });
+
+

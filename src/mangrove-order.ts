@@ -29,18 +29,15 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
   }
 
   const owner = getOrCreateAccount(event.params.owner);
-  if (owner) {
-    offer.owner = owner.id;
-    offer.save();
-  }
+  offer.owner = owner.id;
+  offer.save();
 }
 
 export function handleOrderSummary(event: OrderSummary): void {
   const order = getLastOrder();
   let limitOrder = null as LimitOrder | null;
   
-  
-  if (event.params.restingOrder && event.params.restingOrderId !== BigInt.fromI32(0)) {
+  if (event.params.restingOrderId != BigInt.fromI32(0)) {
     const offerId = getOfferId(
       event.params.inbound_tkn, // reverse inbound_tkn and outbound_tkn because we are in Order
       event.params.outbound_tkn,
@@ -53,11 +50,9 @@ export function handleOrderSummary(event: OrderSummary): void {
     }
     limitOrder = new LimitOrder(offerId);
     limitOrder.offer = offer.id;
-    offer.save();
   } else {
     limitOrder = new LimitOrder(getEventUniqueId(event));
   }
-   
 
   limitOrder.wants = event.params.takerWants;
   limitOrder.gives = event.params.takerGives;

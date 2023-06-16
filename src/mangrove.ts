@@ -100,8 +100,6 @@ export function handleOfferSuccess(event: OfferSuccess): void {
     kandel.save();
   }
   
-  
-  
   offer.isFilled = offer.wants == event.params.takerGives && offer.gives == event.params.takerWants;
   offer.isOpen = false;
   offer.isFailed = false;
