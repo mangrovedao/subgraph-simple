@@ -12,7 +12,7 @@ import { createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent,
 import { createNewOwnedOfferEvent, createOrderSummaryEvent, createSetExpiryEvent } from "./mangrove-order-utils";
 import { handleNewOwnedOffer, handleOrderSummary, handleSetExpiry } from "../../src/mangrove-order";
 import { createDummyOffer, createOffer, getEventUniqueId, getOfferId } from "../../src/helpers";
-import { Context, LimitOrder, Offer, Order } from "../../generated/schema";
+import { OrderStack, LimitOrder, Offer, Order } from "../../generated/schema";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -73,12 +73,13 @@ describe("Describe entity assertions", () => {
     const orderId ="orderId"
     const order = new Order(orderId);
     order.transactionHash = Bytes.fromUTF8("0x0");
+    order.creationDate = BigInt.fromI32(1);
     order.save();
     
-    const context = new Context('context')
-    context.ids = ""
-    context.last = order.id;
-    context.save();
+    const orderStack = new OrderStack('orderStack')
+    orderStack.ids = ""
+    orderStack.last = order.id;
+    orderStack.save();
     
     const takerWants = BigInt.fromI32(1000); 
     const takerGave = BigInt.fromI32(500);
@@ -133,12 +134,13 @@ describe("Describe entity assertions", () => {
     const orderId ="orderId"
     const order = new Order(orderId);
     order.transactionHash = Bytes.fromUTF8("0x0");
+    order.creationDate = BigInt.fromI32(1);
     order.save();
     
-    const context = new Context('context')
-    context.ids = ""
-    context.last = order.id;
-    context.save();
+    const orderStack = new OrderStack('orderStack')
+    orderStack.ids = ""
+    orderStack.last = order.id;
+    orderStack.save();
     
     const takerWants = BigInt.fromI32(1000); 
     const takerGave = BigInt.fromI32(500);
@@ -197,6 +199,7 @@ describe("Describe entity assertions", () => {
     limitOrder.offer = offerId;
     limitOrder.creationDate = BigInt.fromI32(0);
     limitOrder.latestUpdateDate = BigInt.fromI32(0);
+    limitOrder.order = "order";
     limitOrder.save();
 
     const setExpiryEvent = createSetExpiryEvent(token0, token1, BigInt.fromI32(1), BigInt.fromI32(1000));

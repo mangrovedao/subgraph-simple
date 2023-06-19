@@ -8,6 +8,7 @@ type Market @entity {
   outbound_tkn: Bytes! # address
   inbound_tkn: Bytes! # address
   active: Boolean!
+  gasbase: BigInt!
 }
 
 type Offer @entity {
@@ -29,6 +30,10 @@ type Offer @entity {
   failedReason: Bytes
   posthookFailReason: Bytes
   deprovisioned: Boolean!
+  totalGot: BigInt
+  totalGave: BigInt
+  prevGives: BigInt
+  prevWants: BigInt
 
   market: Market!
   maker: Account!
@@ -39,6 +44,7 @@ type Offer @entity {
 type Order @entity {
   id: String!
   transactionHash: Bytes!
+  creationDate: BigInt!
 
   taker: Bytes
   takerGot: BigInt
@@ -62,7 +68,7 @@ type LimitOrder @entity {
   realTaker: Bytes 
   offer: Offer
 
-  order: [Order!]! @derivedFrom(field: "limitOrder")
+  order: Order! 
 
 }
 
@@ -108,16 +114,10 @@ type Kandel @entity {
   depositWithdraws: [KandelDepositWithdraw!]! @derivedFrom(field: "kandel")
 }
 
-type Context @entity {
+type OrderStack @entity {
   id: String!
   ids: String!
   last: Order
 }
 
 
-type GasBase @entity {
-  id: String!
-  gasbase: BigInt!
-  inbound_tkn: Bytes!
-  outbound_tkn: Bytes!
-}

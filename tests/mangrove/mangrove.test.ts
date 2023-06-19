@@ -8,7 +8,7 @@ import {
   test
 } from "matchstick-as/assembly/index";
 import { Kandel, LimitOrder, Market, Offer, Order } from "../../generated/schema";
-import { createOffer, getEventUniqueId, getGasbaseId, getMarketId, getOfferId } from "../../src/helpers";
+import { createOffer, getEventUniqueId, getMarketId, getOfferId } from "../../src/helpers";
 import { createNewOffer, handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handlePosthookFail, handleSetActive, handleSetGasbase } from "../../src/mangrove";
 import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createPosthookFailEvent, createSetActiveEvent, createSetGasbaseEvent } from "./mangrove-utils";
 
@@ -58,7 +58,6 @@ describe("Describe entity assertions", () => {
 
     const gasbaseEvent =  createSetGasbaseEvent(token0, token1, BigInt.fromI32(1000));
     handleSetGasbase(gasbaseEvent);
-    assert.entityCount('GasBase', 1)
 
     const id = BigInt.fromI32(1);
     let offerWrite = createOfferWriteEvent(
@@ -110,7 +109,6 @@ describe("Describe entity assertions", () => {
     // Set gasbase for market
     const gasbaseEvent =  createSetGasbaseEvent(token0, token1, BigInt.fromI32(1000));
     handleSetGasbase(gasbaseEvent);
-    assert.entityCount('GasBase', 1)
 
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(token0, token1, id);
@@ -136,6 +134,8 @@ describe("Describe entity assertions", () => {
       maker,
       BigInt.fromI32(100),
       BigInt.fromI32(100),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
     )
 
     let offerWrite = createOfferWriteEvent(
@@ -166,12 +166,16 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'isRetracted', 'false');
     assert.fieldEquals('Offer', offerId, 'failedReason', 'null');
     assert.fieldEquals('Offer', offerId, 'posthookFailReason', 'null');
+    assert.fieldEquals('Offer', offerId, 'totalGot', '0');
+    assert.fieldEquals('Offer', offerId, 'totalGave', '0');
     assert.fieldEquals('Offer', offerId, 'deprovisioned', 'false');
     assert.fieldEquals('Offer', offerId, 'market', getMarketId(token0, token1));
     assert.fieldEquals('Offer', offerId, 'maker', maker.toHexString());
     let updatedOffer = Offer.load(offerId)!;
     assert.assertTrue(updatedOffer.kandel === null)
     assert.assertTrue(updatedOffer.owner === null)
+    assert.assertTrue(updatedOffer.prevGives === null)
+    assert.assertTrue(updatedOffer.prevWants === null)
     assert.fieldEquals('Offer', offerId, 'creationDate', '100')
     assert.fieldEquals('Offer', offerId, 'latestUpdateDate', '1')
     assert.entityCount("Offer", 1);
@@ -252,6 +256,8 @@ describe("Describe entity assertions", () => {
       maker,
       BigInt.fromI32(100),
       BigInt.fromI32(100),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
     )
 
     let offerFail = createOfferFailEvent(
@@ -270,7 +276,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'transactionHash', '0x000123')
     assert.fieldEquals('Offer', offerId, 'wants', '1234');
     assert.fieldEquals('Offer', offerId, 'gives', '5678');
-    assert.fieldEquals('Offer', offerId, 'gasprice', '10');
+    assert.fieldEquals('Offer', offerId, 'gasprice', '0');
     assert.fieldEquals('Offer', offerId, 'gasreq', '20');
     assert.fieldEquals('Offer', offerId, 'gasBase', '30');
     assert.fieldEquals('Offer', offerId, 'prev', '40');
@@ -280,9 +286,14 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'isRetracted', 'false');
     assert.fieldEquals('Offer', offerId, 'failedReason', Bytes.fromUTF8("Failed").toHexString());
     assert.fieldEquals('Offer', offerId, 'posthookFailReason', 'null');
+    assert.fieldEquals('Offer', offerId, 'totalGot', '0');
+    assert.fieldEquals('Offer', offerId, 'totalGave', '0');
+    assert.fieldEquals('Offer', offerId, 'deprovisioned', 'false');
     assert.fieldEquals('Offer', offerId, 'market', getMarketId(token0, token1));
     assert.fieldEquals('Offer', offerId, 'maker', maker.toHexString());
     let updatedOffer = Offer.load(offerId)!;
+    assert.assertTrue(updatedOffer.prevGives === null)
+    assert.assertTrue(updatedOffer.prevWants === null)
     assert.assertTrue(updatedOffer.kandel === null)
     assert.assertTrue(updatedOffer.owner === null)
     assert.fieldEquals('Offer', offerId, 'creationDate', '100')
@@ -316,6 +327,8 @@ describe("Describe entity assertions", () => {
       maker,
       BigInt.fromI32(100),
       BigInt.fromI32(100),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
     )
 
 
@@ -327,7 +340,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'transactionHash', '0x000123')
     // TODO: de we want to update the wants and gives?
     assert.fieldEquals('Offer', offerId, 'wants', '40');
-    assert.fieldEquals('Offer', offerId, 'gives', '20');
+    assert.fieldEquals('Offer', offerId, 'gives', '0');
     assert.fieldEquals('Offer', offerId, 'gasprice', '10');
     assert.fieldEquals('Offer', offerId, 'gasreq', '20');
     assert.fieldEquals('Offer', offerId, 'gasBase', '30');
@@ -338,6 +351,11 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'isRetracted', 'false');
     assert.fieldEquals('Offer', offerId, 'failedReason', 'null');
     assert.fieldEquals('Offer', offerId, 'posthookFailReason', 'null');
+    assert.fieldEquals('Offer', offerId, 'totalGot', '20');
+    assert.fieldEquals('Offer', offerId, 'totalGave', '10');
+    assert.fieldEquals('Offer', offerId, 'prevGives', '20');
+    assert.fieldEquals('Offer', offerId, 'prevWants', '40');
+    assert.fieldEquals('Offer', offerId, 'deprovisioned', 'false');
     assert.fieldEquals('Offer', offerId, 'market', getMarketId(token0, token1));
     assert.fieldEquals('Offer', offerId, 'maker', maker.toHexString());
     let updatedOffer = Offer.load(offerId)!;
@@ -349,10 +367,19 @@ describe("Describe entity assertions", () => {
   });
 
 
-  test("Offer, handleOfferSuccess, fully fill + has limit order", () => {
+  test("Offer, handleOfferSuccess, fully fill", () => {
 
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(token0, token1, id);
+
+    const orderId ="orderId"
+    const order = new Order(orderId);
+    order.transactionHash = Bytes.fromUTF8("0x0");
+    order.creationDate = BigInt.fromI32(100);
+    order.takerGot = BigInt.fromI32(100);
+    order.takerGave = BigInt.fromI32(50);
+    order.save();
+
 
     const limitOrder = new LimitOrder(offerId)
     limitOrder.wants = BigInt.fromI32(1000);
@@ -364,16 +391,10 @@ describe("Describe entity assertions", () => {
     limitOrder.restingOrder = true;
     limitOrder.offer = offerId;
     limitOrder.creationDate = BigInt.fromI32(100);
-    limitOrder.latestUpdateDate = BigInt.fromI32(0);
+    limitOrder.latestUpdateDate = BigInt.fromI32(1);
+    limitOrder.order = orderId;
     limitOrder.save();
 
-    const orderId ="orderId"
-    const order = new Order(orderId);
-    order.transactionHash = Bytes.fromUTF8("0x0");
-    order.limitOrder = limitOrder.id;
-    order.takerGot = BigInt.fromI32(100);
-    order.takerGave = BigInt.fromI32(50);
-    order.save();
 
 
     createOffer(
@@ -397,6 +418,8 @@ describe("Describe entity assertions", () => {
       maker,
       BigInt.fromI32(100),
       BigInt.fromI32(100),
+      BigInt.fromI32(20),
+      BigInt.fromI32(30),
     )
 
     let offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, BigInt.fromI32(20), BigInt.fromI32(40));
@@ -405,9 +428,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
     //TODO: do we want to update the transaction hash?
     assert.fieldEquals('Offer', offerId, 'transactionHash', '0x000123')
-    // TODO: de we want to update the wants and gives?
     assert.fieldEquals('Offer', offerId, 'wants', '40');
-    assert.fieldEquals('Offer', offerId, 'gives', '20');
+    assert.fieldEquals('Offer', offerId, 'gives', '0');
     assert.fieldEquals('Offer', offerId, 'gasprice', '10');
     assert.fieldEquals('Offer', offerId, 'gasreq', '20');
     assert.fieldEquals('Offer', offerId, 'gasBase', '30');
@@ -418,6 +440,11 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'isRetracted', 'false');
     assert.fieldEquals('Offer', offerId, 'failedReason', 'null');
     assert.fieldEquals('Offer', offerId, 'posthookFailReason', 'null');
+    assert.fieldEquals('Offer', offerId, 'totalGot', '60');
+    assert.fieldEquals('Offer', offerId, 'totalGave', '50');
+    assert.fieldEquals('Offer', offerId, 'prevGives', '20');
+    assert.fieldEquals('Offer', offerId, 'prevWants', '40');
+    assert.fieldEquals('Offer', offerId, 'deprovisioned', 'false');
     assert.fieldEquals('Offer', offerId, 'market', getMarketId(token0, token1));
     assert.fieldEquals('Offer', offerId, 'maker', maker.toHexString());
     let updatedOffer = Offer.load(offerId)!;
@@ -426,14 +453,9 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'creationDate', '100')
     assert.fieldEquals('Offer', offerId, 'latestUpdateDate', '1')
     assert.entityCount("Offer", 1);
-
-    assert.fieldEquals('Order', order.id, 'takerGot', '140');
-    assert.fieldEquals('Order', order.id, 'takerGave', '70');
-    assert.fieldEquals('LimitOrder', offerId, 'latestUpdateDate', '1');
-
   });
 
-  test("Offer, handleOfferRetract", () => {
+  test("Offer, handleOfferRetract, with deporivison", () => {
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(token0, token1, id);
 
@@ -458,9 +480,74 @@ describe("Describe entity assertions", () => {
       maker,
       BigInt.fromI32(100),
       BigInt.fromI32(100),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
     )
 
     let offerRetract = createOfferRetractEvent(token0, token1, id, true);
+    handleOfferRetract(offerRetract);
+
+    assert.fieldEquals('Offer', offerId, 'offerId', '1');
+    //TODO: do we want to update the transaction hash?
+    assert.fieldEquals('Offer', offerId, 'transactionHash', '0x000123')
+    // TODO: de we want to update the wants and gives?
+    assert.fieldEquals('Offer', offerId, 'wants', '40');
+    assert.fieldEquals('Offer', offerId, 'gives', '20');
+    assert.fieldEquals('Offer', offerId, 'gasprice', '0');
+    assert.fieldEquals('Offer', offerId, 'gasreq', '20');
+    assert.fieldEquals('Offer', offerId, 'gasBase', '30');
+    assert.fieldEquals('Offer', offerId, 'prev', '40');
+    assert.fieldEquals('Offer', offerId, 'isOpen', 'false');
+    assert.fieldEquals('Offer', offerId, 'isFailed', 'false');
+    assert.fieldEquals('Offer', offerId, 'isFilled', 'false');
+    assert.fieldEquals('Offer', offerId, 'isRetracted', 'true');
+    assert.fieldEquals('Offer', offerId, 'failedReason', 'null');
+    assert.fieldEquals('Offer', offerId, 'posthookFailReason', 'null');
+    assert.fieldEquals('Offer', offerId, 'totalGot', '0');
+    assert.fieldEquals('Offer', offerId, 'totalGave', '0');
+    assert.fieldEquals('Offer', offerId, 'deprovisioned', 'true');
+    assert.fieldEquals('Offer', offerId, 'market', getMarketId(token0, token1));
+    assert.fieldEquals('Offer', offerId, 'maker', maker.toHexString());
+    let updatedOffer = Offer.load(offerId)!;
+    assert.assertTrue(updatedOffer.prevGives === null)
+    assert.assertTrue(updatedOffer.prevWants === null)
+    assert.assertTrue(updatedOffer.kandel === null)
+    assert.assertTrue(updatedOffer.owner === null)
+    assert.fieldEquals('Offer', offerId, 'creationDate', '100')
+    assert.fieldEquals('Offer', offerId, 'latestUpdateDate', '1')
+    assert.entityCount("Offer", 1);
+  })
+
+  test("Offer, handleOfferRetract, no deporivison", () => {
+    const id = BigInt.fromI32(1);
+    let offerId = getOfferId(token0, token1, id);
+
+    createOffer(
+      id,
+      token1,
+      token0,
+      Bytes.fromHexString('0x000123'),
+      BigInt.fromI32(40),
+      BigInt.fromI32(20),
+      BigInt.fromI32(10),
+      BigInt.fromI32(20),
+      BigInt.fromI32(30),
+      BigInt.fromI32(40),
+      true,
+      true,
+      true,
+      false,
+      Bytes.fromUTF8('failed reason'),
+      Bytes.fromUTF8('posthook fail reason'),
+      false,
+      maker,
+      BigInt.fromI32(100),
+      BigInt.fromI32(100),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+    )
+
+    let offerRetract = createOfferRetractEvent(token0, token1, id, false);
     handleOfferRetract(offerRetract);
 
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
@@ -479,9 +566,14 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'isRetracted', 'true');
     assert.fieldEquals('Offer', offerId, 'failedReason', 'null');
     assert.fieldEquals('Offer', offerId, 'posthookFailReason', 'null');
+    assert.fieldEquals('Offer', offerId, 'totalGot', '0');
+    assert.fieldEquals('Offer', offerId, 'totalGave', '0');
+    assert.fieldEquals('Offer', offerId, 'deprovisioned', 'false');
     assert.fieldEquals('Offer', offerId, 'market', getMarketId(token0, token1));
     assert.fieldEquals('Offer', offerId, 'maker', maker.toHexString());
     let updatedOffer = Offer.load(offerId)!;
+    assert.assertTrue(updatedOffer.prevGives === null)
+    assert.assertTrue(updatedOffer.prevWants === null)
     assert.assertTrue(updatedOffer.kandel === null)
     assert.assertTrue(updatedOffer.owner === null)
     assert.fieldEquals('Offer', offerId, 'creationDate', '100')
@@ -515,6 +607,8 @@ describe("Describe entity assertions", () => {
       maker,
       BigInt.fromI32(100),
       BigInt.fromI32(100),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
     )
 
     let posthookFailed = createPosthookFailEvent(token0, token1, id, Bytes.fromUTF8("Failed")    );
@@ -536,9 +630,14 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'isRetracted', 'false');
     assert.fieldEquals('Offer', offerId, 'failedReason', 'null');
     assert.fieldEquals('Offer', offerId, 'posthookFailReason', Bytes.fromUTF8("Failed").toHexString());
+    assert.fieldEquals('Offer', offerId, 'totalGot', '0');
+    assert.fieldEquals('Offer', offerId, 'totalGave', '0');
+    assert.fieldEquals('Offer', offerId, 'deprovisioned', 'false');
     assert.fieldEquals('Offer', offerId, 'market', getMarketId(token0, token1));
     assert.fieldEquals('Offer', offerId, 'maker', maker.toHexString());
     let updatedOffer = Offer.load(offerId)!;
+    assert.assertTrue(updatedOffer.prevGives === null)
+    assert.assertTrue(updatedOffer.prevWants === null)
     assert.assertTrue(updatedOffer.kandel === null)
     assert.assertTrue(updatedOffer.owner === null)
     assert.fieldEquals('Offer', offerId, 'creationDate', '100')
@@ -555,7 +654,7 @@ describe("Describe entity assertions", () => {
     const orderId = getEventUniqueId(orderStart);
     assert.fieldEquals('Order', orderId, 'transactionHash', Bytes.fromUTF8(orderStart.transaction.hash.toHex()).toHexString() )
 
-    assert.fieldEquals('Context', 'context', 'ids',  `|${orderId}` );
+    assert.fieldEquals('OrderStack', 'orderStack', 'ids',  `|${orderId}` );
   })
 
   test('Order, handleOrderComplete', () => {
@@ -573,31 +672,31 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Order', orderId, 'penalty', '1');
     assert.fieldEquals('Order', orderId, 'feePaid', '2');
 
-    assert.fieldEquals('Context', 'context', 'ids',  `` );
+    assert.fieldEquals('OrderStack', 'orderStack', 'ids',  `` );
   })
 
   test('GasBase, handleSetGasBase, new gasbase', () => {
     const setGasBase = createSetGasbaseEvent(token0, token1, BigInt.fromI32(20))
     handleSetGasbase(setGasBase)
-    assert.entityCount('GasBase', 1)
+    assert.entityCount('Market', 1)
 
-    const gasbaseId = getGasbaseId(token0, token1);
-    assert.fieldEquals('GasBase', gasbaseId, 'gasbase', '20');
-    assert.fieldEquals('GasBase', gasbaseId, 'inbound_tkn', token1.toHexString());
-    assert.fieldEquals('GasBase', gasbaseId, 'outbound_tkn', token0.toHexString());
+    const gasbaseId = getMarketId(token0, token1);
+    assert.fieldEquals('Market', gasbaseId, 'gasbase', '20');
+    assert.fieldEquals('Market', gasbaseId, 'inbound_tkn', token1.toHexString());
+    assert.fieldEquals('Market', gasbaseId, 'outbound_tkn', token0.toHexString());
   })
 
   test('GasBase, handleSetGasBase, update gasbase', () => {
     const setGasBase1 = createSetGasbaseEvent(token0, token1, BigInt.fromI32(20))
     handleSetGasbase(setGasBase1)
-    assert.entityCount('GasBase', 1)
+    assert.entityCount('Market', 1)
 
     const setGasBase2 = createSetGasbaseEvent(token0, token1, BigInt.fromI32(40))
     handleSetGasbase(setGasBase2)
 
-    const gasbaseId = getGasbaseId(token0, token1);
-    assert.fieldEquals('GasBase', gasbaseId, 'gasbase', '40');
-    assert.entityCount('GasBase', 1)
+    const gasbaseId = getMarketId(token0, token1);
+    assert.fieldEquals('Market', gasbaseId, 'gasbase', '40');
+    assert.entityCount('Market', 1)
 
   })
 

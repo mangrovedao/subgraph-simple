@@ -1,6 +1,5 @@
-import { Address, BigInt, Bytes, Value, ethereum, log } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {
-  Mangrove,
   Approval,
   Credit,
   Debit,
@@ -23,9 +22,9 @@ import {
   SetMonitor,
   SetNotify,
   SetUseOracle
-} from "../generated/Mangrove/Mangrove"
-import { Market, Order, Offer, Kandel, GasBase, LimitOrder } from "../generated/schema"
-import { addOrderToStack, getEventUniqueId, getGasbaseId, getMarketId, getOfferId, getOrCreateAccount, getOrderFromStack, removeOrderFromStack } from "./helpers";
+} from "../generated/Mangrove/Mangrove";
+import { Kandel, Market, Offer, Order } from "../generated/schema";
+import { addOrderToStack, getEventUniqueId, getMarketId, getOfferId, getOrCreateAccount, getOrderFromStack, removeOrderFromStack } from "./helpers";
 
 export function handleApproval(event: Approval): void {}
 
@@ -50,6 +49,7 @@ export function handleOfferFail(event: OfferFail): void {
   offer.isFilled = false;
   offer.isRetracted = false;
   offer.posthookFailReason = null;
+  offer.gasprice = BigInt.fromI32(0);
 
   offer.failedReason = event.params.mgvData;
   offer.latestUpdateDate = event.block.timestamp;
@@ -72,6 +72,9 @@ export function handleOfferRetract(event: OfferRetract): void {
   offer.posthookFailReason = null;
   offer.failedReason = null;
   offer.deprovisioned = event.params.deprovision;
+  if(event.params.deprovision) {
+    offer.gasprice = BigInt.fromI32(0);
+  }
   offer.latestUpdateDate = event.block.timestamp;
 
   offer.save();
@@ -101,8 +104,6 @@ export function handleOfferSuccess(event: OfferSuccess): void {
     
     kandel.save();
   }
-
-  updateLimitOrder(offerId, event);
   
   offer.isFilled = offer.wants == event.params.takerGives && offer.gives == event.params.takerWants;
   offer.isOpen = false;
@@ -111,6 +112,12 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   offer.posthookFailReason = null;
   offer.failedReason = null;
   offer.latestUpdateDate = event.block.timestamp;
+
+  offer.prevGives = offer.gives;
+  offer.prevWants = offer.wants;
+  offer.gives = BigInt.fromI32(0);
+  offer.totalGot = offer.totalGot !== null ?  event.params.takerGives.plus( offer.totalGot! ) : event.params.takerGives,
+  offer.totalGave = offer.totalGave !== null ?  event.params.takerWants.plus( offer.totalGave! ) : event.params.takerWants,
 
   offer.save();
 }
@@ -132,22 +139,6 @@ export const createNewOffer = (event: OfferWrite): Offer => {
   return offer;
 }
 
-export function updateLimitOrder(offerId: string, event: OfferSuccess): void {
-  const limitOrder = LimitOrder.load(offerId);
-  if (limitOrder) {
-    for( let i=0; i<limitOrder.order.length; i++) {
-      const orderId = limitOrder.order[i];
-      const order = Order.load(orderId);
-      if (order) {
-        order.takerGot = order.takerGot !== null ? event.params.takerGives.plus(order.takerGot!) : event.params.takerGives;
-        order.takerGave = order.takerGave !== null ? event.params.takerWants.plus(order.takerGave!) : event.params.takerWants;
-        order.save();
-      }
-    }
-    limitOrder.latestUpdateDate = event.block.timestamp;
-    limitOrder.save();
-  }
-}
 
 export function handleOfferWrite(event: OfferWrite): void {
   const offerId = getOfferId(
@@ -171,6 +162,7 @@ export function handleOfferWrite(event: OfferWrite): void {
   );
   const market = Market.load(marketId)!;
   offer.market = market.id;
+  offer.gasBase = market.gasbase;
 
   offer.offerId = event.params.id;
 
@@ -188,13 +180,6 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.failedReason = null;
   offer.posthookFailReason = null;
 
-  const gasbaseId = getGasbaseId(event.params.outbound_tkn, event.params.inbound_tkn);
-  const gasBase = GasBase.load(gasbaseId);
-  if(!gasBase) {
-    log.error("missing gasbase with for market: {}", [marketId]);
-    return;
-  }
-  offer.gasBase = gasBase.gasbase;
 
   offer.save();
 }
@@ -216,6 +201,7 @@ export function handleOrderComplete(event: OrderComplete): void {
 export function handleOrderStart(event: OrderStart): void {
   const order = new Order(getEventUniqueId(event));
   order.transactionHash = Bytes.fromUTF8(event.transaction.hash.toHex());
+  order.creationDate = event.block.timestamp;
   order.save();
 
   addOrderToStack(order);
@@ -247,6 +233,7 @@ export function handleSetActive(event: SetActive): void {
     market = new Market(marketId);
     market.outbound_tkn = event.params.outbound_tkn;
     market.inbound_tkn = event.params.inbound_tkn;
+    market.gasbase = BigInt.fromI32(0);
   }
 
   market.active = event.params.value;
@@ -259,16 +246,17 @@ export function handleSetDensity(event: SetDensity): void {}
 export function handleSetFee(event: SetFee): void {}
 
 export function handleSetGasbase(event: SetGasbase): void {
-  const gasbaseId = getGasbaseId(event.params.outbound_tkn, event.params.inbound_tkn)
-  let gasBase = GasBase.load(gasbaseId);
-  if (!gasBase) {
-    gasBase = new GasBase(gasbaseId);
-    gasBase.inbound_tkn = event.params.inbound_tkn;
-    gasBase.outbound_tkn = event.params.outbound_tkn;
+  const marketId = getMarketId(event.params.outbound_tkn, event.params.inbound_tkn)
+  let market = Market.load(marketId);
+  if (!market) {
+    market = new Market(marketId);
+    market.inbound_tkn = event.params.inbound_tkn;
+    market.outbound_tkn = event.params.outbound_tkn;
+    market.active = false;
   }
-  gasBase.gasbase = event.params.offer_gasbase;
+  market.gasbase = event.params.offer_gasbase;
 
-  gasBase.save();
+  market.save();
 }
 
 export function handleSetGasmax(event: SetGasmax): void {}
