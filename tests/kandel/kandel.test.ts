@@ -149,7 +149,6 @@ describe("Describe entity assertions", () => {
 
     const gasbaseEvent =  createSetGasbaseEvent(token0, token1, BigInt.fromI32(1000));
     handleSetGasbase(gasbaseEvent);
-    assert.entityCount('GasBase', 1)
 
     const id = BigInt.fromI32(0);
     const offerWrite = createOfferWriteEvent(
@@ -189,11 +188,9 @@ describe("Describe entity assertions", () => {
   test("Kandel offer success", () => {
     const gasbaseEvent1 =  createSetGasbaseEvent(token0, token1, BigInt.fromI32(1000));
     handleSetGasbase(gasbaseEvent1);
-    assert.entityCount('GasBase', 1)
 
     const gasbaseEvent2 =  createSetGasbaseEvent(token1, token0, BigInt.fromI32(1000));
     handleSetGasbase(gasbaseEvent2);
-    assert.entityCount('GasBase', 2)
 
     const id = BigInt.fromI32(0);
 

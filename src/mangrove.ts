@@ -1,6 +1,5 @@
-import { Address, BigInt, Bytes, Value, ethereum, log } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {
-  Mangrove,
   Approval,
   Credit,
   Debit,
@@ -23,9 +22,9 @@ import {
   SetMonitor,
   SetNotify,
   SetUseOracle
-} from "../generated/Mangrove/Mangrove"
-import { Market, Order, Offer, Kandel, GasBase, LimitOrder } from "../generated/schema"
-import { addOrderToStack, getEventUniqueId, getGasbaseId, getMarketId, getOfferId, getOrCreateAccount, getOrderFromStack, removeOrderFromStack } from "./helpers";
+} from "../generated/Mangrove/Mangrove";
+import { Kandel, Market, Offer, Order } from "../generated/schema";
+import { addOrderToStack, getEventUniqueId, getMarketId, getOfferId, getOrCreateAccount, getOrderFromStack, removeOrderFromStack } from "./helpers";
 
 export function handleApproval(event: Approval): void {}
 
@@ -163,6 +162,7 @@ export function handleOfferWrite(event: OfferWrite): void {
   );
   const market = Market.load(marketId)!;
   offer.market = market.id;
+  offer.gasBase = market.gasbase;
 
   offer.offerId = event.params.id;
 
@@ -180,13 +180,6 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.failedReason = null;
   offer.posthookFailReason = null;
 
-  const gasbaseId = getGasbaseId(event.params.outbound_tkn, event.params.inbound_tkn);
-  const gasBase = GasBase.load(gasbaseId);
-  if(!gasBase) {
-    log.error("missing gasbase with for market: {}", [marketId]);
-    return;
-  }
-  offer.gasBase = gasBase.gasbase;
 
   offer.save();
 }
@@ -208,6 +201,7 @@ export function handleOrderComplete(event: OrderComplete): void {
 export function handleOrderStart(event: OrderStart): void {
   const order = new Order(getEventUniqueId(event));
   order.transactionHash = Bytes.fromUTF8(event.transaction.hash.toHex());
+  order.creationDate = event.block.timestamp;
   order.save();
 
   addOrderToStack(order);
@@ -239,6 +233,7 @@ export function handleSetActive(event: SetActive): void {
     market = new Market(marketId);
     market.outbound_tkn = event.params.outbound_tkn;
     market.inbound_tkn = event.params.inbound_tkn;
+    market.gasbase = BigInt.fromI32(0);
   }
 
   market.active = event.params.value;
@@ -251,16 +246,17 @@ export function handleSetDensity(event: SetDensity): void {}
 export function handleSetFee(event: SetFee): void {}
 
 export function handleSetGasbase(event: SetGasbase): void {
-  const gasbaseId = getGasbaseId(event.params.outbound_tkn, event.params.inbound_tkn)
-  let gasBase = GasBase.load(gasbaseId);
-  if (!gasBase) {
-    gasBase = new GasBase(gasbaseId);
-    gasBase.inbound_tkn = event.params.inbound_tkn;
-    gasBase.outbound_tkn = event.params.outbound_tkn;
+  const marketId = getMarketId(event.params.outbound_tkn, event.params.inbound_tkn)
+  let market = Market.load(marketId);
+  if (!market) {
+    market = new Market(marketId);
+    market.inbound_tkn = event.params.inbound_tkn;
+    market.outbound_tkn = event.params.outbound_tkn;
+    market.active = false;
   }
-  gasBase.gasbase = event.params.offer_gasbase;
+  market.gasbase = event.params.offer_gasbase;
 
-  gasBase.save();
+  market.save();
 }
 
 export function handleSetGasmax(event: SetGasmax): void {}

@@ -8,7 +8,7 @@ import {
   test
 } from "matchstick-as/assembly/index";
 import { Kandel, LimitOrder, Market, Offer, Order } from "../../generated/schema";
-import { createOffer, getEventUniqueId, getGasbaseId, getMarketId, getOfferId } from "../../src/helpers";
+import { createOffer, getEventUniqueId, getMarketId, getOfferId } from "../../src/helpers";
 import { createNewOffer, handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handlePosthookFail, handleSetActive, handleSetGasbase } from "../../src/mangrove";
 import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createPosthookFailEvent, createSetActiveEvent, createSetGasbaseEvent } from "./mangrove-utils";
 
@@ -58,7 +58,6 @@ describe("Describe entity assertions", () => {
 
     const gasbaseEvent =  createSetGasbaseEvent(token0, token1, BigInt.fromI32(1000));
     handleSetGasbase(gasbaseEvent);
-    assert.entityCount('GasBase', 1)
 
     const id = BigInt.fromI32(1);
     let offerWrite = createOfferWriteEvent(
@@ -110,7 +109,6 @@ describe("Describe entity assertions", () => {
     // Set gasbase for market
     const gasbaseEvent =  createSetGasbaseEvent(token0, token1, BigInt.fromI32(1000));
     handleSetGasbase(gasbaseEvent);
-    assert.entityCount('GasBase', 1)
 
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(token0, token1, id);
@@ -377,6 +375,7 @@ describe("Describe entity assertions", () => {
     const orderId ="orderId"
     const order = new Order(orderId);
     order.transactionHash = Bytes.fromUTF8("0x0");
+    order.creationDate = BigInt.fromI32(100);
     order.takerGot = BigInt.fromI32(100);
     order.takerGave = BigInt.fromI32(50);
     order.save();
@@ -392,7 +391,7 @@ describe("Describe entity assertions", () => {
     limitOrder.restingOrder = true;
     limitOrder.offer = offerId;
     limitOrder.creationDate = BigInt.fromI32(100);
-    limitOrder.latestUpdateDate = BigInt.fromI32(0);
+    limitOrder.latestUpdateDate = BigInt.fromI32(1);
     limitOrder.order = orderId;
     limitOrder.save();
 
@@ -655,7 +654,7 @@ describe("Describe entity assertions", () => {
     const orderId = getEventUniqueId(orderStart);
     assert.fieldEquals('Order', orderId, 'transactionHash', Bytes.fromUTF8(orderStart.transaction.hash.toHex()).toHexString() )
 
-    assert.fieldEquals('Context', 'context', 'ids',  `|${orderId}` );
+    assert.fieldEquals('OrderStack', 'orderStack', 'ids',  `|${orderId}` );
   })
 
   test('Order, handleOrderComplete', () => {
@@ -673,31 +672,31 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Order', orderId, 'penalty', '1');
     assert.fieldEquals('Order', orderId, 'feePaid', '2');
 
-    assert.fieldEquals('Context', 'context', 'ids',  `` );
+    assert.fieldEquals('OrderStack', 'orderStack', 'ids',  `` );
   })
 
   test('GasBase, handleSetGasBase, new gasbase', () => {
     const setGasBase = createSetGasbaseEvent(token0, token1, BigInt.fromI32(20))
     handleSetGasbase(setGasBase)
-    assert.entityCount('GasBase', 1)
+    assert.entityCount('Market', 1)
 
-    const gasbaseId = getGasbaseId(token0, token1);
-    assert.fieldEquals('GasBase', gasbaseId, 'gasbase', '20');
-    assert.fieldEquals('GasBase', gasbaseId, 'inbound_tkn', token1.toHexString());
-    assert.fieldEquals('GasBase', gasbaseId, 'outbound_tkn', token0.toHexString());
+    const gasbaseId = getMarketId(token0, token1);
+    assert.fieldEquals('Market', gasbaseId, 'gasbase', '20');
+    assert.fieldEquals('Market', gasbaseId, 'inbound_tkn', token1.toHexString());
+    assert.fieldEquals('Market', gasbaseId, 'outbound_tkn', token0.toHexString());
   })
 
   test('GasBase, handleSetGasBase, update gasbase', () => {
     const setGasBase1 = createSetGasbaseEvent(token0, token1, BigInt.fromI32(20))
     handleSetGasbase(setGasBase1)
-    assert.entityCount('GasBase', 1)
+    assert.entityCount('Market', 1)
 
     const setGasBase2 = createSetGasbaseEvent(token0, token1, BigInt.fromI32(40))
     handleSetGasbase(setGasBase2)
 
-    const gasbaseId = getGasbaseId(token0, token1);
-    assert.fieldEquals('GasBase', gasbaseId, 'gasbase', '40');
-    assert.entityCount('GasBase', 1)
+    const gasbaseId = getMarketId(token0, token1);
+    assert.fieldEquals('Market', gasbaseId, 'gasbase', '40');
+    assert.entityCount('Market', 1)
 
   })
 

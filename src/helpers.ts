@@ -1,9 +1,6 @@
 import { Address, BigInt, Bytes, Value, ethereum } from "@graphprotocol/graph-ts";
-import { Account, Context, Offer, Order } from "../generated/schema";
+import { Account, OrderStack, Offer, Order } from "../generated/schema";
 
-export const getGasbaseId = (outbound_tkn: Address, inbound_tkn: Address): string  => {
-  return `${outbound_tkn.toHex()}-${inbound_tkn.toHex()}`;
-};
 
 export const getMarketId = (outbound_tkn: Address, inbound_tkn: Address): string  => {
   return `${outbound_tkn.toHex()}-${inbound_tkn.toHex()}`;
@@ -26,29 +23,29 @@ export const getOrCreateAccount = (address: Address): Account => {
 }
 
 
-export const getContext = (): Context => {
-  let context = Context.load('context');
-  if (!context) {
-    context = new Context('context');
-    context.ids = ``;
+export const getOrderStack = (): OrderStack => {
+  let orderStack = OrderStack.load('orderStack');
+  if (!orderStack) {
+    orderStack = new OrderStack('orderStack');
+    orderStack.ids = ``;
 
-    context.save();
+    orderStack.save();
   }
 
-  return context;
+  return orderStack;
 }
 
 export const addOrderToStack = (order: Order): void => {
-  const context = getContext();
+  const orderStack = getOrderStack();
 
-  context.ids = `${context.ids}|${order.id}`
+  orderStack.ids = `${orderStack.ids}|${order.id}`
 
-  context.save();
+  orderStack.save();
 }
 
 export const getOrderFromStack = (): Order => {
-  const context = getContext();
-  const ids = context.ids;
+  const orderStack = getOrderStack();
+  const ids = orderStack.ids;
 
   const idsArray = ids.split('|');
   const order = Order.load(idsArray[idsArray.length - 1])!;
@@ -57,24 +54,24 @@ export const getOrderFromStack = (): Order => {
 }
 
 export const removeOrderFromStack = (): void => {
-  const context = getContext();
+  const orderStack = getOrderStack();
 
-  const ids = context.ids;
+  const ids = orderStack.ids;
   for (let i = ids.length - 1 ; i >= 0 ; --i) {
     if (ids.at(i) == '|' || i == 0) {
-      context.ids = ids.slice(0, i);
-      context.last = ids.slice(i + 1);
+      orderStack.ids = ids.slice(0, i);
+      orderStack.last = ids.slice(i + 1);
       break;
     }
   }
 
-  context.save();
+  orderStack.save();
 }
 
 export const getLastOrder = (): Order => {
-  const context = getContext();
+  const orderStack = getOrderStack();
 
-  const order = Order.load(context.last!)!;
+  const order = Order.load(orderStack.last!)!;
   return order;
 }
 

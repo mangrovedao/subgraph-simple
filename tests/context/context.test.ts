@@ -6,7 +6,7 @@ import {
   beforeEach,
   afterEach
 } from "matchstick-as/assembly/index"
-import { Bytes } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { Order } from "../../generated/schema";
 import { addOrderToStack, getLastOrder, getOrderFromStack, removeOrderFromStack } from "../../src/helpers";
 // Tests structure (matchstick-as >=0.5.0)
@@ -23,9 +23,11 @@ describe("Describe entity assertions", () => {
   test("Test order queue", () => {
     const order1 = new Order("order1");
     order1.transactionHash = Bytes.fromUTF8("0x0");
+    order1.creationDate = BigInt.fromI32(1);
 
     const order2 = new Order("order2");
     order2.transactionHash = Bytes.fromUTF8("0x1");
+    order2.creationDate = BigInt.fromI32(2);
 
     order1.save();
     order2.save();
