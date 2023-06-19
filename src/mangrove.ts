@@ -50,6 +50,7 @@ export function handleOfferFail(event: OfferFail): void {
   offer.isFilled = false;
   offer.isRetracted = false;
   offer.posthookFailReason = null;
+  offer.gasprice = BigInt.fromI32(0);
 
   offer.failedReason = event.params.mgvData;
   offer.latestUpdateDate = event.block.timestamp;
@@ -72,6 +73,9 @@ export function handleOfferRetract(event: OfferRetract): void {
   offer.posthookFailReason = null;
   offer.failedReason = null;
   offer.deprovisioned = event.params.deprovision;
+  if(event.params.deprovision) {
+    offer.gasprice = BigInt.fromI32(0);
+  }
   offer.latestUpdateDate = event.block.timestamp;
 
   offer.save();
@@ -101,8 +105,6 @@ export function handleOfferSuccess(event: OfferSuccess): void {
     
     kandel.save();
   }
-
-  updateLimitOrder(offerId, event);
   
   offer.isFilled = offer.wants == event.params.takerGives && offer.gives == event.params.takerWants;
   offer.isOpen = false;
@@ -111,6 +113,12 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   offer.posthookFailReason = null;
   offer.failedReason = null;
   offer.latestUpdateDate = event.block.timestamp;
+
+  offer.prevGives = offer.gives;
+  offer.prevWants = offer.wants;
+  offer.gives = BigInt.fromI32(0);
+  offer.totalGot = offer.totalGot !== null ?  event.params.takerGives.plus( offer.totalGot! ) : event.params.takerGives,
+  offer.totalGave = offer.totalGave !== null ?  event.params.takerWants.plus( offer.totalGave! ) : event.params.takerWants,
 
   offer.save();
 }
@@ -132,20 +140,6 @@ export const createNewOffer = (event: OfferWrite): Offer => {
   return offer;
 }
 
-export function updateLimitOrder(offerId: string, event: OfferSuccess): void {
-  const limitOrder = LimitOrder.load(offerId);
-  if (limitOrder) {
-        const orderId = limitOrder.order;
-        const order = Order.load(orderId);
-        if (order) {
-          order.takerGot = order.takerGot !== null ? event.params.takerGives.plus(order.takerGot!) : event.params.takerGives;
-          order.takerGave = order.takerGave !== null ? event.params.takerWants.plus(order.takerGave!) : event.params.takerWants;
-          order.save();
-        }
-    limitOrder.latestUpdateDate = event.block.timestamp;
-    limitOrder.save();
-  }
-}
 
 export function handleOfferWrite(event: OfferWrite): void {
   const offerId = getOfferId(

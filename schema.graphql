@@ -29,6 +29,10 @@ type Offer @entity {
   failedReason: Bytes
   posthookFailReason: Bytes
   deprovisioned: Boolean!
+  totalGot: BigInt
+  totalGave: BigInt
+  prevGives: BigInt
+  prevWants: BigInt
 
   market: Market!
   maker: Account!
