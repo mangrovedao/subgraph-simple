@@ -104,8 +104,8 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   offer.prevGives = offer.gives;
   offer.prevWants = offer.wants;
   offer.gives = BigInt.fromI32(0);
-  offer.totalGot = offer.totalGot !== null ?  event.params.takerGives.plus( offer.totalGot! ) : event.params.takerGives,
-  offer.totalGave = offer.totalGave !== null ?  event.params.takerWants.plus( offer.totalGave! ) : event.params.takerWants,
+  offer.totalGot = event.params.takerGives.plus(offer.totalGot!);
+  offer.totalGave = event.params.takerWants.plus(offer.totalGave!);
 
   offer.save();
 }
@@ -139,6 +139,8 @@ export function handleOfferWrite(event: OfferWrite): void {
   if (!offer) {
     offer = createNewOffer(event);
     offer.creationDate = event.block.timestamp;
+    offer.totalGot = BigInt.fromI32(0);
+    offer.totalGave = BigInt.fromI32(0);
   }
   offer.latestUpdateDate = event.block.timestamp;
   offer.latestLogIndex = event.logIndex;
@@ -192,7 +194,7 @@ export function handleOrderComplete(event: OrderComplete): void {
 
 export function handleOrderStart(event: OrderStart): void {
   const order = new Order(getEventUniqueId(event));
-  order.transactionHash = Bytes.fromUTF8(event.transaction.hash.toHex());
+  order.transactionHash = event.transaction.hash;
   order.creationDate = event.block.timestamp;
   order.save();
 
