@@ -203,7 +203,7 @@ export function handleOrderComplete(event: OrderComplete): void {
 
 export function handleOrderStart(event: OrderStart): void {
   const order = new Order(getEventUniqueId(event));
-  order.transactionHash = Bytes.fromUTF8(event.transaction.hash.toHex());
+  order.transactionHash = event.transaction.hash;
   order.creationDate = event.block.timestamp;
   order.save();
 

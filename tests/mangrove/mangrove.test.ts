@@ -655,25 +655,25 @@ describe("Describe entity assertions", () => {
 
  
   test('Order, handleOrderSuccess', () => {
-    const orderStart =  createOrderStartEvent()
-    handleOrderStart(orderStart)
-    assert.entityCount('Order', 1)
+    const orderStart =  createOrderStartEvent();
+    handleOrderStart(orderStart);
+    assert.entityCount('Order', 1);
 
     const orderId = getEventUniqueId(orderStart);
-    assert.fieldEquals('Order', orderId, 'transactionHash', Bytes.fromUTF8(orderStart.transaction.hash.toHex()).toHexString() )
+    assert.fieldEquals('Order', orderId, 'transactionHash', orderStart.transaction.hash.toHex());
 
-    assert.fieldEquals('OrderStack', 'orderStack', 'ids',  `|${orderId}` );
+    assert.fieldEquals('OrderStack', 'orderStack', 'ids',  `|${orderId}`);
   })
 
   test('Order, handleOrderComplete', () => {
-    const orderStart =  createOrderStartEvent()
-    handleOrderStart(orderStart)
-    const orderComplete =  createOrderCompleteEvent(token1, token0, taker, BigInt.fromI32(20), BigInt.fromI32(40), BigInt.fromI32(1), BigInt.fromI32(2))
-    handleOrderComplete(orderComplete)
-    assert.entityCount('Order', 1)
+    const orderStart =  createOrderStartEvent();
+    handleOrderStart(orderStart);
+    const orderComplete =  createOrderCompleteEvent(token1, token0, taker, BigInt.fromI32(20), BigInt.fromI32(40), BigInt.fromI32(1), BigInt.fromI32(2));
+    handleOrderComplete(orderComplete);
+    assert.entityCount('Order', 1);
 
     const orderId = getEventUniqueId(orderStart);
-    assert.fieldEquals('Order', orderId, 'transactionHash', Bytes.fromUTF8(orderStart.transaction.hash.toHex()).toHexString() )
+    assert.fieldEquals('Order', orderId, 'transactionHash', orderStart.transaction.hash.toHex());
     assert.fieldEquals('Order', orderId, 'taker', taker.toHexString());
     assert.fieldEquals('Order', orderId, 'takerGot', '20');
     assert.fieldEquals('Order', orderId, 'takerGave', '40');
