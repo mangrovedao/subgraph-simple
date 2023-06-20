@@ -79,7 +79,7 @@ export const getEventUniqueId = (event: ethereum.Event): string => {
   return `${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
 }
 
-export const createOffer =(
+export const createOffer = (
   offerId: BigInt,
   inbound_tkn: Address,
   outbound_tkn: Address,
