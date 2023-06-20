@@ -91,23 +91,6 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   );
   const offer = Offer.load(offerId)!;
   
-  if (offer.kandel) {
-    const kandel = Kandel.load(offer.kandel!)!;
-    const market = Market.load(offer.market)!;
-    
-    if (market.outbound_tkn == kandel.base) {
-      // takerWants == outbound_tkn
-      kandel.totalBase = kandel.totalBase.minus(event.params.takerWants);
-      kandel.totalQuote = kandel.totalQuote.plus(event.params.takerGives);
-    } else {
-      // takerWants == inbound_tkn
-      kandel.totalBase = kandel.totalBase.plus(event.params.takerGives);
-      kandel.totalQuote = kandel.totalQuote.minus(event.params.takerWants);
-    }
-    
-    kandel.save();
-  }
-  
   offer.isFilled = offer.wants == event.params.takerGives && offer.gives == event.params.takerWants;
   offer.isOpen = false;
   offer.isFailed = false;

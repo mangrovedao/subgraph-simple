@@ -40,10 +40,8 @@ export function handleCredit(event: Credit): void {
 
   if (Address.fromBytes(kandel.base).equals(event.params.token)) {
     kandel.depositedBase = kandel.depositedBase.plus(event.params.amount);
-    kandel.totalBase = kandel.totalBase.plus(event.params.amount);
   } else {
     kandel.depositedQuote = kandel.depositedQuote.plus(event.params.amount);
-    kandel.totalQuote = kandel.totalQuote.plus(event.params.amount);
   }
 
   kandel.save()
@@ -67,10 +65,8 @@ export function handleDebit(event: Debit): void {
 
   if (Address.fromBytes(kandel.base).equals(event.params.token)) {
     kandel.depositedBase = kandel.depositedBase.minus(event.params.amount);
-    kandel.totalBase = kandel.totalBase.minus(event.params.amount);
   } else {
     kandel.depositedQuote = kandel.depositedQuote.minus(event.params.amount);
-    kandel.totalQuote = kandel.totalQuote.minus(event.params.amount);
   }
 
   kandel.save();
@@ -166,7 +162,6 @@ export function handleSetAdmin(event: SetAdmin): void {
 
 export function handleSetCompoundRates(event: SetCompoundRates): void {
   const kandel = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
-  kandel.creationDate = event.block.timestamp;
   kandel.compoundRateBase = event.params.compoundRateBase;
   kandel.compoundRateQuote = event.params.compoundRateQuote;
 
@@ -200,7 +195,7 @@ export function handleSetGeometricParams(event: SetGeometricParams): void {
 
 export function handleSetIndexMapping(event: SetIndexMapping): void {
   const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
-  kandel.offerIndexes.push( Bytes.fromUTF8(`${event.params.index}-${event.params.offerId}-${event.params.ba}`) );
+  kandel.offerIndexes = kandel.offerIndexes.concat([ Bytes.fromUTF8(`${event.params.index}-${event.params.offerId}-${event.params.ba}`) ] );
   kandel.save();
 }
 

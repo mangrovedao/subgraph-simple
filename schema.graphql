@@ -99,10 +99,7 @@ type Kandel @entity {
   reserveId: Account
   router: Account
 
-  totalBase: BigInt!
   depositedBase: BigInt!
-
-  totalQuote: BigInt!
   depositedQuote: BigInt!
 
   offerIndexes: [Bytes!]!

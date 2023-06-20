@@ -77,6 +77,7 @@ describe("Describe entity assertions", () => {
     const offer = Offer.load(offerId)!;
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
     assert.fieldEquals('Offer', offerId, 'latestTransactionHash', offerWrite.transaction.hash.toHexString())
+    assert.fieldEquals('Offer', offerId, 'latestLogIndex', offerWrite.logIndex.toString())
     assert.fieldEquals('Offer', offerId, 'wants', '1000');
     assert.fieldEquals('Offer', offerId, 'gives', '2000');
     assert.fieldEquals('Offer', offerId, 'gasprice', '0');
@@ -154,6 +155,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
     
     assert.fieldEquals('Offer', offerId, 'latestTransactionHash', offerWrite.transaction.hash.toHexString())
+    assert.fieldEquals('Offer', offerId, 'latestLogIndex', offerWrite.logIndex.toString())
     assert.fieldEquals('Offer', offerId, 'wants', '1000');
     assert.fieldEquals('Offer', offerId, 'gives', '2000');
     assert.fieldEquals('Offer', offerId, 'gasprice', '0');
@@ -208,8 +210,6 @@ describe("Describe entity assertions", () => {
     kandel.quote = token1;
     kandel.depositedBase = BigInt.fromI32(0);
     kandel.depositedQuote = BigInt.fromI32(0);
-    kandel.totalBase = BigInt.fromI32(0);
-    kandel.totalQuote = BigInt.fromI32(0);
     kandel.deployer = Bytes.fromUTF8('owner');
     kandel.admin = Bytes.fromUTF8('admin');
     kandel.offerIndexes = [];
@@ -276,6 +276,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
     
     assert.fieldEquals('Offer', offerId, 'latestTransactionHash', offerFail.transaction.hash.toHexString());
+    assert.fieldEquals('Offer', offerId, 'latestLogIndex', offerFail.logIndex.toString())
     assert.fieldEquals('Offer', offerId, 'wants', '1234');
     assert.fieldEquals('Offer', offerId, 'gives', '5678');
     assert.fieldEquals('Offer', offerId, 'gasprice', '0');
@@ -341,6 +342,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
     
     assert.fieldEquals('Offer', offerId, 'latestTransactionHash', offerSuccess.transaction.hash.toHexString());
+    assert.fieldEquals('Offer', offerId, 'latestLogIndex', offerSuccess.logIndex.toString())
     // TODO: de we want to update the wants and gives?
     assert.fieldEquals('Offer', offerId, 'wants', '40');
     assert.fieldEquals('Offer', offerId, 'gives', '0');
@@ -431,6 +433,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
     
     assert.fieldEquals('Offer', offerId, 'latestTransactionHash', offerSuccess.transaction.hash.toHexString());
+    assert.fieldEquals('Offer', offerId, 'latestLogIndex', offerSuccess.logIndex.toString())
     assert.fieldEquals('Offer', offerId, 'wants', '40');
     assert.fieldEquals('Offer', offerId, 'gives', '0');
     assert.fieldEquals('Offer', offerId, 'gasprice', '10');
@@ -494,6 +497,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
     
     assert.fieldEquals('Offer', offerId, 'latestTransactionHash', offerRetract.transaction.hash.toHexString())
+    assert.fieldEquals('Offer', offerId, 'latestLogIndex', offerRetract.logIndex.toString())
     // TODO: de we want to update the wants and gives?
     assert.fieldEquals('Offer', offerId, 'wants', '40');
     assert.fieldEquals('Offer', offerId, 'gives', '20');
@@ -558,6 +562,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
     
     assert.fieldEquals('Offer', offerId, 'latestTransactionHash', offerRetract.transaction.hash.toHexString())
+    assert.fieldEquals('Offer', offerId, 'latestLogIndex', offerRetract.logIndex.toString())
     // TODO: de we want to update the wants and gives?
     assert.fieldEquals('Offer', offerId, 'wants', '40');
     assert.fieldEquals('Offer', offerId, 'gives', '20');
@@ -623,6 +628,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
     //TODO: do we want to update the transaction hash?
     assert.fieldEquals('Offer', offerId, 'latestTransactionHash', '0x000123')
+    assert.fieldEquals('Offer', offerId, 'latestLogIndex','1')
     // TODO: de we want to update the wants and gives?
     assert.fieldEquals('Offer', offerId, 'wants', '40');
     assert.fieldEquals('Offer', offerId, 'gives', '20');
