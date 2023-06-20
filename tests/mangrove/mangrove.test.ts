@@ -2,7 +2,7 @@ import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {
   afterEach,
   assert,
-  beforeAll,
+  beforeEach,
   clearStore,
   describe,
   test
@@ -22,8 +22,14 @@ let taker = Address.fromString("0x0000000000000000000000000000000000000003")
 let owner = Address.fromString("0x0000000000000000000000000000000000000004")
 
 describe("Describe entity assertions", () => {
-  beforeAll(() => {
+  beforeEach(() => {
+    let setActiveEvent = createSetActiveEvent(token0, token1, true);
+    handleSetActive(setActiveEvent);
+    assert.entityCount("Market", 1);
 
+    setActiveEvent = createSetActiveEvent(token1, token0, true);
+    handleSetActive(setActiveEvent);
+    assert.entityCount("Market", 2);
   })
 
   afterEach(() => {
@@ -31,21 +37,16 @@ describe("Describe entity assertions", () => {
   })
 
   test("Market, handleSetActive, true, then false", () => {
-    let setActiveEvent = createSetActiveEvent(token0, token1, true);
-    handleSetActive(setActiveEvent);
-    assert.entityCount("Market", 1);
-
     const marketId = getMarketId(token0, token1)
     const market = Market.load(marketId);
     assert.assertNotNull(market);
 
     assert.fieldEquals('Market', marketId, 'active', 'true');
 
-    setActiveEvent = createSetActiveEvent(token0, token1, false);
+    const setActiveEvent = createSetActiveEvent(token0, token1, false);
     handleSetActive(setActiveEvent);
     
     assert.fieldEquals('Market', marketId, 'active', 'false');
-    assert.entityCount("Market", 1);
   });
 
   // test offer write, offer retract, offer success and offer fail individually
@@ -54,7 +55,6 @@ describe("Describe entity assertions", () => {
     // Open market
     let setActiveEvent = createSetActiveEvent(token0, token1, true);
     handleSetActive(setActiveEvent);
-    assert.entityCount("Market", 1);
 
     const gasbaseEvent =  createSetGasbaseEvent(token0, token1, BigInt.fromI32(1000));
     handleSetGasbase(gasbaseEvent);
@@ -104,7 +104,6 @@ describe("Describe entity assertions", () => {
     // Open market
     let setActiveEvent = createSetActiveEvent(token0, token1, true);
     handleSetActive(setActiveEvent);
-    assert.entityCount("Market", 1);
 
     // Set gasbase for market
     const gasbaseEvent =  createSetGasbaseEvent(token0, token1, BigInt.fromI32(1000));
@@ -368,7 +367,6 @@ describe("Describe entity assertions", () => {
 
 
   test("Offer, handleOfferSuccess, fully fill", () => {
-
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(token0, token1, id);
 
@@ -671,6 +669,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Order', orderId, 'takerGave', '40');
     assert.fieldEquals('Order', orderId, 'penalty', '1');
     assert.fieldEquals('Order', orderId, 'feePaid', '2');
+    assert.fieldEquals('Order', orderId, 'market', getMarketId(orderComplete.params.outbound_tkn, orderComplete.params.inbound_tkn));
 
     assert.fieldEquals('OrderStack', 'orderStack', 'ids',  `` );
   })
@@ -678,7 +677,7 @@ describe("Describe entity assertions", () => {
   test('GasBase, handleSetGasBase, new gasbase', () => {
     const setGasBase = createSetGasbaseEvent(token0, token1, BigInt.fromI32(20))
     handleSetGasbase(setGasBase)
-    assert.entityCount('Market', 1)
+    assert.entityCount('Market', 2);
 
     const gasbaseId = getMarketId(token0, token1);
     assert.fieldEquals('Market', gasbaseId, 'gasbase', '20');
@@ -689,14 +688,14 @@ describe("Describe entity assertions", () => {
   test('GasBase, handleSetGasBase, update gasbase', () => {
     const setGasBase1 = createSetGasbaseEvent(token0, token1, BigInt.fromI32(20))
     handleSetGasbase(setGasBase1)
-    assert.entityCount('Market', 1)
+    assert.entityCount('Market', 2);
 
     const setGasBase2 = createSetGasbaseEvent(token0, token1, BigInt.fromI32(40))
     handleSetGasbase(setGasBase2)
 
     const gasbaseId = getMarketId(token0, token1);
     assert.fieldEquals('Market', gasbaseId, 'gasbase', '40');
-    assert.entityCount('Market', 1)
+    assert.entityCount('Market', 2);
 
   })
 

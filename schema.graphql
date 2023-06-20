@@ -52,6 +52,7 @@ type Order @entity {
   penalty: BigInt
   feePaid: BigInt
 
+  market: Market
   limitOrder: LimitOrder 
 }
 
