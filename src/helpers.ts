@@ -1,6 +1,11 @@
-import { Address, BigInt, Bytes, Value, ethereum } from "@graphprotocol/graph-ts";
-import { Account, OrderStack, Offer, Order } from "../generated/schema";
+import { Address, BigInt, Bytes, Entity, Value, ethereum } from "@graphprotocol/graph-ts";
+import { Account, OrderStack, Offer, Order, KandelParameters } from "../generated/schema";
+import * as schema from "../generated/schema";
+import { log } from "matchstick-as";
 
+export const getKandelParamsId = (txHash: Bytes, kandel:Address): string => {
+  return `${txHash}-${kandel.toHex()}`;
+}
 
 export const getMarketId = (outbound_tkn: Address, inbound_tkn: Address): string  => {
   return `${outbound_tkn.toHex()}-${inbound_tkn.toHex()}`;
@@ -22,10 +27,23 @@ export const getOrCreateAccount = (address: Address): Account => {
   return account;
 }
 
+export const getOrCreateKandelParameters = (txHash: Bytes, timestamp: BigInt, kandel:Address): KandelParameters => {
+  let kandelParameters = KandelParameters.load(getKandelParamsId(txHash, kandel)); // TODO: use load in block
+
+  if (kandelParameters === null) {
+    kandelParameters = new KandelParameters(getKandelParamsId(txHash, kandel));
+    kandelParameters.transactionHash = txHash;
+    kandelParameters.creationDate = timestamp;
+    kandelParameters.kandel = kandel;
+    kandelParameters.save();
+  }
+  return kandelParameters;
+}
+
 
 export const getOrderStack = (): OrderStack => {
   let orderStack = OrderStack.load('orderStack');
-  if (!orderStack) {
+  if (orderStack === null) {
     orderStack = new OrderStack('orderStack');
     orderStack.ids = ``;
 
@@ -52,6 +70,7 @@ export const getOrderFromStack = (): Order => {
 
   return order;
 }
+
 
 export const removeOrderFromStack = (): void => {
   const orderStack = getOrderStack();
@@ -84,6 +103,7 @@ export const createOffer =(
   inbound_tkn: Address,
   outbound_tkn: Address,
   transactionHash: Bytes,
+  logIndex: BigInt,
   wants: BigInt,
   gives: BigInt,
   gasprice: BigInt,
@@ -106,7 +126,8 @@ export const createOffer =(
   let id= getOfferId(outbound_tkn, inbound_tkn, offerId)
   let offer = new Offer(id);
   offer.offerId = offerId;
-  offer.transactionHash = transactionHash;
+  offer.latestTransactionHash = transactionHash;
+  offer.latestLogIndex = logIndex;
   offer.wants = wants;
   offer.gives = gives;
   offer.gasprice = gasprice;
@@ -140,6 +161,7 @@ export const createDummyOffer = (
     inbound_tkn,
     outbound_tkn,
     Bytes.fromHexString('0x00'),
+    BigInt.fromI32(0),
     BigInt.fromI32(0),
     BigInt.fromI32(0),
     BigInt.fromI32(0),

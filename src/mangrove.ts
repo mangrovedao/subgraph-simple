@@ -53,6 +53,8 @@ export function handleOfferFail(event: OfferFail): void {
 
   offer.failedReason = event.params.mgvData;
   offer.latestUpdateDate = event.block.timestamp;
+  offer.latestLogIndex = event.logIndex;
+  offer.latestTransactionHash = event.transaction.hash;
 
   offer.save();
 }
@@ -76,7 +78,8 @@ export function handleOfferRetract(event: OfferRetract): void {
     offer.gasprice = BigInt.fromI32(0);
   }
   offer.latestUpdateDate = event.block.timestamp;
-
+  offer.latestLogIndex = event.logIndex;
+  offer.latestTransactionHash = event.transaction.hash;
   offer.save();
 }
 
@@ -112,6 +115,8 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   offer.posthookFailReason = null;
   offer.failedReason = null;
   offer.latestUpdateDate = event.block.timestamp;
+  offer.latestLogIndex = event.logIndex;
+  offer.latestTransactionHash = event.transaction.hash;
 
   offer.prevGives = offer.gives;
   offer.prevWants = offer.wants;
@@ -129,7 +134,8 @@ export const createNewOffer = (event: OfferWrite): Offer => {
     event.params.id,
   );
   const offer = new Offer(offerId);
-  offer.transactionHash = event.transaction.hash;
+  offer.latestLogIndex = event.logIndex;
+  offer.latestTransactionHash = event.transaction.hash;
 
   const kandel = Kandel.load(event.params.maker);
   if (kandel) {
@@ -152,6 +158,8 @@ export function handleOfferWrite(event: OfferWrite): void {
     offer.creationDate = event.block.timestamp;
   }
   offer.latestUpdateDate = event.block.timestamp;
+  offer.latestLogIndex = event.logIndex;
+  offer.latestTransactionHash = event.transaction.hash;
 
   const owner = getOrCreateAccount(event.params.maker);
   offer.maker = owner.id;

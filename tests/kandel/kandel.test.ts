@@ -13,7 +13,7 @@ import { createCreditEvent, createDebitEvent, createPairEvent, createSetAdminEve
 import { handleCredit, handleDebit, handlePair, handleSetAdmin, handleSetGasprice, handleSetGasreq, handleSetGeometricParams, handleSetLength, handleSetReserveId, handleSetRouter } from "../../src/kandel";
 import { createOfferSuccessEvent, createOfferWriteEvent, createSetActiveEvent, createSetGasbaseEvent } from "../mangrove/mangrove-utils";
 import { handleOfferSuccess, handleOfferWrite, handleSetActive, handleSetGasbase } from "../../src/mangrove";
-import { getOfferId } from "../../src/helpers";
+import { getKandelParamsId, getOfferId } from "../../src/helpers";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -45,13 +45,15 @@ describe("Describe entity assertions", () => {
     clearStore()
   });
 
-  test("Kandel setGasPrice", () => {
+  test("KandelParameters, handleSetGasprice", () => {
     const bi10 = BigInt.fromI32(10);
     const setGasPriceEvent = createSetGaspriceEvent(bi10)
     setGasPriceEvent.address = kandel;
     handleSetGasprice(setGasPriceEvent);
+    const kandelParamsId= getKandelParamsId(setGasPriceEvent.transaction.hash, setGasPriceEvent.address)
      
-    assert.fieldEquals("Kandel", kandel.toHexString(), "gasprice", "10");
+    assert.fieldEquals("KandelParameters", kandelParamsId, "gasprice", "10");
+    assert.fieldEquals("KandelParameters", kandelParamsId, "kandel", setGasPriceEvent.address.toHex());
   });
 
   test("Kandel setAdmin", () => {

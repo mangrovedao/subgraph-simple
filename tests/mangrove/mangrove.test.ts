@@ -76,7 +76,7 @@ describe("Describe entity assertions", () => {
     let offerId = getOfferId(token0, token1, id);
     const offer = Offer.load(offerId)!;
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
-    assert.fieldEquals('Offer', offerId, 'transactionHash', offerWrite.transaction.hash.toHexString())
+    assert.fieldEquals('Offer', offerId, 'latestTransactionHash', offerWrite.transaction.hash.toHexString())
     assert.fieldEquals('Offer', offerId, 'wants', '1000');
     assert.fieldEquals('Offer', offerId, 'gives', '2000');
     assert.fieldEquals('Offer', offerId, 'gasprice', '0');
@@ -117,6 +117,7 @@ describe("Describe entity assertions", () => {
       token1,
       token0,
       Bytes.fromHexString('0x000123'),
+      BigInt.fromI32(1),
       BigInt.fromI32(1234),
       BigInt.fromI32(5678),
       BigInt.fromI32(10),
@@ -151,8 +152,8 @@ describe("Describe entity assertions", () => {
     handleOfferWrite(offerWrite);
 
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
-    //TODO: do we want to update the transaction hash?
-    assert.fieldEquals('Offer', offerId, 'transactionHash', '0x000123')
+    
+    assert.fieldEquals('Offer', offerId, 'latestTransactionHash', offerWrite.transaction.hash.toHexString())
     assert.fieldEquals('Offer', offerId, 'wants', '1000');
     assert.fieldEquals('Offer', offerId, 'gives', '2000');
     assert.fieldEquals('Offer', offerId, 'gasprice', '0');
@@ -211,6 +212,7 @@ describe("Describe entity assertions", () => {
     kandel.totalQuote = BigInt.fromI32(0);
     kandel.deployer = Bytes.fromUTF8('owner');
     kandel.admin = Bytes.fromUTF8('admin');
+    kandel.offerIndexes = [];
     kandel.save()
     const id = BigInt.fromI32(0);
     let offerWrite = createOfferWriteEvent(
@@ -239,6 +241,7 @@ describe("Describe entity assertions", () => {
       token1,
       token0,
       Bytes.fromHexString('0x000123'),
+      BigInt.fromI32(1),
       BigInt.fromI32(1234),
       BigInt.fromI32(5678),
       BigInt.fromI32(10),
@@ -271,8 +274,8 @@ describe("Describe entity assertions", () => {
     handleOfferFail(offerFail);
 
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
-    //TODO: do we want to update the transaction hash?
-    assert.fieldEquals('Offer', offerId, 'transactionHash', '0x000123')
+    
+    assert.fieldEquals('Offer', offerId, 'latestTransactionHash', offerFail.transaction.hash.toHexString());
     assert.fieldEquals('Offer', offerId, 'wants', '1234');
     assert.fieldEquals('Offer', offerId, 'gives', '5678');
     assert.fieldEquals('Offer', offerId, 'gasprice', '0');
@@ -310,6 +313,7 @@ describe("Describe entity assertions", () => {
       token1,
       token0,
       Bytes.fromHexString('0x000123'),
+      BigInt.fromI32(1),
       BigInt.fromI32(40),
       BigInt.fromI32(20),
       BigInt.fromI32(10),
@@ -335,8 +339,8 @@ describe("Describe entity assertions", () => {
     handleOfferSuccess(offerSuccess);
 
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
-    //TODO: do we want to update the transaction hash?
-    assert.fieldEquals('Offer', offerId, 'transactionHash', '0x000123')
+    
+    assert.fieldEquals('Offer', offerId, 'latestTransactionHash', offerSuccess.transaction.hash.toHexString());
     // TODO: de we want to update the wants and gives?
     assert.fieldEquals('Offer', offerId, 'wants', '40');
     assert.fieldEquals('Offer', offerId, 'gives', '0');
@@ -400,6 +404,7 @@ describe("Describe entity assertions", () => {
       token1,
       token0,
       Bytes.fromHexString('0x000123'),
+      BigInt.fromI32(1),
       BigInt.fromI32(40),
       BigInt.fromI32(20),
       BigInt.fromI32(10),
@@ -424,8 +429,8 @@ describe("Describe entity assertions", () => {
     handleOfferSuccess(offerSuccess);
 
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
-    //TODO: do we want to update the transaction hash?
-    assert.fieldEquals('Offer', offerId, 'transactionHash', '0x000123')
+    
+    assert.fieldEquals('Offer', offerId, 'latestTransactionHash', offerSuccess.transaction.hash.toHexString());
     assert.fieldEquals('Offer', offerId, 'wants', '40');
     assert.fieldEquals('Offer', offerId, 'gives', '0');
     assert.fieldEquals('Offer', offerId, 'gasprice', '10');
@@ -462,6 +467,7 @@ describe("Describe entity assertions", () => {
       token1,
       token0,
       Bytes.fromHexString('0x000123'),
+      BigInt.fromI32(1),
       BigInt.fromI32(40),
       BigInt.fromI32(20),
       BigInt.fromI32(10),
@@ -486,8 +492,8 @@ describe("Describe entity assertions", () => {
     handleOfferRetract(offerRetract);
 
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
-    //TODO: do we want to update the transaction hash?
-    assert.fieldEquals('Offer', offerId, 'transactionHash', '0x000123')
+    
+    assert.fieldEquals('Offer', offerId, 'latestTransactionHash', offerRetract.transaction.hash.toHexString())
     // TODO: de we want to update the wants and gives?
     assert.fieldEquals('Offer', offerId, 'wants', '40');
     assert.fieldEquals('Offer', offerId, 'gives', '20');
@@ -525,6 +531,7 @@ describe("Describe entity assertions", () => {
       token1,
       token0,
       Bytes.fromHexString('0x000123'),
+      BigInt.fromI32(1),
       BigInt.fromI32(40),
       BigInt.fromI32(20),
       BigInt.fromI32(10),
@@ -549,8 +556,8 @@ describe("Describe entity assertions", () => {
     handleOfferRetract(offerRetract);
 
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
-    //TODO: do we want to update the transaction hash?
-    assert.fieldEquals('Offer', offerId, 'transactionHash', '0x000123')
+    
+    assert.fieldEquals('Offer', offerId, 'latestTransactionHash', offerRetract.transaction.hash.toHexString())
     // TODO: de we want to update the wants and gives?
     assert.fieldEquals('Offer', offerId, 'wants', '40');
     assert.fieldEquals('Offer', offerId, 'gives', '20');
@@ -589,6 +596,7 @@ describe("Describe entity assertions", () => {
       token1,
       token0,
       Bytes.fromHexString('0x000123'),
+      BigInt.fromI32(1),
       BigInt.fromI32(40),
       BigInt.fromI32(20),
       BigInt.fromI32(10),
@@ -614,7 +622,7 @@ describe("Describe entity assertions", () => {
 
     assert.fieldEquals('Offer', offerId, 'offerId', '1');
     //TODO: do we want to update the transaction hash?
-    assert.fieldEquals('Offer', offerId, 'transactionHash', '0x000123')
+    assert.fieldEquals('Offer', offerId, 'latestTransactionHash', '0x000123')
     // TODO: de we want to update the wants and gives?
     assert.fieldEquals('Offer', offerId, 'wants', '40');
     assert.fieldEquals('Offer', offerId, 'gives', '20');
