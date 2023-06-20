@@ -83,6 +83,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'gasreq', '0');
     assert.fieldEquals('Offer', offerId, 'gasBase', '1000');
     assert.fieldEquals('Offer', offerId, 'prev', '0');
+    assert.fieldEquals('Offer', offerId, 'totalGot', '0');
+    assert.fieldEquals('Offer', offerId, 'totalGave', '0');
     assert.fieldEquals('Offer', offerId, 'isOpen', 'true');
     assert.fieldEquals('Offer', offerId, 'isFailed', 'false');
     assert.fieldEquals('Offer', offerId, 'isFilled', 'false');
@@ -330,7 +332,6 @@ describe("Describe entity assertions", () => {
       BigInt.fromI32(0),
     )
 
-
     let offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, BigInt.fromI32(10), BigInt.fromI32(20));
     handleOfferSuccess(offerSuccess);
 
@@ -378,7 +379,6 @@ describe("Describe entity assertions", () => {
     order.takerGave = BigInt.fromI32(50);
     order.save();
 
-
     const limitOrder = new LimitOrder(offerId)
     limitOrder.wants = BigInt.fromI32(1000);
     limitOrder.gives = BigInt.fromI32(500);
@@ -392,8 +392,6 @@ describe("Describe entity assertions", () => {
     limitOrder.latestUpdateDate = BigInt.fromI32(1);
     limitOrder.order = orderId;
     limitOrder.save();
-
-
 
     createOffer(
       id,
@@ -451,6 +449,12 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'creationDate', '100')
     assert.fieldEquals('Offer', offerId, 'latestUpdateDate', '1')
     assert.entityCount("Offer", 1);
+
+    offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, BigInt.fromI32(20), BigInt.fromI32(40));
+    handleOfferSuccess(offerSuccess);
+
+    assert.fieldEquals('Offer', offerId, 'totalGot', '100');
+    assert.fieldEquals('Offer', offerId, 'totalGave', '70');
   });
 
   test("Offer, handleOfferRetract, with deporivison", () => {
