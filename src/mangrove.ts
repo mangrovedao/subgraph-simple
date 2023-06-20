@@ -193,6 +193,8 @@ export function handleOrderComplete(event: OrderComplete): void {
   order.penalty = event.params.penalty;
   order.feePaid = event.params.feePaid;
 
+  const market = Market.load(getMarketId(event.params.outbound_tkn, event.params.inbound_tkn))!;
+  order.market = market.id;
   order.save();
 
   removeOrderFromStack();
