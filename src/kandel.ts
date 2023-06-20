@@ -22,6 +22,7 @@ import {
 } from "../generated/templates/Kandel/Kandel"
 import { KandelDepositWithdraw, Kandel as  KandelEntity, KandelPopulateRetract, Offer } from "../generated/schema";
 import { getEventUniqueId, getMarketId, getOfferId, getOrCreateKandelParameters } from "./helpers";
+import { log } from "matchstick-as";
 
 export function handleCredit(event: Credit): void {
   const deposit = new KandelDepositWithdraw(
@@ -90,16 +91,16 @@ export function handlePopulateEnd(event: PopulateEnd): void {
 
   for(let i = 0; i < offerIds.length; i++) {
     let offer = Offer.load(offerIds[i])!; // TODO: use load in block
-    if( offer.latestTransactionHash == event.transaction.hash && offer.latestLogIndex > kandelPopulateRetract.startLogIndex   ) {
+    if( offer.latestTransactionHash == event.transaction.hash && offer.latestLogIndex.gt( kandelPopulateRetract.startLogIndex) ) {
       const totalGave = offer.totalGave === null ? BigInt.fromI32(0) : offer.totalGave;
       const totalGot = offer.totalGot === null ? BigInt.fromI32(0) : offer.totalGot;
-      kandelPopulateRetract.offerGives.push( Bytes.fromUTF8( `${ offerIds[i] }-${ offer.gives }-${ totalGave!.toString() }-${ totalGot!.toString() }`) );
+      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([ Bytes.fromUTF8( `${ offerIds[i] }-${ offer.gives }-${ totalGave!.toString() }-${ totalGot!.toString() }`) ]);
     }
   } 
   kandelPopulateRetract.save();
 }
 
-function getOfferIdsForKandel(kandel: KandelEntity): string[] {
+export function getOfferIdsForKandel(kandel: KandelEntity): string[] {
   let offerIds = [] as string[]
   for (let i = 0; i < kandel.offerIndexes.length; i++) {
     let info = kandel.offerIndexes[i].toString().split('-');
@@ -132,10 +133,10 @@ export function handleRetractEnd(event: RetractEnd): void {
 
   for(let i = 0; i < offerIds.length; i++) {
     let offer = Offer.load(offerIds[i])!; // TODO: use load in block
-    if( offer.latestTransactionHash == event.transaction.hash && offer.latestLogIndex > kandelPopulateRetract.startLogIndex   ) {
+    if( offer.latestTransactionHash == event.transaction.hash && offer.latestLogIndex.gt(kandelPopulateRetract.startLogIndex )) {
       const totalGave = offer.totalGave === null ? BigInt.fromI32(0) : offer.totalGave;
       const totalGot = offer.totalGot === null ? BigInt.fromI32(0) : offer.totalGot;
-      kandelPopulateRetract.offerGives.push( Bytes.fromUTF8( `${ offerIds[i] }-${ 0 }-${ totalGave!.toString() }-${ totalGot!.toString() }`) );
+      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([ Bytes.fromUTF8( `${ offerIds[i] }-${ 0 }-${ totalGave!.toString() }-${ totalGot!.toString() }`) ]);
     }
   } 
   kandelPopulateRetract.save();

@@ -152,12 +152,12 @@ export const createOffer =(
 }
 
 export const createDummyOffer = (
-  offerId: BigInt,
+  offerNumber: BigInt,
   inbound_tkn: Address,
   outbound_tkn: Address
 ): Offer => {
   return createOffer(
-    offerId,
+    offerNumber,
     inbound_tkn,
     outbound_tkn,
     Bytes.fromHexString('0x00'),

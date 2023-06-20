@@ -7,12 +7,12 @@ import {
   describe,
   test
 } from "matchstick-as/assembly/index";
-import { Kandel } from "../../generated/schema";
-import { getEventUniqueId, getKandelParamsId } from "../../src/helpers";
-import { handleCredit, handleDebit, handleSetAdmin, handleSetCompoundRates, handleSetGasprice, handleSetGasreq, handleSetGeometricParams, handleSetIndexMapping, handleSetLength, handleSetReserveId, handleSetRouter } from "../../src/kandel";
+import { Kandel, KandelPopulateRetract } from "../../generated/schema";
+import { createDummyOffer, getEventUniqueId, getKandelParamsId, getOfferId } from "../../src/helpers";
+import { getOfferIdsForKandel, handleCredit, handleDebit, handlePopulateEnd, handlePopulateStart, handleRetractEnd, handleRetractStart, handleSetAdmin, handleSetCompoundRates, handleSetGasprice, handleSetGasreq, handleSetGeometricParams, handleSetIndexMapping, handleSetLength, handleSetReserveId, handleSetRouter } from "../../src/kandel";
 import { handleSetActive } from "../../src/mangrove";
 import { createSetActiveEvent } from "../mangrove/mangrove-utils";
-import { createCreditEvent, createDebitEvent, createSetAdminEvent, createSetCompoundRatesEvent, createSetGaspriceEvent, createSetGasreqEvent, createSetGeometricParamsEvent, createSetIndexMappingEvent, createSetLengthEvent, createSetReserveIdEvent, createSetRouterEvent } from "./kandel-utils";
+import { createCreditEvent, createDebitEvent, createPopulateEndEvent, createPopulateStartEvent, createRetractEndEvent, createRetractStartEvent, createSetAdminEvent, createSetCompoundRatesEvent, createSetGaspriceEvent, createSetGasreqEvent, createSetGeometricParamsEvent, createSetIndexMappingEvent, createSetLengthEvent, createSetReserveIdEvent, createSetRouterEvent } from "./kandel-utils";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -55,7 +55,7 @@ describe("Describe entity assertions", () => {
     clearStore()
   });
 
-  test("Kandel, handleCredit, base", () => {
+  test("KandelDepositWithdraw, handleCredit, base", () => {
     const creditEvent = createCreditEvent(token0, BigInt.fromI32(10));
     creditEvent.address = kandelAddress;
     handleCredit(creditEvent);
@@ -68,7 +68,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("KandelDepositWithdraw",creditId, "isDeposit", 'true')
   })
 
-  test("Kandel, handleCredit, quote", () => {
+  test("KandelDepositWithdraw, handleCredit, quote", () => {
     const creditEvent2 = createCreditEvent(token1, BigInt.fromI32(20)); 
     creditEvent2.address = kandelAddress; 
     handleCredit(creditEvent2); 
@@ -81,7 +81,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("KandelDepositWithdraw",creditId2, "isDeposit", 'true')
   });
 
-  test("Kandel, handleDebit, base", () => {
+  test("KandelDepositWithdraw, handleDebit, base", () => {
     const debitEvent = createDebitEvent(token0, BigInt.fromI32(10));
     debitEvent.address = kandelAddress;
     handleDebit(debitEvent);
@@ -94,7 +94,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("KandelDepositWithdraw",debitId, "isDeposit", 'false')
   })
 
-  test("Kandel, handleDebit, quote", () => {
+  test("KandelDepositWithdraw, handleDebit, quote", () => {
     const debitEvent2 = createDebitEvent(token1, BigInt.fromI32(20));
     debitEvent2.address = kandelAddress;
     handleDebit(debitEvent2);
@@ -107,9 +107,193 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("KandelDepositWithdraw",debitId2, "isDeposit", 'false')
   })
 
-  // populate
+  test("KandelPopulateRetract, handlePopulateStart", () => {
+    const populateEvent = createPopulateStartEvent();
+    populateEvent.address = kandelAddress;
+    handlePopulateStart(populateEvent);
+    const populateId = populateEvent.transaction.hash.toHex();
+    assert.fieldEquals("KandelPopulateRetract",populateId, "transactionHash", populateEvent.transaction.hash.toHexString())
+    assert.fieldEquals("KandelPopulateRetract",populateId, "creationDate", populateEvent.block.timestamp.toString())
+    assert.fieldEquals("KandelPopulateRetract",populateId, "isRetract", 'false')
+    assert.fieldEquals("KandelPopulateRetract",populateId, "startLogIndex", populateEvent.logIndex.toString())
+    assert.fieldEquals("KandelPopulateRetract",populateId, "kandel", populateEvent.address.toHexString())
+    assert.fieldEquals("KandelPopulateRetract",populateId, "offerGives", "[]")
+  })
 
-  // retract
+  test("KandelPopulateRetract, handlePopulateEnd", () => {
+    const kandel = Kandel.load( kandelAddress )! 
+    kandel.offerIndexes = [
+      Bytes.fromUTF8(`${0}-${1}-${0}`),
+      Bytes.fromUTF8(`${1}-${2}-${0}`),
+      Bytes.fromUTF8(`${2}-${3}-${0}`),
+      Bytes.fromUTF8(`${3}-${1}-${1}`),
+      Bytes.fromUTF8(`${4}-${2}-${1}`),
+      Bytes.fromUTF8(`${5}-${3}-${1}`),
+    ];
+    kandel.save();
+    const offer1 = createDummyOffer(BigInt.fromI32(1),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
+    offer1.gives = BigInt.fromI32(10);
+    offer1.totalGave = BigInt.fromI32(10);
+    offer1.totalGot = BigInt.fromI32(100);
+    offer1.latestLogIndex = BigInt.fromI32(4);
+    offer1.save();
+    const offer2 =createDummyOffer(BigInt.fromI32(2),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
+    offer2.gives = BigInt.fromI32(20);
+    offer2.totalGave = BigInt.fromI32(20);
+    offer2.totalGot = BigInt.fromI32(200);
+    offer2.latestLogIndex = BigInt.fromI32(5);
+    offer2.latestTransactionHash = Bytes.fromUTF8("0x1234567890");
+    offer2.save();
+    const offer3 =createDummyOffer(BigInt.fromI32(3),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
+    offer3.gives = BigInt.fromI32(30);
+    offer3.totalGave = BigInt.fromI32(30);
+    offer3.totalGot = BigInt.fromI32(300);
+    offer3.latestLogIndex = BigInt.fromI32(6);
+    offer3.save();
+    const offer4 =createDummyOffer(BigInt.fromI32(1),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
+    offer4.gives = BigInt.fromI32(40);
+    offer4.totalGave = BigInt.fromI32(40);
+    offer4.totalGot = BigInt.fromI32(400);
+    offer4.latestLogIndex = BigInt.fromI32(7);
+    offer4.save();
+    const offer5 =createDummyOffer(BigInt.fromI32(2),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
+    offer5.gives = BigInt.fromI32(50);
+    offer5.totalGave = BigInt.fromI32(50);
+    offer5.totalGot = BigInt.fromI32(500);
+    offer5.latestLogIndex = BigInt.fromI32(8);
+    offer5.latestTransactionHash = Bytes.fromUTF8("0x1234567890");
+    offer5.save();
+    const offer6 =createDummyOffer(BigInt.fromI32(3),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
+    offer6.gives = BigInt.fromI32(60);
+    offer6.totalGave = BigInt.fromI32(60);
+    offer6.totalGot = BigInt.fromI32(600);
+    offer6.latestLogIndex = BigInt.fromI32(9);
+    offer6.save();
+
+    const kandelPopulateRetract = new KandelPopulateRetract(offer1.latestTransactionHash.toHex());
+    kandelPopulateRetract.transactionHash = offer1.latestTransactionHash;
+    kandelPopulateRetract.creationDate = offer1.creationDate;
+    kandelPopulateRetract.isRetract = false;
+    kandelPopulateRetract.startLogIndex = BigInt.fromI32(4);
+    kandelPopulateRetract.kandel = kandelAddress;
+    kandelPopulateRetract.offerGives = [];
+    kandelPopulateRetract.save();
+
+
+    const populateEndEvent = createPopulateEndEvent();
+    populateEndEvent.transaction.hash = offer1.latestTransactionHash;
+    populateEndEvent.address = kandelAddress;
+    handlePopulateEnd(populateEndEvent);
+
+    const kandelPopulateRetractUpdated = KandelPopulateRetract.load(offer1.latestTransactionHash.toHex())!;
+    assert.assertTrue( kandelPopulateRetractUpdated.offerGives.length == 3);
+    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[0] == Bytes.fromUTF8(`${offer3.id}-${offer3.gives}-${offer3.totalGave!.toString()}-${offer3.totalGot!.toString()}`));
+    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[1] == Bytes.fromUTF8(`${offer4.id}-${offer4.gives}-${offer4.totalGave!.toString()}-${offer4.totalGot!.toString()}`));
+    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[2] == Bytes.fromUTF8(`${offer6.id}-${offer6.gives}-${offer6.totalGave!.toString()}-${offer6.totalGot!.toString()}`));
+  })
+
+  test("getOfferIdsForKandel", () => {
+    const kandel = Kandel.load( kandelAddress )! 
+    kandel.offerIndexes = [
+      Bytes.fromUTF8(`${0}-${1}-${0}`),
+      Bytes.fromUTF8(`${1}-${2}-${0}`),
+      Bytes.fromUTF8(`${2}-${1}-${1}`),
+      Bytes.fromUTF8(`${3}-${2}-${1}`),
+    ];
+
+    const offerIds = getOfferIdsForKandel(kandel);
+    assert.assertTrue( offerIds.length == 4 );
+    assert.assertTrue( offerIds[0] == getOfferId( Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote), BigInt.fromI32(1)) );
+    assert.assertTrue( offerIds[1] == getOfferId( Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote), BigInt.fromI32(2)) );
+    assert.assertTrue( offerIds[2] == getOfferId( Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base), BigInt.fromI32(1)) );
+    assert.assertTrue( offerIds[3] == getOfferId( Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base), BigInt.fromI32(2)) );
+
+  })
+
+  test("KandelPopulateRetract, handleRetractEnd", () => {
+    const kandel = Kandel.load( kandelAddress )! 
+    kandel.offerIndexes = [
+      Bytes.fromUTF8(`${0}-${1}-${0}`),
+      Bytes.fromUTF8(`${1}-${2}-${0}`),
+      Bytes.fromUTF8(`${2}-${3}-${0}`),
+      Bytes.fromUTF8(`${3}-${1}-${1}`),
+      Bytes.fromUTF8(`${4}-${2}-${1}`),
+      Bytes.fromUTF8(`${5}-${3}-${1}`),
+    ];
+    kandel.save();
+    const offer1 = createDummyOffer(BigInt.fromI32(1),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
+    offer1.gives = BigInt.fromI32(10);
+    offer1.totalGave = BigInt.fromI32(10);
+    offer1.totalGot = BigInt.fromI32(100);
+    offer1.latestLogIndex = BigInt.fromI32(4);
+    offer1.save();
+    const offer2 =createDummyOffer(BigInt.fromI32(2),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
+    offer2.gives = BigInt.fromI32(20);
+    offer2.totalGave = BigInt.fromI32(20);
+    offer2.totalGot = BigInt.fromI32(200);
+    offer2.latestLogIndex = BigInt.fromI32(5);
+    offer2.latestTransactionHash = Bytes.fromUTF8("0x1234567890");
+    offer2.save();
+    const offer3 =createDummyOffer(BigInt.fromI32(3),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
+    offer3.gives = BigInt.fromI32(30);
+    offer3.totalGave = BigInt.fromI32(30);
+    offer3.totalGot = BigInt.fromI32(300);
+    offer3.latestLogIndex = BigInt.fromI32(6);
+    offer3.save();
+    const offer4 =createDummyOffer(BigInt.fromI32(1),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
+    offer4.gives = BigInt.fromI32(40);
+    offer4.totalGave = BigInt.fromI32(40);
+    offer4.totalGot = BigInt.fromI32(400);
+    offer4.latestLogIndex = BigInt.fromI32(7);
+    offer4.save();
+    const offer5 =createDummyOffer(BigInt.fromI32(2),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
+    offer5.gives = BigInt.fromI32(50);
+    offer5.totalGave = BigInt.fromI32(50);
+    offer5.totalGot = BigInt.fromI32(500);
+    offer5.latestLogIndex = BigInt.fromI32(8);
+    offer5.latestTransactionHash = Bytes.fromUTF8("0x1234567890");
+    offer5.save();
+    const offer6 =createDummyOffer(BigInt.fromI32(3),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
+    offer6.gives = BigInt.fromI32(60);
+    offer6.totalGave = BigInt.fromI32(60);
+    offer6.totalGot = BigInt.fromI32(600);
+    offer6.latestLogIndex = BigInt.fromI32(9);
+    offer6.save();
+
+    const kandelPopulateRetract = new KandelPopulateRetract(offer1.latestTransactionHash.toHex());
+    kandelPopulateRetract.transactionHash = offer1.latestTransactionHash;
+    kandelPopulateRetract.creationDate = offer1.creationDate;
+    kandelPopulateRetract.isRetract = true;
+    kandelPopulateRetract.startLogIndex = BigInt.fromI32(4);
+    kandelPopulateRetract.kandel = kandelAddress;
+    kandelPopulateRetract.offerGives = [];
+    kandelPopulateRetract.save();
+
+
+    const retractEndEvent = createRetractEndEvent();
+    retractEndEvent.transaction.hash = offer1.latestTransactionHash;
+    retractEndEvent.address = kandelAddress;
+    handleRetractEnd(retractEndEvent);
+
+    const kandelPopulateRetractUpdated = KandelPopulateRetract.load(offer1.latestTransactionHash.toHex())!;
+    assert.assertTrue( kandelPopulateRetractUpdated.offerGives.length == 3);
+    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[0] == Bytes.fromUTF8(`${offer3.id}-${0}-${offer3.totalGave!.toString()}-${offer3.totalGot!.toString()}`));
+    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[1] == Bytes.fromUTF8(`${offer4.id}-${0}-${offer4.totalGave!.toString()}-${offer4.totalGot!.toString()}`));
+    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[2] == Bytes.fromUTF8(`${offer6.id}-${0}-${offer6.totalGave!.toString()}-${offer6.totalGot!.toString()}`));
+  })
+
+  test("KandelPopulateRetract, handleRetractStart", () => {
+    const retractStartEvent = createRetractStartEvent();
+    retractStartEvent.address = kandelAddress;
+    handleRetractStart(retractStartEvent);
+    const retractId = retractStartEvent.transaction.hash.toHex();
+    assert.fieldEquals("KandelPopulateRetract",retractId, "transactionHash", retractStartEvent.transaction.hash.toHexString())
+    assert.fieldEquals("KandelPopulateRetract",retractId, "creationDate", retractStartEvent.block.timestamp.toString())
+    assert.fieldEquals("KandelPopulateRetract",retractId, "isRetract", 'true')
+    assert.fieldEquals("KandelPopulateRetract",retractId, "startLogIndex", retractStartEvent.logIndex.toString())
+    assert.fieldEquals("KandelPopulateRetract",retractId, "kandel", retractStartEvent.address.toHexString())
+    assert.fieldEquals("KandelPopulateRetract",retractId, "offerGives", "[]")
+  })
 
   test("Kandel, handleSetAdmin", () => {
     const setAdmin = createSetAdminEvent(newOwner);
@@ -196,7 +380,7 @@ describe("Describe entity assertions", () => {
     assert.assertTrue( kandel.offerIndexes[1] == Bytes.fromUTF8(`${setIndexMapping2.params.index}-${setIndexMapping2.params.offerId}-${setIndexMapping2.params.ba}`)  );
   })
 
-  test("Kandel, handleSetLength", () => {
+  test("KandelParameters, handleSetLength", () => {
     const value = BigInt.fromI32(32);
     const setLength = createSetLengthEvent(value);
     setLength.address = kandelAddress;
