@@ -123,12 +123,12 @@ describe("Describe entity assertions", () => {
   test("KandelPopulateRetract, handlePopulateEnd", () => {
     const kandel = Kandel.load( kandelAddress )! 
     kandel.offerIndexes = [
-      Bytes.fromUTF8(`${0}-${1}-${0}`),
-      Bytes.fromUTF8(`${1}-${2}-${0}`),
-      Bytes.fromUTF8(`${2}-${3}-${0}`),
-      Bytes.fromUTF8(`${3}-${1}-${1}`),
-      Bytes.fromUTF8(`${4}-${2}-${1}`),
-      Bytes.fromUTF8(`${5}-${3}-${1}`),
+      `${0}-${1}-${0}`,
+      `${1}-${2}-${0}`,
+      `${2}-${3}-${0}`,
+      `${3}-${1}-${1}`,
+      `${4}-${2}-${1}`,
+      `${5}-${3}-${1}`,
     ];
     kandel.save();
     const offer1 = createDummyOffer(BigInt.fromI32(1),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
@@ -195,10 +195,10 @@ describe("Describe entity assertions", () => {
   test("getOfferIdsForKandel", () => {
     const kandel = Kandel.load( kandelAddress )! 
     kandel.offerIndexes = [
-      Bytes.fromUTF8(`${0}-${1}-${0}`),
-      Bytes.fromUTF8(`${1}-${2}-${0}`),
-      Bytes.fromUTF8(`${2}-${1}-${1}`),
-      Bytes.fromUTF8(`${3}-${2}-${1}`),
+      `${0}-${1}-${0}`,
+      `${1}-${2}-${0}`,
+      `${2}-${1}-${1}`,
+      `${3}-${2}-${1}`,
     ];
 
     const offerIds = getOfferIdsForKandel(kandel);
@@ -213,12 +213,12 @@ describe("Describe entity assertions", () => {
   test("KandelPopulateRetract, handleRetractEnd", () => {
     const kandel = Kandel.load( kandelAddress )! 
     kandel.offerIndexes = [
-      Bytes.fromUTF8(`${0}-${1}-${0}`),
-      Bytes.fromUTF8(`${1}-${2}-${0}`),
-      Bytes.fromUTF8(`${2}-${3}-${0}`),
-      Bytes.fromUTF8(`${3}-${1}-${1}`),
-      Bytes.fromUTF8(`${4}-${2}-${1}`),
-      Bytes.fromUTF8(`${5}-${3}-${1}`),
+      `${0}-${1}-${0}`,
+      `${1}-${2}-${0}`,
+      `${2}-${3}-${0}`,
+      `${3}-${1}-${1}`,
+      `${4}-${2}-${1}`,
+      `${5}-${3}-${1}`,
     ];
     kandel.save();
     const offer1 = createDummyOffer(BigInt.fromI32(1),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
@@ -376,8 +376,8 @@ describe("Describe entity assertions", () => {
     handleSetIndexMapping(setIndexMapping2);
     const kandel =  Kandel.load(kandelAddress)!;
     assert.assertTrue( kandel.offerIndexes.length == 2 );
-    assert.assertTrue( kandel.offerIndexes[0] == Bytes.fromUTF8(`${setIndexMapping1.params.index}-${setIndexMapping1.params.offerId}-${setIndexMapping1.params.ba}`)  );
-    assert.assertTrue( kandel.offerIndexes[1] == Bytes.fromUTF8(`${setIndexMapping2.params.index}-${setIndexMapping2.params.offerId}-${setIndexMapping2.params.ba}`)  );
+    assert.assertTrue( kandel.offerIndexes[0] == `${setIndexMapping1.params.index}-${setIndexMapping1.params.offerId}-${setIndexMapping1.params.ba}`);
+    assert.assertTrue( kandel.offerIndexes[1] == `${setIndexMapping2.params.index}-${setIndexMapping2.params.offerId}-${setIndexMapping2.params.ba}`);
   })
 
   test("KandelParameters, handleSetLength", () => {

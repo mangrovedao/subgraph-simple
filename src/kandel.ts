@@ -122,7 +122,7 @@ export function handlePopulateStart(event: PopulateStart): void {
   kandelPopulateRetract.isRetract = false;
   kandelPopulateRetract.startLogIndex = event.logIndex;
   kandelPopulateRetract.kandel = event.address;
-  kandelPopulateRetract.offerGives = [];
+  kandelPopulateRetract.offerGives = new Array<Bytes>();
   kandelPopulateRetract.save();
 }
 
@@ -149,7 +149,7 @@ export function handleRetractStart(event: RetractStart): void {
   kandelPopulateRetract.isRetract = true;
   kandelPopulateRetract.startLogIndex = event.logIndex;
   kandelPopulateRetract.kandel = event.address;
-  kandelPopulateRetract.offerGives = [];
+  kandelPopulateRetract.offerGives = new Array<Bytes>();
   kandelPopulateRetract.save();
 }
 
@@ -196,7 +196,7 @@ export function handleSetGeometricParams(event: SetGeometricParams): void {
 
 export function handleSetIndexMapping(event: SetIndexMapping): void {
   const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
-  kandel.offerIndexes = kandel.offerIndexes.concat([Bytes.fromUTF8(`${event.params.index}-${event.params.offerId}-${event.params.ba}`)]);
+  kandel.offerIndexes = kandel.offerIndexes.concat([`${event.params.index}-${event.params.offerId}-${event.params.ba}`]);
   kandel.save();
 }
 

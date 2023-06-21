@@ -102,7 +102,7 @@ type Kandel @entity {
   depositedBase: BigInt!
   depositedQuote: BigInt!
 
-  offerIndexes: [Bytes!]!
+  offerIndexes: [String!]!
 
   offers: [Offer!]! @derivedFrom(field: "kandel")
   depositWithdraws: [KandelDepositWithdraw!]! @derivedFrom(field: "kandel")
