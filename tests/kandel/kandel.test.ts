@@ -131,39 +131,39 @@ describe("Describe entity assertions", () => {
       Bytes.fromUTF8(`${5}-${3}-${1}`),
     ];
     kandel.save();
-    const offer1 = createDummyOffer(BigInt.fromI32(1),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
+    const offer1 = createDummyOffer(BigInt.fromI32(1),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
     offer1.gives = BigInt.fromI32(10);
     offer1.totalGave = BigInt.fromI32(10);
     offer1.totalGot = BigInt.fromI32(100);
     offer1.latestLogIndex = BigInt.fromI32(4);
     offer1.save();
-    const offer2 =createDummyOffer(BigInt.fromI32(2),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
+    const offer2 =createDummyOffer(BigInt.fromI32(2),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
     offer2.gives = BigInt.fromI32(20);
     offer2.totalGave = BigInt.fromI32(20);
     offer2.totalGot = BigInt.fromI32(200);
     offer2.latestLogIndex = BigInt.fromI32(5);
     offer2.latestTransactionHash = Bytes.fromUTF8("0x1234567890");
     offer2.save();
-    const offer3 =createDummyOffer(BigInt.fromI32(3),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
+    const offer3 =createDummyOffer(BigInt.fromI32(3),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
     offer3.gives = BigInt.fromI32(30);
     offer3.totalGave = BigInt.fromI32(30);
     offer3.totalGot = BigInt.fromI32(300);
     offer3.latestLogIndex = BigInt.fromI32(6);
     offer3.save();
-    const offer4 =createDummyOffer(BigInt.fromI32(1),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
+    const offer4 =createDummyOffer(BigInt.fromI32(1),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
     offer4.gives = BigInt.fromI32(40);
     offer4.totalGave = BigInt.fromI32(40);
     offer4.totalGot = BigInt.fromI32(400);
     offer4.latestLogIndex = BigInt.fromI32(7);
     offer4.save();
-    const offer5 =createDummyOffer(BigInt.fromI32(2),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
+    const offer5 =createDummyOffer(BigInt.fromI32(2),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
     offer5.gives = BigInt.fromI32(50);
     offer5.totalGave = BigInt.fromI32(50);
     offer5.totalGot = BigInt.fromI32(500);
     offer5.latestLogIndex = BigInt.fromI32(8);
     offer5.latestTransactionHash = Bytes.fromUTF8("0x1234567890");
     offer5.save();
-    const offer6 =createDummyOffer(BigInt.fromI32(3),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
+    const offer6 =createDummyOffer(BigInt.fromI32(3),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
     offer6.gives = BigInt.fromI32(60);
     offer6.totalGave = BigInt.fromI32(60);
     offer6.totalGot = BigInt.fromI32(600);
@@ -203,10 +203,10 @@ describe("Describe entity assertions", () => {
 
     const offerIds = getOfferIdsForKandel(kandel);
     assert.assertTrue( offerIds.length == 4 );
-    assert.assertTrue( offerIds[0] == getOfferId( Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote), BigInt.fromI32(1)) );
-    assert.assertTrue( offerIds[1] == getOfferId( Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote), BigInt.fromI32(2)) );
-    assert.assertTrue( offerIds[2] == getOfferId( Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base), BigInt.fromI32(1)) );
-    assert.assertTrue( offerIds[3] == getOfferId( Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base), BigInt.fromI32(2)) );
+    assert.assertTrue( offerIds[0] == getOfferId( Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base), BigInt.fromI32(1)) );
+    assert.assertTrue( offerIds[1] == getOfferId( Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base), BigInt.fromI32(2)) );
+    assert.assertTrue( offerIds[2] == getOfferId( Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote), BigInt.fromI32(1)) );
+    assert.assertTrue( offerIds[3] == getOfferId( Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote), BigInt.fromI32(2)) );
 
   })
 
@@ -221,39 +221,39 @@ describe("Describe entity assertions", () => {
       Bytes.fromUTF8(`${5}-${3}-${1}`),
     ];
     kandel.save();
-    const offer1 = createDummyOffer(BigInt.fromI32(1),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
+    const offer1 = createDummyOffer(BigInt.fromI32(1),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
     offer1.gives = BigInt.fromI32(10);
     offer1.totalGave = BigInt.fromI32(10);
     offer1.totalGot = BigInt.fromI32(100);
     offer1.latestLogIndex = BigInt.fromI32(4);
     offer1.save();
-    const offer2 =createDummyOffer(BigInt.fromI32(2),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
+    const offer2 =createDummyOffer(BigInt.fromI32(2),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
     offer2.gives = BigInt.fromI32(20);
     offer2.totalGave = BigInt.fromI32(20);
     offer2.totalGot = BigInt.fromI32(200);
     offer2.latestLogIndex = BigInt.fromI32(5);
     offer2.latestTransactionHash = Bytes.fromUTF8("0x1234567890");
     offer2.save();
-    const offer3 =createDummyOffer(BigInt.fromI32(3),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
+    const offer3 =createDummyOffer(BigInt.fromI32(3),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
     offer3.gives = BigInt.fromI32(30);
     offer3.totalGave = BigInt.fromI32(30);
     offer3.totalGot = BigInt.fromI32(300);
     offer3.latestLogIndex = BigInt.fromI32(6);
     offer3.save();
-    const offer4 =createDummyOffer(BigInt.fromI32(1),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
+    const offer4 =createDummyOffer(BigInt.fromI32(1),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
     offer4.gives = BigInt.fromI32(40);
     offer4.totalGave = BigInt.fromI32(40);
     offer4.totalGot = BigInt.fromI32(400);
     offer4.latestLogIndex = BigInt.fromI32(7);
     offer4.save();
-    const offer5 =createDummyOffer(BigInt.fromI32(2),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
+    const offer5 =createDummyOffer(BigInt.fromI32(2),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
     offer5.gives = BigInt.fromI32(50);
     offer5.totalGave = BigInt.fromI32(50);
     offer5.totalGot = BigInt.fromI32(500);
     offer5.latestLogIndex = BigInt.fromI32(8);
     offer5.latestTransactionHash = Bytes.fromUTF8("0x1234567890");
     offer5.save();
-    const offer6 =createDummyOffer(BigInt.fromI32(3),Address.fromBytes( kandel.base ),Address.fromBytes( kandel.quote) )
+    const offer6 =createDummyOffer(BigInt.fromI32(3),Address.fromBytes( kandel.quote ),Address.fromBytes( kandel.base) )
     offer6.gives = BigInt.fromI32(60);
     offer6.totalGave = BigInt.fromI32(60);
     offer6.totalGot = BigInt.fromI32(600);

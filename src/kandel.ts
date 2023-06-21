@@ -106,9 +106,9 @@ export function getOfferIdsForKandel(kandel: KandelEntity): string[] {
     let info = kandel.offerIndexes[i].toString().split('-');
       let offerNumber = info[1];
       let ba = info[2];
-      if (ba == '0') {
+      if (ba == '1') {
         offerIds.push( getOfferId( Address.fromBytes( kandel.base ), Address.fromBytes( kandel.quote ), BigInt.fromString(offerNumber) ) );
-      } else if (ba == '1') {
+      } else if (ba == '0') {
         offerIds.push( getOfferId( Address.fromBytes( kandel.quote ), Address.fromBytes( kandel.base ), BigInt.fromString(offerNumber)) );
       }
   }
