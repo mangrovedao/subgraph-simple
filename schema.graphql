@@ -116,7 +116,7 @@ type KandelPopulateRetract @entity {
   startLogIndex: BigInt!
 
   isRetract: Boolean!
-  offerGives: [Bytes!]!
+  offerGives: [String!]!
   
   kandel: Kandel!
 }

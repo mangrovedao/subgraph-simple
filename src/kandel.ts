@@ -94,7 +94,7 @@ export function handlePopulateEnd(event: PopulateEnd): void {
     if (offer.latestTransactionHash == event.transaction.hash && offer.latestLogIndex.gt(kandelPopulateRetract.startLogIndex)) {
       const totalGave = offer.totalGave === null ? BigInt.fromI32(0) : offer.totalGave;
       const totalGot = offer.totalGot === null ? BigInt.fromI32(0) : offer.totalGot;
-      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([Bytes.fromUTF8(`${offerIds[i]}-${offer.gives}-${totalGave.toString()}-${totalGot.toString()}`)]);
+      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([`${offerIds[i]}-${offer.gives}-${totalGave.toString()}-${totalGot.toString()}`]);
     }
   }
   kandelPopulateRetract.save();
@@ -122,7 +122,7 @@ export function handlePopulateStart(event: PopulateStart): void {
   kandelPopulateRetract.isRetract = false;
   kandelPopulateRetract.startLogIndex = event.logIndex;
   kandelPopulateRetract.kandel = event.address;
-  kandelPopulateRetract.offerGives = new Array<Bytes>();
+  kandelPopulateRetract.offerGives = new Array<string>();
   kandelPopulateRetract.save();
 }
 
@@ -136,7 +136,7 @@ export function handleRetractEnd(event: RetractEnd): void {
     if (offer.latestTransactionHash == event.transaction.hash && offer.latestLogIndex.gt(kandelPopulateRetract.startLogIndex)) {
       const totalGave = offer.totalGave === null ? BigInt.fromI32(0) : offer.totalGave;
       const totalGot = offer.totalGot === null ? BigInt.fromI32(0) : offer.totalGot;
-      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([Bytes.fromUTF8(`${offerIds[i]}-${0}-${totalGave.toString()}-${totalGot.toString()}`)]);
+      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([`${offerIds[i]}-${0}-${totalGave.toString()}-${totalGot.toString()}`]);
     }
   }
   kandelPopulateRetract.save();
@@ -149,7 +149,7 @@ export function handleRetractStart(event: RetractStart): void {
   kandelPopulateRetract.isRetract = true;
   kandelPopulateRetract.startLogIndex = event.logIndex;
   kandelPopulateRetract.kandel = event.address;
-  kandelPopulateRetract.offerGives = new Array<Bytes>();
+  kandelPopulateRetract.offerGives = new Array<string>();
   kandelPopulateRetract.save();
 }
 
