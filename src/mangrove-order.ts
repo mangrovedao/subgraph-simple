@@ -80,7 +80,7 @@ export function handleSetExpiry(event: SetExpiry): void {
   );
   const limitOrder = LimitOrder.load(offerId);
   if (!limitOrder) {
-    log.error("Missing limit order for offerId {}", [offerId]);
+    log.info("Missing limit order for offerId {}", [offerId]);
     return;
   }
   limitOrder.expiryDate = event.params.date;

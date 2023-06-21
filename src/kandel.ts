@@ -94,14 +94,14 @@ export function handlePopulateEnd(event: PopulateEnd): void {
     if( offer.latestTransactionHash == event.transaction.hash && offer.latestLogIndex.gt( kandelPopulateRetract.startLogIndex) ) {
       const totalGave = offer.totalGave === null ? BigInt.fromI32(0) : offer.totalGave;
       const totalGot = offer.totalGot === null ? BigInt.fromI32(0) : offer.totalGot;
-      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([ Bytes.fromUTF8( `${ offerIds[i] }-${ offer.gives }-${ totalGave!.toString() }-${ totalGot!.toString() }`) ]);
+      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([ Bytes.fromUTF8( `${ offerIds[i] }-${ offer.gives }-${ totalGave.toString() }-${ totalGot.toString() }`) ]);
     }
   } 
   kandelPopulateRetract.save();
 }
 
 export function getOfferIdsForKandel(kandel: KandelEntity): string[] {
-  let offerIds = [] as string[]
+  let offerIds = new Array<string>()
   for (let i = 0; i < kandel.offerIndexes.length; i++) {
     let info = kandel.offerIndexes[i].toString().split('-');
       let offerNumber = info[1];
@@ -136,7 +136,7 @@ export function handleRetractEnd(event: RetractEnd): void {
     if( offer.latestTransactionHash == event.transaction.hash && offer.latestLogIndex.gt(kandelPopulateRetract.startLogIndex )) {
       const totalGave = offer.totalGave === null ? BigInt.fromI32(0) : offer.totalGave;
       const totalGot = offer.totalGot === null ? BigInt.fromI32(0) : offer.totalGot;
-      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([ Bytes.fromUTF8( `${ offerIds[i] }-${ 0 }-${ totalGave!.toString() }-${ totalGot!.toString() }`) ]);
+      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([ Bytes.fromUTF8( `${ offerIds[i] }-${ 0 }-${ totalGave.toString() }-${ totalGot.toString() }`) ]);
     }
   } 
   kandelPopulateRetract.save();

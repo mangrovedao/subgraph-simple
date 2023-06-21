@@ -104,8 +104,8 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   offer.prevGives = offer.gives;
   offer.prevWants = offer.wants;
   offer.gives = BigInt.fromI32(0);
-  offer.totalGot = event.params.takerGives.plus(offer.totalGot!);
-  offer.totalGave = event.params.takerWants.plus(offer.totalGave!);
+  offer.totalGot = event.params.takerGives.plus(offer.totalGot);
+  offer.totalGave = event.params.takerWants.plus(offer.totalGave);
 
   offer.save();
 }
