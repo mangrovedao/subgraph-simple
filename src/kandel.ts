@@ -20,7 +20,7 @@ import {
   SetReserveId,
   SetRouter
 } from "../generated/templates/Kandel/Kandel"
-import { KandelDepositWithdraw, Kandel as  KandelEntity, KandelPopulateRetract, Offer } from "../generated/schema";
+import { KandelDepositWithdraw, Kandel as KandelEntity, KandelPopulateRetract, Offer } from "../generated/schema";
 import { getEventUniqueId, getMarketId, getOfferId, getOrCreateKandelParameters } from "./helpers";
 import { log } from "matchstick-as";
 
@@ -74,7 +74,7 @@ export function handleDebit(event: Debit): void {
   withdraw.save();
 }
 
-export function handleLogIncident(event: LogIncident): void {}
+export function handleLogIncident(event: LogIncident): void { }
 
 export function handleMgv(event: Mgv): void {
   // nothing to do here as we have one subgraph by mangrove
@@ -87,16 +87,16 @@ export function handlePair(event: Pair): void {
 export function handlePopulateEnd(event: PopulateEnd): void {
   const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
   const offerIds = getOfferIdsForKandel(kandel);
-  const kandelPopulateRetract = KandelPopulateRetract.load( event.transaction.hash.toHex() )!; // TODO: use load in block
+  const kandelPopulateRetract = KandelPopulateRetract.load(event.transaction.hash.toHex())!; // TODO: use load in block
 
-  for(let i = 0; i < offerIds.length; i++) {
+  for (let i = 0; i < offerIds.length; i++) {
     let offer = Offer.load(offerIds[i])!; // TODO: use load in block
-    if( offer.latestTransactionHash == event.transaction.hash && offer.latestLogIndex.gt( kandelPopulateRetract.startLogIndex) ) {
+    if (offer.latestTransactionHash == event.transaction.hash && offer.latestLogIndex.gt(kandelPopulateRetract.startLogIndex)) {
       const totalGave = offer.totalGave === null ? BigInt.fromI32(0) : offer.totalGave;
       const totalGot = offer.totalGot === null ? BigInt.fromI32(0) : offer.totalGot;
-      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([ Bytes.fromUTF8( `${ offerIds[i] }-${ offer.gives }-${ totalGave.toString() }-${ totalGot.toString() }`) ]);
+      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([Bytes.fromUTF8(`${offerIds[i]}-${offer.gives}-${totalGave.toString()}-${totalGot.toString()}`)]);
     }
-  } 
+  }
   kandelPopulateRetract.save();
 }
 
@@ -104,19 +104,19 @@ export function getOfferIdsForKandel(kandel: KandelEntity): string[] {
   let offerIds = new Array<string>()
   for (let i = 0; i < kandel.offerIndexes.length; i++) {
     let info = kandel.offerIndexes[i].toString().split('-');
-      let offerNumber = info[1];
-      let ba = info[2];
-      if (ba == '1') {
-        offerIds.push( getOfferId( Address.fromBytes( kandel.base ), Address.fromBytes( kandel.quote ), BigInt.fromString(offerNumber) ) );
-      } else if (ba == '0') {
-        offerIds.push( getOfferId( Address.fromBytes( kandel.quote ), Address.fromBytes( kandel.base ), BigInt.fromString(offerNumber)) );
-      }
+    let offerNumber = info[1];
+    let ba = info[2];
+    if (ba == '1') {
+      offerIds.push(getOfferId(Address.fromBytes(kandel.base), Address.fromBytes(kandel.quote), BigInt.fromString(offerNumber)));
+    } else if (ba == '0') {
+      offerIds.push(getOfferId(Address.fromBytes(kandel.quote), Address.fromBytes(kandel.base), BigInt.fromString(offerNumber)));
+    }
   }
   return offerIds;
 }
 
 export function handlePopulateStart(event: PopulateStart): void {
-  const kandelPopulateRetract = new KandelPopulateRetract(event.transaction.hash.toHex() );
+  const kandelPopulateRetract = new KandelPopulateRetract(event.transaction.hash.toHex());
   kandelPopulateRetract.transactionHash = event.transaction.hash;
   kandelPopulateRetract.creationDate = event.block.timestamp;
   kandelPopulateRetract.isRetract = false;
@@ -129,21 +129,21 @@ export function handlePopulateStart(event: PopulateStart): void {
 export function handleRetractEnd(event: RetractEnd): void {
   const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
   const offerIds = getOfferIdsForKandel(kandel);
-  const kandelPopulateRetract = KandelPopulateRetract.load( event.transaction.hash.toHex() )!; // TODO: use load in block
+  const kandelPopulateRetract = KandelPopulateRetract.load(event.transaction.hash.toHex())!; // TODO: use load in block
 
-  for(let i = 0; i < offerIds.length; i++) {
+  for (let i = 0; i < offerIds.length; i++) {
     let offer = Offer.load(offerIds[i])!; // TODO: use load in block
-    if( offer.latestTransactionHash == event.transaction.hash && offer.latestLogIndex.gt(kandelPopulateRetract.startLogIndex )) {
+    if (offer.latestTransactionHash == event.transaction.hash && offer.latestLogIndex.gt(kandelPopulateRetract.startLogIndex)) {
       const totalGave = offer.totalGave === null ? BigInt.fromI32(0) : offer.totalGave;
       const totalGot = offer.totalGot === null ? BigInt.fromI32(0) : offer.totalGot;
-      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([ Bytes.fromUTF8( `${ offerIds[i] }-${ 0 }-${ totalGave.toString() }-${ totalGot.toString() }`) ]);
+      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([Bytes.fromUTF8(`${offerIds[i]}-${0}-${totalGave.toString()}-${totalGot.toString()}`)]);
     }
-  } 
+  }
   kandelPopulateRetract.save();
 }
 
 export function handleRetractStart(event: RetractStart): void {
-  const kandelPopulateRetract = new KandelPopulateRetract(event.transaction.hash.toHex() );
+  const kandelPopulateRetract = new KandelPopulateRetract(event.transaction.hash.toHex());
   kandelPopulateRetract.transactionHash = event.transaction.hash;
   kandelPopulateRetract.creationDate = event.block.timestamp;
   kandelPopulateRetract.isRetract = true;
@@ -196,7 +196,7 @@ export function handleSetGeometricParams(event: SetGeometricParams): void {
 
 export function handleSetIndexMapping(event: SetIndexMapping): void {
   const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
-  kandel.offerIndexes = kandel.offerIndexes.concat([ Bytes.fromUTF8(`${event.params.index}-${event.params.offerId}-${event.params.ba}`) ] );
+  kandel.offerIndexes = kandel.offerIndexes.concat([Bytes.fromUTF8(`${event.params.index}-${event.params.offerId}-${event.params.ba}`)]);
   kandel.save();
 }
 
