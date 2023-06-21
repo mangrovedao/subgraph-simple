@@ -103,12 +103,12 @@ export function handlePopulateEnd(event: PopulateEnd): void {
 export function getOfferIdsForKandel(kandel: KandelEntity): string[] {
   let offerIds = new Array<string>()
   for (let i = 0; i < kandel.offerIndexes.length; i++) {
-    let info = kandel.offerIndexes[i].toString().split('-');
-    let offerNumber = info[1];
-    let ba = info[2];
-    if (ba == '1') {
+    const info = kandel.offerIndexes[i].toString().split('-');
+    const offerNumber = info[1];
+    const ba = info[2];
+    if (ba == '1') { // Ask
       offerIds.push(getOfferId(Address.fromBytes(kandel.base), Address.fromBytes(kandel.quote), BigInt.fromString(offerNumber)));
-    } else if (ba == '0') {
+    } else if (ba == '0') { // Bid
       offerIds.push(getOfferId(Address.fromBytes(kandel.quote), Address.fromBytes(kandel.base), BigInt.fromString(offerNumber)));
     }
   }
