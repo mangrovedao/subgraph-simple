@@ -53,6 +53,8 @@ export function handleOfferFail(event: OfferFail): void {
 
   offer.failedReason = event.params.mgvData;
   offer.latestUpdateDate = event.block.timestamp;
+  offer.latestLogIndex = event.logIndex;
+  offer.latestTransactionHash = event.transaction.hash;
 
   offer.save();
 }
@@ -76,7 +78,8 @@ export function handleOfferRetract(event: OfferRetract): void {
     offer.gasprice = BigInt.fromI32(0);
   }
   offer.latestUpdateDate = event.block.timestamp;
-
+  offer.latestLogIndex = event.logIndex;
+  offer.latestTransactionHash = event.transaction.hash;
   offer.save();
 }
 
@@ -88,23 +91,6 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   );
   const offer = Offer.load(offerId)!;
   
-  if (offer.kandel) {
-    const kandel = Kandel.load(offer.kandel!)!;
-    const market = Market.load(offer.market)!;
-    
-    if (market.outbound_tkn == kandel.base) {
-      // takerWants == outbound_tkn
-      kandel.totalBase = kandel.totalBase.minus(event.params.takerWants);
-      kandel.totalQuote = kandel.totalQuote.plus(event.params.takerGives);
-    } else {
-      // takerWants == inbound_tkn
-      kandel.totalBase = kandel.totalBase.plus(event.params.takerGives);
-      kandel.totalQuote = kandel.totalQuote.minus(event.params.takerWants);
-    }
-    
-    kandel.save();
-  }
-  
   offer.isFilled = offer.wants == event.params.takerGives && offer.gives == event.params.takerWants;
   offer.isOpen = false;
   offer.isFailed = false;
@@ -112,12 +98,14 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   offer.posthookFailReason = null;
   offer.failedReason = null;
   offer.latestUpdateDate = event.block.timestamp;
+  offer.latestLogIndex = event.logIndex;
+  offer.latestTransactionHash = event.transaction.hash;
 
   offer.prevGives = offer.gives;
   offer.prevWants = offer.wants;
   offer.gives = BigInt.fromI32(0);
-  offer.totalGot = event.params.takerGives.plus(offer.totalGot!);
-  offer.totalGave = event.params.takerWants.plus(offer.totalGave!);
+  offer.totalGot = event.params.takerGives.plus(offer.totalGot);
+  offer.totalGave = event.params.takerWants.plus(offer.totalGave);
 
   offer.save();
 }
@@ -129,7 +117,8 @@ export const createNewOffer = (event: OfferWrite): Offer => {
     event.params.id,
   );
   const offer = new Offer(offerId);
-  offer.transactionHash = event.transaction.hash;
+  offer.latestLogIndex = event.logIndex;
+  offer.latestTransactionHash = event.transaction.hash;
 
   const kandel = Kandel.load(event.params.maker);
   if (kandel) {
@@ -154,6 +143,8 @@ export function handleOfferWrite(event: OfferWrite): void {
     offer.totalGave = BigInt.fromI32(0);
   }
   offer.latestUpdateDate = event.block.timestamp;
+  offer.latestLogIndex = event.logIndex;
+  offer.latestTransactionHash = event.transaction.hash;
 
   const owner = getOrCreateAccount(event.params.maker);
   offer.maker = owner.id;

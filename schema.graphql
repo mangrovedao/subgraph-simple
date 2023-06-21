@@ -13,7 +13,8 @@ type Market @entity {
 
 type Offer @entity {
   id: String!
-  transactionHash: Bytes!
+  latestTransactionHash: Bytes!
+  latestLogIndex: BigInt!
   creationDate: BigInt!
   latestUpdateDate: BigInt!
   offerId: BigInt!
@@ -98,21 +99,43 @@ type Kandel @entity {
   reserveId: Account
   router: Account
 
-  totalBase: BigInt!
   depositedBase: BigInt!
-
-  totalQuote: BigInt!
   depositedQuote: BigInt!
+
+  offerIndexes: [String!]!
+
+  offers: [Offer!]! @derivedFrom(field: "kandel")
+  depositWithdraws: [KandelDepositWithdraw!]! @derivedFrom(field: "kandel")
+  parameters: [KandelParameters!]! @derivedFrom(field: "kandel")
+}
+
+type KandelPopulateRetract @entity {
+  id: String!
+  transactionHash: Bytes!
+  creationDate: BigInt!
+  startLogIndex: BigInt!
+
+  isRetract: Boolean!
+  offerGives: [String!]!
+  
+  kandel: Kandel!
+}
+
+type KandelParameters @entity {
+  id: String!
+  transactionHash: Bytes!
+  creationDate: BigInt!
 
   gasprice: BigInt
   gasreq: BigInt
-
+  compoundRateBase: BigInt
+  compoundRateQuote: BigInt
   spread: BigInt
   ratio: BigInt
   length: BigInt
-  
-  offers: [Offer!]! @derivedFrom(field: "kandel")
-  depositWithdraws: [KandelDepositWithdraw!]! @derivedFrom(field: "kandel")
+
+  kandel: Kandel!
+
 }
 
 type OrderStack @entity {

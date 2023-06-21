@@ -24,11 +24,10 @@ export function handleNewKandel(event: NewKandel): void {
   kandel.depositedBase = BigInt.fromI32(0);
   kandel.depositedQuote = BigInt.fromI32(0);
 
-  kandel.totalBase = BigInt.fromI32(0);
-  kandel.totalQuote = BigInt.fromI32(0);
-
   kandel.deployer = event.params.owner;
   kandel.admin = event.params.owner;
+
+  kandel.offerIndexes = [];
 
   kandel.save();
 }
