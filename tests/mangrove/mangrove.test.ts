@@ -722,8 +722,4 @@ describe("Describe entity assertions", () => {
     assert.entityCount('Market', 2);
   })
 
-  test("failing test", () => {
-    assert.assertTrue(false)
-  });
-
 });
