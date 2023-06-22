@@ -341,7 +341,7 @@ describe("Describe entity assertions", () => {
       BigInt.fromI32(100),
       BigInt.fromI32(0),
       BigInt.fromI32(0),
-    )
+    );
 
     let offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, BigInt.fromI32(10), BigInt.fromI32(20));
     handleOfferSuccess(offerSuccess);
