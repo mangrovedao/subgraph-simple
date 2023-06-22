@@ -52,6 +52,7 @@ type Order @entity {
   takerGave: BigInt
   penalty: BigInt
   feePaid: BigInt
+  isOpen: Boolean
 
   market: Market
   limitOrder: LimitOrder 
@@ -71,7 +72,6 @@ type LimitOrder @entity {
   offer: Offer
 
   order: Order! 
-
 }
 
 type KandelDepositWithdraw @entity {

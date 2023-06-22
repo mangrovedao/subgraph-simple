@@ -1,4 +1,4 @@
-import { BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { BigInt } from "@graphprotocol/graph-ts";
 import {
   Approval,
   Credit,
@@ -23,7 +23,7 @@ import {
   SetNotify,
   SetUseOracle
 } from "../generated/Mangrove/Mangrove";
-import { Kandel, Market, Offer, Order } from "../generated/schema";
+import { Kandel, LimitOrder, Market, Offer, Order } from "../generated/schema";
 import { addOrderToStack, getEventUniqueId, getMarketId, getOfferId, getOrCreateAccount, getOrderFromStack, removeOrderFromStack } from "./helpers";
 
 export function handleApproval(event: Approval): void {}
@@ -35,6 +35,18 @@ export function handleDebit(event: Debit): void {}
 export function handleKill(event: Kill): void {}
 
 export function handleNewMgv(event: NewMgv): void {}
+
+export const limitOrderSetIsOpenToFalse = (offerId: string): void => {
+  const limitOrder = LimitOrder.load(offerId);
+  if (!limitOrder) {
+    return;
+  }
+  const order = Order.load(limitOrder.order)!;
+
+  order.isOpen = false;
+
+  order.save();
+}
 
 export function handleOfferFail(event: OfferFail): void {
   const offerId = getOfferId(
@@ -56,6 +68,8 @@ export function handleOfferFail(event: OfferFail): void {
   offer.latestLogIndex = event.logIndex;
   offer.latestTransactionHash = event.transaction.hash;
 
+  limitOrderSetIsOpenToFalse(offerId); 
+
   offer.save();
 }
 
@@ -74,12 +88,17 @@ export function handleOfferRetract(event: OfferRetract): void {
   offer.posthookFailReason = null;
   offer.failedReason = null;
   offer.deprovisioned = event.params.deprovision;
+
   if(event.params.deprovision) {
     offer.gasprice = BigInt.fromI32(0);
   }
+
   offer.latestUpdateDate = event.block.timestamp;
   offer.latestLogIndex = event.logIndex;
   offer.latestTransactionHash = event.transaction.hash;
+
+  limitOrderSetIsOpenToFalse(offerId); 
+
   offer.save();
 }
 
@@ -90,8 +109,12 @@ export function handleOfferSuccess(event: OfferSuccess): void {
     event.params.id,
   );
   const offer = Offer.load(offerId)!;
-  
-  offer.isFilled = offer.wants == event.params.takerGives && offer.gives == event.params.takerWants;
+ 
+  if (offer.wants == event.params.takerGives && offer.gives == event.params.takerWants) {
+    offer.isFilled = true; 
+    limitOrderSetIsOpenToFalse(offerId); 
+  }
+
   offer.isOpen = false;
   offer.isFailed = false;
   offer.isRetracted = false;
@@ -100,7 +123,6 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   offer.latestUpdateDate = event.block.timestamp;
   offer.latestLogIndex = event.logIndex;
   offer.latestTransactionHash = event.transaction.hash;
-
   offer.prevGives = offer.gives;
   offer.prevWants = offer.wants;
   offer.gives = BigInt.fromI32(0);
@@ -136,12 +158,14 @@ export function handleOfferWrite(event: OfferWrite): void {
     event.params.id,
   );
   let offer = Offer.load(offerId);
+
   if (!offer) {
     offer = createNewOffer(event);
     offer.creationDate = event.block.timestamp;
     offer.totalGot = BigInt.fromI32(0);
     offer.totalGave = BigInt.fromI32(0);
   }
+
   offer.latestUpdateDate = event.block.timestamp;
   offer.latestLogIndex = event.logIndex;
   offer.latestTransactionHash = event.transaction.hash;
@@ -172,7 +196,6 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.deprovisioned = false;
   offer.failedReason = null;
   offer.posthookFailReason = null;
-
 
   offer.save();
 }
