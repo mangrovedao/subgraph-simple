@@ -41,11 +41,9 @@ export const limitOrderSetIsOpenToFalse = (offerId: string): void => {
   if (!limitOrder) {
     return;
   }
-  const order = Order.load(limitOrder.order)!;
+  limitOrder.isOpen = false;
 
-  order.isOpen = false;
-
-  order.save();
+  limitOrder.save();
 }
 
 export function handleOfferFail(event: OfferFail): void {

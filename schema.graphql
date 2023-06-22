@@ -52,7 +52,6 @@ type Order @entity {
   takerGave: BigInt
   penalty: BigInt
   feePaid: BigInt
-  isOpen: Boolean
 
   market: Market
   limitOrder: LimitOrder 
@@ -70,6 +69,7 @@ type LimitOrder @entity {
   restingOrder: Boolean!
   realTaker: Bytes 
   offer: Offer
+  isOpen: Boolean
 
   order: Order! 
 }

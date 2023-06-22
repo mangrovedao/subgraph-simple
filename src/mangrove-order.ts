@@ -65,7 +65,7 @@ export function handleOrderSummary(event: OrderSummary): void {
   limitOrder.latestUpdateDate = event.block.timestamp;
   limitOrder.order = order.id;
 
-  order.isOpen = event.params.restingOrder;
+  limitOrder.isOpen = event.params.restingOrder;
 
   order.limitOrder  = limitOrder.id;
 

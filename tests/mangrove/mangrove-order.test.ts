@@ -110,7 +110,7 @@ describe("Describe entity assertions", () => {
     const offerId = getOfferId(token0, token1, id);
 
     assert.fieldEquals('Order', orderId, 'limitOrder', offerId);
-    assert.fieldEquals('Order', orderId, 'isOpen', 'true');
+    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'true');
     assert.fieldEquals('LimitOrder', offerId, 'wants', takerWants.toString());
     assert.fieldEquals('LimitOrder', offerId, 'gives', takerGives.toString());
     assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
@@ -170,10 +170,9 @@ describe("Describe entity assertions", () => {
     handleOrderSummary(orderSummaryEvent);
     
     const limitOrderId = getEventUniqueId(orderSummaryEvent);
-
     assert.fieldEquals('Order', orderId, 'limitOrder', limitOrderId);
-    assert.fieldEquals('Order', orderId, 'isOpen', 'false');
 
+    assert.fieldEquals('LimitOrder', limitOrderId, 'isOpen', 'false');
     assert.fieldEquals('LimitOrder', limitOrderId, 'wants', takerWants.toString());
     assert.fieldEquals('LimitOrder', limitOrderId, 'gives', takerGives.toString());
     assert.fieldEquals('LimitOrder', limitOrderId, 'realTaker', taker.toHex());
@@ -264,7 +263,7 @@ describe("Describe entity assertions", () => {
     const offerId = getOfferId(token0, token1, id);
 
     assert.fieldEquals('Order', orderId, 'limitOrder', offerId);
-    assert.fieldEquals('Order', orderId, 'isOpen', 'true');
+    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'true');
     assert.fieldEquals('LimitOrder', offerId, 'wants', takerWants.toString());
     assert.fieldEquals('LimitOrder', offerId, 'gives', takerGives.toString());
     assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
@@ -296,7 +295,7 @@ describe("Describe entity assertions", () => {
     const offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, gives, wants);
     handleOfferSuccess(offerSuccess);
 
-    assert.fieldEquals('Order', orderId, 'isOpen', 'false');
+    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'false');
     assert.fieldEquals('Offer', offerId, 'isFilled', 'true');
     assert.fieldEquals('Offer', offerId, 'isFailed', 'false');
     assert.fieldEquals('Offer', offerId, 'isRetracted', 'false');
@@ -354,7 +353,7 @@ describe("Describe entity assertions", () => {
     const offerId = getOfferId(token0, token1, id);
 
     assert.fieldEquals('Order', orderId, 'limitOrder', offerId);
-    assert.fieldEquals('Order', orderId, 'isOpen', 'true');
+    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'true');
     assert.fieldEquals('LimitOrder', offerId, 'wants', takerWants.toString());
     assert.fieldEquals('LimitOrder', offerId, 'gives', takerGives.toString());
     assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
@@ -386,7 +385,7 @@ describe("Describe entity assertions", () => {
     const offerRetract = createOfferRetractEvent(token0, token1, id, false);
     handleOfferRetract(offerRetract);
 
-    assert.fieldEquals('Order', orderId, 'isOpen', 'false');
+    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'false');
 
     assert.fieldEquals('Offer', offerId, 'isFilled', 'false');
     assert.fieldEquals('Offer', offerId, 'isFailed', 'false');
@@ -445,7 +444,7 @@ describe("Describe entity assertions", () => {
     const offerId = getOfferId(token0, token1, id);
 
     assert.fieldEquals('Order', orderId, 'limitOrder', offerId);
-    assert.fieldEquals('Order', orderId, 'isOpen', 'true');
+    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'true');
     assert.fieldEquals('LimitOrder', offerId, 'wants', takerWants.toString());
     assert.fieldEquals('LimitOrder', offerId, 'gives', takerGives.toString());
     assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
@@ -478,7 +477,7 @@ describe("Describe entity assertions", () => {
     const offerFail = createOfferFailEvent(token0, token1, id, taker, gives, wants, failedReason);
     handleOfferFail(offerFail);
 
-    assert.fieldEquals('Order', orderId, 'isOpen', 'false');
+    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'false');
 
     assert.fieldEquals('Offer', offerId, 'isFilled', 'false');
     assert.fieldEquals('Offer', offerId, 'isFailed', 'true');
