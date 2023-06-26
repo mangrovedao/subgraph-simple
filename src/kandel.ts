@@ -21,8 +21,7 @@ import {
   SetRouter
 } from "../generated/templates/Kandel/Kandel"
 import { KandelDepositWithdraw, Kandel as KandelEntity, KandelPopulateRetract, Offer } from "../generated/schema";
-import { getEventUniqueId, getMarketId, getOfferId, getOrCreateKandelParameters } from "./helpers";
-import { log } from "matchstick-as";
+import { getEventUniqueId, getOfferId, getOrCreateKandelParameters } from "./helpers";
 
 export function handleCredit(event: Credit): void {
   const deposit = new KandelDepositWithdraw(

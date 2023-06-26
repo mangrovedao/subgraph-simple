@@ -13,6 +13,8 @@ import { getOfferIdsForKandel, handleCredit, handleDebit, handlePopulateEnd, han
 import { handleSetActive } from "../../src/mangrove";
 import { createSetActiveEvent } from "../mangrove/mangrove-utils";
 import { createCreditEvent, createDebitEvent, createPopulateEndEvent, createPopulateStartEvent, createRetractEndEvent, createRetractStartEvent, createSetAdminEvent, createSetCompoundRatesEvent, createSetGaspriceEvent, createSetGasreqEvent, createSetGeometricParamsEvent, createSetIndexMappingEvent, createSetLengthEvent, createSetReserveIdEvent, createSetRouterEvent } from "./kandel-utils";
+import { createNewKandelEvent } from "./kandel-seeder-utils";
+import { handleNewKandel } from "../../src/kandel-seeder";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -25,11 +27,12 @@ const newOwner = Address.fromString("0x0000000000000000000000000000000000000005"
 const router = Address.fromString("0x0000000000000000000000000000000000000006")
 const reserveId = Address.fromString("0x0000000000000000000000000000000000000007")
 const taker = Address.fromString("0x0000000000000000000000000000000000000008")
+const kandelAddress2 = Address.fromString("0x0000000000000000000000000000000000000009")
 
 
 describe("Describe entity assertions", () => {
   beforeEach(() => {
-    const kandel =new Kandel(kandelAddress);
+    const kandel = new Kandel(kandelAddress);
     kandel.transactionHash = Bytes.fromHexString('0x000123');
     kandel.seeder = Bytes.fromUTF8('seeder');
     kandel.address = Bytes.fromUTF8('address');
@@ -53,6 +56,18 @@ describe("Describe entity assertions", () => {
 
   afterEach(() => {
     clearStore()
+  });
+
+  test("create a new kandel", () => {
+    const newKandelEvent = createNewKandelEvent(
+      owner,
+      token0,
+      token1,
+      kandelAddress2,
+    );
+
+    handleNewKandel(newKandelEvent);
+    assert.fieldEquals('Kandel', kandelAddress2.toHex(), 'deployer', owner.toHex());
   });
 
   test("KandelDepositWithdraw, handleCredit, base", () => {
