@@ -1,0 +1,11 @@
+query(
+	$address: Bytes,
+) {
+	orders(
+		where: {
+			taker: $address
+		}
+	) {
+		taker
+	}
+}
