@@ -1,0 +1,11 @@
+query(
+	$address: Bytes,
+) {
+	limitOrders(
+		where: {
+			realTaker: $address
+		}
+	) {
+		realTaker
+	}
+}
