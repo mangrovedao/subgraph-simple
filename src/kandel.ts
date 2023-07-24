@@ -1,6 +1,5 @@
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { Address, BigInt } from "@graphprotocol/graph-ts"
 import {
-  Kandel,
   Credit,
   Debit,
   LogIncident,
@@ -21,8 +20,7 @@ import {
   SetRouter
 } from "../generated/templates/Kandel/Kandel"
 import { KandelDepositWithdraw, Kandel as KandelEntity, KandelPopulateRetract, Offer } from "../generated/schema";
-import { getEventUniqueId, getOfferId, getOrCreateKandelParameters } from "./helpers";
-import { log } from "matchstick-as";
+import { getEventUniqueId, getOfferId, getOrCreateAccount, getOrCreateKandelParameters } from "./helpers";
 
 export function handleCredit(event: Credit): void {
   const deposit = new KandelDepositWithdraw(
@@ -156,8 +154,8 @@ export function handleRetractStart(event: RetractStart): void {
 export function handleSetAdmin(event: SetAdmin): void {
   const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
 
-  kandel.admin = event.params.admin;
-
+  const adminAccount = getOrCreateAccount(event.params.admin);
+  kandel.admin = adminAccount.address;
   kandel.save();
 }
 
