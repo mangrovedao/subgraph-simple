@@ -209,6 +209,7 @@ describe("Describe entity assertions", () => {
     const kandel = new Kandel(maker);
 
     kandel.transactionHash = Bytes.fromHexString('0x000123');
+    kandel.creationDate = BigInt.fromI32(0);
     kandel.seeder = Bytes.fromUTF8('seeder');
     kandel.address = Bytes.fromUTF8('address');
     kandel.base = token0;
