@@ -26,13 +26,12 @@ const router = Address.fromString("0x0000000000000000000000000000000000000006")
 const reserveId = Address.fromString("0x0000000000000000000000000000000000000007")
 const taker = Address.fromString("0x0000000000000000000000000000000000000008")
 
-
 describe("Describe entity assertions", () => {
   beforeEach(() => {
-    const kandel =new Kandel(kandelAddress);
+    const kandel = new Kandel(kandelAddress);
     kandel.transactionHash = Bytes.fromHexString('0x000123');
     kandel.seeder = Bytes.fromUTF8('seeder');
-    kandel.address = Bytes.fromUTF8('address');
+    kandel.address = kandelAddress;
     kandel.base = token0;
     kandel.quote = token1;
     kandel.depositedBase = BigInt.fromI32(100);
@@ -294,7 +293,6 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("KandelPopulateRetract",retractId, "kandel", retractStartEvent.address.toHexString())
     assert.fieldEquals("KandelPopulateRetract",retractId, "offerGives", "[]")
   })
-
   test("Kandel, handleSetAdmin", () => {
     const setAdmin = createSetAdminEvent(newOwner);
     setAdmin.address = kandelAddress;
@@ -309,13 +307,16 @@ describe("Describe entity assertions", () => {
     const compoundRateEvent = createSetCompoundRatesEvent(base, quote);
     compoundRateEvent.address = kandelAddress;
     handleSetCompoundRates(compoundRateEvent);
-    const kandelParamsId= getKandelParamsId(compoundRateEvent.transaction.hash, compoundRateEvent.address)
+    const kandelParamsId = getKandelParamsId(compoundRateEvent.transaction.hash, compoundRateEvent.address);
     
     assert.fieldEquals("KandelParameters", kandelParamsId, "kandel", compoundRateEvent.address.toHex());
     assert.fieldEquals("KandelParameters", kandelParamsId, "transactionHash", compoundRateEvent.transaction.hash.toHexString());
     assert.fieldEquals("KandelParameters", kandelParamsId, "creationDate", compoundRateEvent.block.timestamp.toString());
     assert.fieldEquals("KandelParameters", kandelParamsId, "compoundRateBase",compoundRateEvent.params.compoundRateBase.toString());
     assert.fieldEquals("KandelParameters", kandelParamsId, "compoundRateQuote",compoundRateEvent.params.compoundRateQuote.toString());
+
+    assert.fieldEquals("Kandel", kandelAddress.toHexString(), "compoundRateBase",compoundRateEvent.params.compoundRateBase.toString());
+    assert.fieldEquals("Kandel", kandelAddress.toHexString(), "compoundRateQuote",compoundRateEvent.params.compoundRateQuote.toString());
   });
 
   test("KandelParameters, handleSetGasprice", () => {
@@ -323,12 +324,13 @@ describe("Describe entity assertions", () => {
     const setGasPriceEvent = createSetGaspriceEvent(bi10)
     setGasPriceEvent.address = kandelAddress;
     handleSetGasprice(setGasPriceEvent);
-    const kandelParamsId= getKandelParamsId(setGasPriceEvent.transaction.hash, setGasPriceEvent.address)
+    const kandelParamsId = getKandelParamsId(setGasPriceEvent.transaction.hash, setGasPriceEvent.address);
      
     assert.fieldEquals("KandelParameters", kandelParamsId, "gasprice", "10");
-    assert.fieldEquals("KandelParameters", kandelParamsId, "kandel", setGasPriceEvent.address.toHex());
     assert.fieldEquals("KandelParameters", kandelParamsId, "transactionHash", setGasPriceEvent.transaction.hash.toHexString());
     assert.fieldEquals("KandelParameters", kandelParamsId, "creationDate", setGasPriceEvent.block.timestamp.toString());
+
+    assert.fieldEquals("Kandel", kandelAddress.toHexString(), "gasprice", "10");
   });
 
   test("KandelParameters, handleSetGasreq", () => {
@@ -336,13 +338,14 @@ describe("Describe entity assertions", () => {
     const setGasReq = createSetGasreqEvent(value);
     setGasReq.address = kandelAddress;
     handleSetGasreq(setGasReq);
-    const kandelParamsId= getKandelParamsId(setGasReq.transaction.hash, setGasReq.address)
+    const kandelParamsId = getKandelParamsId(setGasReq.transaction.hash, setGasReq.address);
 
     assert.fieldEquals("KandelParameters", kandelParamsId, "gasreq", value.toString());
     assert.fieldEquals("KandelParameters", kandelParamsId, "kandel", setGasReq.address.toHex());
     assert.fieldEquals("KandelParameters", kandelParamsId, "transactionHash", setGasReq.transaction.hash.toHexString());
     assert.fieldEquals("KandelParameters", kandelParamsId, "creationDate", setGasReq.block.timestamp.toString());
-    
+   
+    assert.fieldEquals("Kandel", kandelAddress.toHexString(), "gasreq", value.toString());
   });
 
   test("KandelParameters, handleSetGeometricParams", () => {
@@ -353,10 +356,10 @@ describe("Describe entity assertions", () => {
       spread,
       ratio
     );
+
     geometricParams.address = kandelAddress;
     handleSetGeometricParams(geometricParams);
-    const kandelParamsId= getKandelParamsId(geometricParams.transaction.hash, geometricParams.address)
-
+    const kandelParamsId = getKandelParamsId(geometricParams.transaction.hash, geometricParams.address);
 
     assert.fieldEquals("KandelParameters", kandelParamsId, "spread", spread.toString());
     assert.fieldEquals("KandelParameters", kandelParamsId, "ratio", ratio.toString());
@@ -364,6 +367,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("KandelParameters", kandelParamsId, "transactionHash", geometricParams.transaction.hash.toHexString());
     assert.fieldEquals("KandelParameters", kandelParamsId, "creationDate", geometricParams.block.timestamp.toString());
 
+    assert.fieldEquals("Kandel", kandelAddress.toHexString(), "spread", spread.toString());
+    assert.fieldEquals("Kandel", kandelAddress.toHexString(), "ratio", ratio.toString());
   });
 
   test("Kandel, handleSetIndexMapping", () => {
@@ -385,12 +390,14 @@ describe("Describe entity assertions", () => {
     const setLength = createSetLengthEvent(value);
     setLength.address = kandelAddress;
     handleSetLength(setLength);
-    const kandelParamsId= getKandelParamsId(setLength.transaction.hash, setLength.address)
+    const kandelParamsId = getKandelParamsId(setLength.transaction.hash, setLength.address);
 
     assert.fieldEquals("KandelParameters", kandelParamsId, "length", value.toString());
     assert.fieldEquals("KandelParameters", kandelParamsId, "kandel", setLength.address.toHex());
     assert.fieldEquals("KandelParameters", kandelParamsId, "transactionHash", setLength.transaction.hash.toHexString());
     assert.fieldEquals("KandelParameters", kandelParamsId, "creationDate", setLength.block.timestamp.toString());
+
+    assert.fieldEquals("Kandel", kandelAddress.toHex(), "length", value.toString());
   });
 
   test("Kandel, handleSetReserveId", () => {
@@ -409,4 +416,4 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Kandel", kandelAddress.toHexString(), "router", router.toHexString());
   });
 
-})
+});

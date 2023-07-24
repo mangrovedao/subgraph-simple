@@ -1,7 +1,5 @@
-import { Address, BigInt, Bytes, Entity, Value, ethereum } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { Account, OrderStack, Offer, Order, KandelParameters } from "../generated/schema";
-import * as schema from "../generated/schema";
-import { log } from "matchstick-as";
 
 export const getKandelParamsId = (txHash: Bytes, kandel:Address): string => {
   return `${txHash}-${kandel.toHex()}`;
@@ -182,4 +180,3 @@ export const createDummyOffer = (
     BigInt.fromI32(0)
   )
 }
-

@@ -21,7 +21,7 @@ import {
   SetRouter
 } from "../generated/templates/Kandel/Kandel"
 import { KandelDepositWithdraw, Kandel as KandelEntity, KandelPopulateRetract, Offer } from "../generated/schema";
-import { getEventUniqueId, getMarketId, getOfferId, getOrCreateKandelParameters } from "./helpers";
+import { getEventUniqueId, getOfferId, getOrCreateKandelParameters } from "./helpers";
 import { log } from "matchstick-as";
 
 export function handleCredit(event: Credit): void {
@@ -162,36 +162,51 @@ export function handleSetAdmin(event: SetAdmin): void {
 }
 
 export function handleSetCompoundRates(event: SetCompoundRates): void {
-  const kandel = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  const kandel = KandelEntity.load(event.address)!;
   kandel.compoundRateBase = event.params.compoundRateBase;
   kandel.compoundRateQuote = event.params.compoundRateQuote;
-
   kandel.save();
+
+  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  kandelParams.compoundRateBase = event.params.compoundRateBase;
+  kandelParams.compoundRateQuote = event.params.compoundRateQuote;
+
+  kandelParams.save();
 }
 
 export function handleSetGasprice(event: SetGasprice): void {
-  const kandel = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
-  kandel.creationDate = event.block.timestamp;
+  const kandel = KandelEntity.load(event.address)!;
   kandel.gasprice = event.params.value;
-
   kandel.save();
+
+  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  kandelParams.gasprice = event.params.value;
+
+  kandelParams.save();
 }
 
 export function handleSetGasreq(event: SetGasreq): void {
-  const kandel = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
-  kandel.creationDate = event.block.timestamp;
+  const kandel = KandelEntity.load(event.address)!;
   kandel.gasreq = event.params.value;
-
   kandel.save();
+
+  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  kandelParams.gasreq = event.params.value;
+
+  kandelParams.save();
 }
 
 export function handleSetGeometricParams(event: SetGeometricParams): void {
-  const kandel = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
-  kandel.creationDate = event.block.timestamp;
-  kandel.spread = event.params.spread;
+  const kandel = KandelEntity.load(event.address)!;
+  kandel.spread = event.params.spread
   kandel.ratio = event.params.ratio;
-
   kandel.save();
+
+  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  kandelParams.spread = event.params.spread
+  kandelParams.ratio = event.params.ratio;
+
+  kandelParams.save();
 }
 
 export function handleSetIndexMapping(event: SetIndexMapping): void {
@@ -201,11 +216,14 @@ export function handleSetIndexMapping(event: SetIndexMapping): void {
 }
 
 export function handleSetLength(event: SetLength): void {
-  const kandel = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
-  kandel.creationDate = event.block.timestamp;
+  const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
   kandel.length = event.params.value;
-
   kandel.save();
+
+  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  kandelParams.length = event.params.value;
+
+  kandelParams.save();
 }
 
 export function handleSetReserveId(event: SetReserveId): void {
