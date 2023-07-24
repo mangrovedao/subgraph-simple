@@ -30,6 +30,7 @@ describe("Describe entity assertions", () => {
   beforeEach(() => {
     const kandel = new Kandel(kandelAddress);
     kandel.transactionHash = Bytes.fromHexString('0x000123');
+    kandel.creationDate = BigInt.fromI32(1000);
     kandel.seeder = Bytes.fromUTF8('seeder');
     kandel.address = kandelAddress;
     kandel.base = token0;
@@ -60,6 +61,7 @@ describe("Describe entity assertions", () => {
     handleCredit(creditEvent);
     const creditId = getEventUniqueId(creditEvent)
     assert.fieldEquals("Kandel", kandelAddress.toHexString(), "depositedBase", "110");
+    assert.fieldEquals("Kandel", kandelAddress.toHexString(), "creationDate", "1000");
     assert.fieldEquals("KandelDepositWithdraw",creditId, "transactionHash", creditEvent.transaction.hash.toHexString())
     assert.fieldEquals("KandelDepositWithdraw",creditId, "date", creditEvent.block.timestamp.toString())
     assert.fieldEquals("KandelDepositWithdraw",creditId, "token", creditEvent.params.token.toHexString())
