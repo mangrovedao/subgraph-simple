@@ -102,6 +102,15 @@ type Kandel @entity {
   depositedBase: BigInt!
   depositedQuote: BigInt!
 
+  # Parameters
+  gasprice: BigInt
+  gasreq: BigInt
+  compoundRateBase: BigInt
+  compoundRateQuote: BigInt
+  spread: BigInt
+  ratio: BigInt
+  length: BigInt
+
   offerIndexes: [String!]!
 
   offers: [Offer!]! @derivedFrom(field: "kandel")
@@ -135,7 +144,6 @@ type KandelParameters @entity {
   length: BigInt
 
   kandel: Kandel!
-
 }
 
 type OrderStack @entity {
@@ -143,5 +151,3 @@ type OrderStack @entity {
   ids: String!
   last: Order
 }
-
-
