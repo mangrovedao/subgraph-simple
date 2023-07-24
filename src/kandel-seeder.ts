@@ -5,6 +5,7 @@ import {
 import { Kandel } from "../generated/templates"
 import { Kandel as KandelEntity } from "../generated/schema";
 import { BigInt } from "@graphprotocol/graph-ts";
+import { getOrCreateAccount } from "./helpers";
 
 export function handleNewAaveKandel(event: NewAaveKandel): void {
 
@@ -24,8 +25,11 @@ export function handleNewKandel(event: NewKandel): void {
   kandel.depositedBase = BigInt.fromI32(0);
   kandel.depositedQuote = BigInt.fromI32(0);
 
-  kandel.deployer = event.params.owner;
-  kandel.admin = event.params.owner;
+  const ownerAccount = getOrCreateAccount(event.params.owner);
+  kandel.deployer = ownerAccount.address;
+
+  const adminAcount = getOrCreateAccount(event.params.owner);
+  kandel.admin = adminAcount.address;
 
   kandel.offerIndexes = [];
 

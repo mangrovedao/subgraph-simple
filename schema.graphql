@@ -96,8 +96,8 @@ type Kandel @entity {
   quote: Bytes!
   deployer: Account!
   admin: Account!
-  reserveId: Account
-  router: Account
+  reserveId: Bytes
+  router: Bytes
 
   depositedBase: BigInt!
   depositedQuote: BigInt!
