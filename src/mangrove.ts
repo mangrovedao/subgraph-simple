@@ -36,12 +36,12 @@ export function handleKill(event: Kill): void {}
 
 export function handleNewMgv(event: NewMgv): void {}
 
-export const limitOrderSetIsOpenToFalse = (offerId: string): void => {
+export const limitOrderSetIsOpen = (offerId: string, value: boolean): void => {
   const limitOrder = LimitOrder.load(offerId);
   if (!limitOrder) {
     return;
   }
-  limitOrder.isOpen = false;
+  limitOrder.isOpen = value;
 
   limitOrder.save();
 }
@@ -66,7 +66,7 @@ export function handleOfferFail(event: OfferFail): void {
   offer.latestLogIndex = event.logIndex;
   offer.latestTransactionHash = event.transaction.hash;
 
-  limitOrderSetIsOpenToFalse(offerId); 
+  limitOrderSetIsOpen(offerId, false); 
 
   offer.save();
 }
@@ -95,7 +95,7 @@ export function handleOfferRetract(event: OfferRetract): void {
   offer.latestLogIndex = event.logIndex;
   offer.latestTransactionHash = event.transaction.hash;
 
-  limitOrderSetIsOpenToFalse(offerId); 
+  limitOrderSetIsOpen(offerId, false); 
 
   offer.save();
 }
@@ -110,9 +110,9 @@ export function handleOfferSuccess(event: OfferSuccess): void {
  
   if (offer.wants == event.params.takerGives && offer.gives == event.params.takerWants) {
     offer.isFilled = true; 
-    limitOrderSetIsOpenToFalse(offerId); 
   }
 
+  limitOrderSetIsOpen(offerId, false); 
   offer.isOpen = false;
   offer.isFailed = false;
   offer.isRetracted = false;
@@ -147,7 +147,6 @@ export const createNewOffer = (event: OfferWrite): Offer => {
 
   return offer;
 }
-
 
 export function handleOfferWrite(event: OfferWrite): void {
   const offerId = getOfferId(
@@ -194,6 +193,8 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.deprovisioned = false;
   offer.failedReason = null;
   offer.posthookFailReason = null;
+
+  limitOrderSetIsOpen(offer.id, true);
 
   offer.save();
 }

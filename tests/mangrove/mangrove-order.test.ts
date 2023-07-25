@@ -484,5 +484,110 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'failedReason', failedReason.toHex());
     assert.fieldEquals('Offer', offerId, 'isRetracted', 'false');
   });
+
+  test("LimitOrder partially fileld, with fail", () => {
+    let setActiveEvent = createSetActiveEvent(token0, token1, true);
+    handleSetActive(setActiveEvent);
+    assert.entityCount("Market", 1);
+    
+    const id = BigInt.fromI32(1);
+    createDummyOffer(
+      id,
+      token1,
+      token0,
+    )
+    const orderId ="orderId"
+    const order = new Order(orderId);
+    order.transactionHash = Bytes.fromUTF8("0x0");
+    order.creationDate = BigInt.fromI32(1);
+    order.save();
+    
+    const orderStack = new OrderStack('orderStack')
+    orderStack.ids = ""
+    orderStack.last = order.id;
+    orderStack.save();
+
+    const takerWants = BigInt.fromI32(1000); 
+    const takerGave = BigInt.fromI32(500);
+
+    const takerGives = BigInt.fromI32(2000);
+    const takerGot = BigInt.fromI32(1000);
+
+    const expiryDate = BigInt.fromI32(1686754719);
+
+    const orderSummaryEvent = createOrderSummaryEvent(
+      mgv,
+      token1,
+      token0,
+      taker,
+      false,
+      takerWants, // takerWants,
+      takerGives, // takerGives
+      false,
+      true, 
+      expiryDate,
+      takerGot, // takerGot
+      takerGave, // takerGave
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      id,
+    );
+    handleOrderSummary(orderSummaryEvent);
+
+    const offerId = getOfferId(token0, token1, id);
+
+    assert.fieldEquals('Order', orderId, 'limitOrder', offerId);
+    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'true');
+    assert.fieldEquals('LimitOrder', offerId, 'wants', takerWants.toString());
+    assert.fieldEquals('LimitOrder', offerId, 'gives', takerGives.toString());
+    assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
+    assert.fieldEquals('LimitOrder', offerId, 'expiryDate', expiryDate.toI32().toString());
+    assert.fieldEquals('LimitOrder', offerId, 'fillOrKill', 'false');
+    assert.fieldEquals('LimitOrder', offerId, 'fillWants', 'false');
+    assert.fieldEquals('LimitOrder', offerId, 'restingOrder', 'true');
+    assert.fieldEquals('LimitOrder', offerId, 'offer', offerId);
+    assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
+    assert.fieldEquals('LimitOrder', offerId, 'creationDate', '1');
+    assert.fieldEquals('LimitOrder', offerId, 'latestUpdateDate', '1');
+
+    const wants = takerWants;
+    const gives = takerGives;
+    
+    let offerWrite = createOfferWriteEvent(
+      token0, 
+      token1,
+      maker,
+      wants,
+      gives,
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      id,
+      BigInt.fromI32(0),
+    );
+    handleOfferWrite(offerWrite);
+
+    const offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, gives, wants);
+    handleOfferSuccess(offerSuccess);
+
+    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'false');
+    assert.fieldEquals('Offer', offerId, 'isFilled', 'true');
+    assert.fieldEquals('Offer', offerId, 'isFailed', 'false');
+    assert.fieldEquals('Offer', offerId, 'isRetracted', 'false');
+
+    offerWrite = createOfferWriteEvent(
+      token0, 
+      token1,
+      maker,
+      wants,
+      gives,
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      id,
+      BigInt.fromI32(0),
+    );
+    handleOfferWrite(offerWrite);
+
+    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'true');
+  });
   //TODO: would like to test negative path, where the LimitOrder does not exist. How?
 });
