@@ -167,7 +167,7 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.latestLogIndex = event.logIndex;
   offer.latestTransactionHash = event.transaction.hash;
 
-  const owner = getOrCreateAccount(event.params.maker);
+  const owner = getOrCreateAccount(event.params.maker, event.block.timestamp, true);
   offer.maker = owner.id;
 
   const marketId = getMarketId(
@@ -202,7 +202,7 @@ export function handleOfferWrite(event: OfferWrite): void {
 export function handleOrderComplete(event: OrderComplete): void {
   const order = getOrderFromStack();
 
-  order.taker = event.params.taker;
+  order.taker = getOrCreateAccount(event.params.taker, event.block.timestamp, true).id;
   order.takerGot = event.params.takerGot;
   order.takerGave = event.params.takerGave;
   order.penalty = event.params.penalty;

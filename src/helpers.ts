@@ -13,12 +13,19 @@ export const getOfferId = (outbound_tkn: Address, inbound_tkn: Address, id: BigI
   return `${outbound_tkn.toHex()}-${inbound_tkn.toHex()}-${id.toHex()}`;
 };
 
-export const getOrCreateAccount = (address: Address): Account => {
+export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnInteraction: bool): Account => {
   let account = Account.load(address);
 
   if (!account) {
     account = new Account(address);
     account.address = address;
+    account.creationDate = currentDate;
+    account.latestInteractionDate = currentDate;
+    account.save();
+  }
+
+  if (isAnInteraction) {
+    account.latestInteractionDate = currentDate;
     account.save();
   }
 

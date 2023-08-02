@@ -99,6 +99,8 @@ describe("Describe entity assertions", () => {
     assert.assertTrue(offer.owner === null)
     assert.fieldEquals('Offer', offerId, 'creationDate', '1')
     assert.fieldEquals('Offer', offerId, 'latestUpdateDate', '1')
+    assert.fieldEquals('Account', maker.toHex(), 'creationDate', offerWrite.block.timestamp.toI32().toString());
+    assert.fieldEquals('Account', maker.toHex(), 'latestInteractionDate', offerWrite.block.timestamp.toI32().toString());
   })
 
   test("Offer, handleOfferWrite, Update exsiting offer", () => {
@@ -697,6 +699,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Order', orderId, 'market', getMarketId(orderComplete.params.outbound_tkn, orderComplete.params.inbound_tkn));
 
     assert.fieldEquals('OrderStack', 'orderStack', 'ids',  `` );
+    assert.fieldEquals('Account', taker.toHex(), 'creationDate', orderComplete.block.timestamp.toI32().toString());
+    assert.fieldEquals('Account', taker.toHex(), 'latestInteractionDate', orderComplete.block.timestamp.toI32().toString());
   })
 
   test('GasBase, handleSetGasBase, new gasbase', () => {

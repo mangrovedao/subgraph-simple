@@ -122,6 +122,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
     assert.fieldEquals('LimitOrder', offerId, 'creationDate', '1');
     assert.fieldEquals('LimitOrder', offerId, 'latestUpdateDate', '1');
+
+    assert.fieldEquals('Account', taker.toHex(), 'latestInteractionDate', orderSummaryEvent.block.timestamp.toI32().toString());
   });
 
   //TODO: would like to test negative path, where the offer does not exist. How?
@@ -534,6 +536,9 @@ describe("Describe entity assertions", () => {
     );
     handleOrderSummary(orderSummaryEvent);
 
+    assert.fieldEquals('Account', taker.toHex(), 'creationDate', orderSummaryEvent.block.timestamp.toI32().toString());
+    assert.fieldEquals('Account', taker.toHex(), 'latestInteractionDate', orderSummaryEvent.block.timestamp.toI32().toString());
+
     const offerId = getOfferId(token0, token1, id);
 
     assert.fieldEquals('Order', orderId, 'limitOrder', offerId);
@@ -553,7 +558,7 @@ describe("Describe entity assertions", () => {
     const wants = takerWants;
     const gives = takerGives;
     
-    let offerWrite = createOfferWriteEvent(
+    const offerWrite = createOfferWriteEvent(
       token0, 
       token1,
       maker,
@@ -565,6 +570,9 @@ describe("Describe entity assertions", () => {
       BigInt.fromI32(0),
     );
     handleOfferWrite(offerWrite);
+
+    assert.fieldEquals('Account', maker.toHex(), 'creationDate', offerWrite.block.timestamp.toI32().toString());
+    assert.fieldEquals('Account', maker.toHex(), 'latestInteractionDate', offerWrite.block.timestamp.toI32().toString());
 
     const offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, gives, wants);
     handleOfferSuccess(offerSuccess);
@@ -574,7 +582,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'isFailed', 'false');
     assert.fieldEquals('Offer', offerId, 'isRetracted', 'false');
 
-    offerWrite = createOfferWriteEvent(
+    const offerWrite2 = createOfferWriteEvent(
       token0, 
       token1,
       maker,
@@ -585,9 +593,13 @@ describe("Describe entity assertions", () => {
       id,
       BigInt.fromI32(0),
     );
-    handleOfferWrite(offerWrite);
+    offerWrite2.block.timestamp = offerWrite2.block.timestamp.plus(BigInt.fromI32(1));
+    handleOfferWrite(offerWrite2);
 
     assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'true');
+    assert.fieldEquals('Account', maker.toHex(), 'creationDate', offerWrite.block.timestamp.toI32().toString());
+    assert.fieldEquals('Account', maker.toHex(), 'latestInteractionDate', offerWrite2.block.timestamp.toI32().toString());
+
   });
   //TODO: would like to test negative path, where the LimitOrder does not exist. How?
 });
