@@ -1,5 +1,5 @@
 import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
-import { Account, OrderStack, Offer, Order, KandelParameters } from "../generated/schema";
+import { Account, OrderStack, Offer, Order, KandelParameters, AccountVolumeByPair } from "../generated/schema";
 
 export const getKandelParamsId = (txHash: Bytes, kandel:Address): string => {
   return `${txHash}-${kandel.toHex()}`;
@@ -30,6 +30,49 @@ export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnIn
   }
 
   return account;
+}
+
+export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, token1: Address): AccountVolumeByPair => {
+  const id = `${account.toHex()}-${token0.toHex()}-${token1.toHex()}`;
+  let volume = AccountVolumeByPair.load(id);
+  if (!volume) {
+    volume = AccountVolumeByPair.load(`${account.toHex()}-${token1.toHex()}-${token0.toHex()}`);
+    if (!volume) {
+      volume = new AccountVolumeByPair(id);
+      volume.account = account;
+      volume.token0 = token0;
+      volume.token1 = token1;
+      volume.token0Sent = BigInt.fromI32(0);
+      volume.token0Received = BigInt.fromI32(0);
+      volume.token1Sent = BigInt.fromI32(0);
+      volume.token1Received = BigInt.fromI32(0);
+      volume.save();
+    }
+  }
+
+  return volume;
+};
+
+export const increaseAccountVolume = (volume: AccountVolumeByPair, token0: Address, volumeToken0: BigInt, volumeToken1: BigInt, receivedToken0: bool): void => {
+  if (volume.token0 == token0) {
+    if (receivedToken0) {
+      volume.token0Received = volume.token0Received.plus(volumeToken0);
+      volume.token1Sent = volume.token1Sent.plus(volumeToken1);
+    } else {
+      volume.token0Sent = volume.token0Sent.plus(volumeToken0);
+      volume.token1Received = volume.token1Received.plus(volumeToken1);
+    }
+  } else {
+    if (receivedToken0) {
+      volume.token1Received = volume.token1Received.plus(volumeToken0);
+      volume.token0Sent = volume.token0Sent.plus(volumeToken1);
+    } else {
+      volume.token1Sent = volume.token1Sent.plus(volumeToken0);
+      volume.token0Received = volume.token0Received.plus(volumeToken1)
+    }
+  }
+
+  volume.save();
 }
 
 export const getOrCreateKandelParameters = (txHash: Bytes, timestamp: BigInt, kandel:Address): KandelParameters => {

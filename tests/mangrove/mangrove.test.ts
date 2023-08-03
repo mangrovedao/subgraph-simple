@@ -7,7 +7,7 @@ import {
   describe,
   test
 } from "matchstick-as/assembly/index";
-import { Kandel, LimitOrder, Market, Offer, Order } from "../../generated/schema";
+import { Account, Kandel, LimitOrder, Market, Offer, Order } from "../../generated/schema";
 import { createOffer, getEventUniqueId, getMarketId, getOfferId } from "../../src/helpers";
 import { createNewOffer, handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handlePosthookFail, handleSetActive, handleSetGasbase } from "../../src/mangrove";
 import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createPosthookFailEvent, createSetActiveEvent, createSetGasbaseEvent } from "./mangrove-utils";
@@ -537,7 +537,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'creationDate', '100')
     assert.fieldEquals('Offer', offerId, 'latestUpdateDate', '1')
     assert.entityCount("Offer", 1);
-  })
+  });
 
   test("Offer, handleOfferRetract, no deporivison", () => {
     const id = BigInt.fromI32(1);
@@ -602,7 +602,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'creationDate', '100')
     assert.fieldEquals('Offer', offerId, 'latestUpdateDate', '1')
     assert.entityCount("Offer", 1);
-  })
+  });
 
 
   test("Offer, handlePosthookFail", () => {
@@ -633,7 +633,7 @@ describe("Describe entity assertions", () => {
       BigInt.fromI32(100),
       BigInt.fromI32(0),
       BigInt.fromI32(0),
-    )
+    );
 
     let posthookFailed = createPosthookFailEvent(token0, token1, id, Bytes.fromUTF8("Failed")    );
     handlePosthookFail(posthookFailed);
@@ -668,7 +668,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Offer', offerId, 'creationDate', '100')
     assert.fieldEquals('Offer', offerId, 'latestUpdateDate', '1')
     assert.entityCount("Offer", 1);
-  })
+  });
 
  
   test('Order, handleOrderSuccess', () => {
@@ -680,7 +680,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Order', orderId, 'transactionHash', orderStart.transaction.hash.toHex());
 
     assert.fieldEquals('OrderStack', 'orderStack', 'ids',  `|${orderId}`);
-  })
+  });
 
   test('Order, handleOrderComplete', () => {
     const orderStart =  createOrderStartEvent();
@@ -701,7 +701,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('OrderStack', 'orderStack', 'ids',  `` );
     assert.fieldEquals('Account', taker.toHex(), 'creationDate', orderComplete.block.timestamp.toI32().toString());
     assert.fieldEquals('Account', taker.toHex(), 'latestInteractionDate', orderComplete.block.timestamp.toI32().toString());
-  })
+  });
 
   test('GasBase, handleSetGasBase, new gasbase', () => {
     const setGasBase = createSetGasbaseEvent(token0, token1, BigInt.fromI32(20))
@@ -712,7 +712,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Market', gasbaseId, 'gasbase', '20');
     assert.fieldEquals('Market', gasbaseId, 'inbound_tkn', token1.toHexString());
     assert.fieldEquals('Market', gasbaseId, 'outbound_tkn', token0.toHexString());
-  })
+  });
 
   test('GasBase, handleSetGasBase, update gasbase', () => {
     const setGasBase1 = createSetGasbaseEvent(token0, token1, BigInt.fromI32(20))
@@ -725,6 +725,111 @@ describe("Describe entity assertions", () => {
     const gasbaseId = getMarketId(token0, token1);
     assert.fieldEquals('Market', gasbaseId, 'gasbase', '40');
     assert.entityCount('Market', 2);
-  })
+  });
+
+  const getAccountVolumeByPairId = (account: Address, outbound_tkn: Address, inbound_tkn: Address): string => {
+    return `${account.toHex()}-${outbound_tkn.toHex()}-${inbound_tkn.toHex()}`;
+  };
+
+  test('Maker volume tracking', () => {
+    const offerWrite = createOfferWriteEvent(
+      token0, 
+      token1,
+      maker,
+      BigInt.fromI32(1000),
+      BigInt.fromI32(2000),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+    );
+    handleOfferWrite(offerWrite);
+
+    const offerSuccess = createOfferSuccessEvent(token0, token1, BigInt.fromI32(0), taker, BigInt.fromI32(10), BigInt.fromI32(20));
+    handleOfferSuccess(offerSuccess);
+
+    let id = getAccountVolumeByPairId(maker, offerWrite.params.outbound_tkn, offerWrite.params.inbound_tkn)
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'account', maker.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0', offerWrite.params.outbound_tkn.toHex());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1', offerWrite.params.inbound_tkn.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Received', "0");
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', offerSuccess.params.takerWants.toI32().toString());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', offerSuccess.params.takerGives.toI32().toString()); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', "0"); 
+
+    const offerWrite2 = createOfferWriteEvent(
+      token1,
+      token0, 
+      maker,
+      BigInt.fromI32(1000),
+      BigInt.fromI32(2000),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      BigInt.fromI32(1),
+      BigInt.fromI32(0),
+    );
+    handleOfferWrite(offerWrite2);
+
+    const offerSuccess2 = createOfferSuccessEvent(token1, token0, BigInt.fromI32(1), taker, BigInt.fromI32(100), BigInt.fromI32(200));
+    handleOfferSuccess(offerSuccess2);
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'account', maker.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0', offerWrite2.params.inbound_tkn.toHex());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1', offerWrite2.params.outbound_tkn.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Received', offerSuccess2.params.takerGives.toI32().toString());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', offerSuccess.params.takerWants.toI32().toString());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', offerSuccess.params.takerGives.toI32().toString()); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', offerSuccess2.params.takerWants.toI32().toString()); 
+
+  });
+
+  test('Taker volume tracking', () => {
+    const orderStart =  createOrderStartEvent();
+    handleOrderStart(orderStart);
+
+    const takerGot = BigInt.fromI32(20);
+    const takerGave = BigInt.fromI32(40);
+
+    const orderComplete =  createOrderCompleteEvent(token1, token0, taker, takerGot, takerGave, BigInt.fromI32(1), BigInt.fromI32(2));
+    handleOrderComplete(orderComplete);
+
+    let id = getAccountVolumeByPairId(taker, orderComplete.params.outbound_tkn, orderComplete.params.inbound_tkn)
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'account', taker.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0', orderComplete.params.outbound_tkn.toHex());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1', orderComplete.params.inbound_tkn.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Received', orderComplete.params.takerGot.toI32().toString());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', "0");
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', "0"); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', orderComplete.params.takerGave.toI32().toString()); 
+
+    const orderStart2 =  createOrderStartEvent();
+    handleOrderStart(orderStart2);
+
+    const takerGot2 = BigInt.fromI32(100);
+    const takerGave2 = BigInt.fromI32(200);
+
+    const orderComplete2 =  createOrderCompleteEvent(token0, token1, taker, takerGot2, takerGave2, BigInt.fromI32(1), BigInt.fromI32(2));
+    handleOrderComplete(orderComplete2);
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'account', taker.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0', orderComplete.params.outbound_tkn.toHex());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1', orderComplete.params.inbound_tkn.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Received', orderComplete.params.takerGot.toI32().toString());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', orderComplete2.params.takerGave.toI32().toString());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', orderComplete2.params.takerGot.toI32().toString()); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', orderComplete.params.takerGave.toI32().toString()); 
+  });
 
 });

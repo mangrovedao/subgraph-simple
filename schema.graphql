@@ -3,6 +3,22 @@ type Account @entity(immutable: true) {
   address: Bytes!
   creationDate: BigInt!
   latestInteractionDate: BigInt!
+  volumes: [AccountVolumeByPair!]! @derivedFrom(field: "account")
+}
+
+type AccountVolumeByPair @entity {
+  id: String!
+
+  account: Account!
+
+  token0: Bytes!
+  token1: Bytes!
+
+  token0Sent: BigInt!
+  token0Received: BigInt!
+
+  token1Sent: BigInt!
+  token1Received: BigInt!
 }
 
 type Market @entity {
