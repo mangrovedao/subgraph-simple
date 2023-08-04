@@ -1,4 +1,4 @@
-type Account @entity(immutable: true) {
+type Account @entity {
   id: Bytes!
   address: Bytes!
   creationDate: BigInt!
