@@ -810,6 +810,7 @@ describe("Describe entity assertions", () => {
 
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', "0"); 
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', orderComplete.params.takerGave.toI32().toString()); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'updatedDate', orderComplete.block.timestamp.toString()); 
 
     const orderStart2 =  createOrderStartEvent();
     handleOrderStart(orderStart2);
@@ -818,6 +819,7 @@ describe("Describe entity assertions", () => {
     const takerGave2 = BigInt.fromI32(200);
 
     const orderComplete2 =  createOrderCompleteEvent(token0, token1, taker, takerGot2, takerGave2, BigInt.fromI32(1), BigInt.fromI32(2));
+    orderComplete2.block.timestamp = orderComplete2.block.timestamp.plus(BigInt.fromI32(1));
     handleOrderComplete(orderComplete2);
 
     assert.fieldEquals('AccountVolumeByPair', id, 'account', taker.toHex());
@@ -830,6 +832,7 @@ describe("Describe entity assertions", () => {
 
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', orderComplete2.params.takerGot.toI32().toString()); 
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', orderComplete.params.takerGave.toI32().toString()); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'updatedDate', orderComplete2.block.timestamp.toString()); 
   });
 
 });

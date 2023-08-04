@@ -30,9 +30,9 @@ export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnIn
   }
 
   return account;
-}
+};
 
-export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, token1: Address): AccountVolumeByPair => {
+export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, token1: Address, currentDate: BigInt): AccountVolumeByPair => {
   const id = `${account.toHex()}-${token0.toHex()}-${token1.toHex()}`;
   let volume = AccountVolumeByPair.load(id);
   if (!volume) {
@@ -46,14 +46,22 @@ export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, 
       volume.token0Received = BigInt.fromI32(0);
       volume.token1Sent = BigInt.fromI32(0);
       volume.token1Received = BigInt.fromI32(0);
+      volume.updatedDate = currentDate;
       volume.save();
     }
   }
+  volume.updatedDate = currentDate;
 
   return volume;
 };
 
-export const increaseAccountVolume = (volume: AccountVolumeByPair, token0: Address, volumeToken0: BigInt, volumeToken1: BigInt, receivedToken0: bool): void => {
+export const increaseAccountVolume = (
+  volume: AccountVolumeByPair, 
+  token0: Address, 
+  volumeToken0: BigInt, 
+  volumeToken1: BigInt, 
+  receivedToken0: bool,
+): void => {
   if (volume.token0 == token0) {
     if (receivedToken0) {
       volume.token0Received = volume.token0Received.plus(volumeToken0);
@@ -73,7 +81,7 @@ export const increaseAccountVolume = (volume: AccountVolumeByPair, token0: Addre
   }
 
   volume.save();
-}
+};
 
 export const getOrCreateKandelParameters = (txHash: Bytes, timestamp: BigInt, kandel:Address): KandelParameters => {
   let kandelParameters = KandelParameters.load(getKandelParamsId(txHash, kandel)); // TODO: use load in block
@@ -86,7 +94,7 @@ export const getOrCreateKandelParameters = (txHash: Bytes, timestamp: BigInt, ka
     kandelParameters.save();
   }
   return kandelParameters;
-}
+};
 
 
 export const getOrderStack = (): OrderStack => {
@@ -99,7 +107,7 @@ export const getOrderStack = (): OrderStack => {
   }
 
   return orderStack;
-}
+};
 
 export const addOrderToStack = (order: Order): void => {
   const orderStack = getOrderStack();
@@ -107,7 +115,7 @@ export const addOrderToStack = (order: Order): void => {
   orderStack.ids = `${orderStack.ids}|${order.id}`
 
   orderStack.save();
-}
+};
 
 export const getOrderFromStack = (): Order => {
   const orderStack = getOrderStack();
@@ -117,8 +125,7 @@ export const getOrderFromStack = (): Order => {
   const order = Order.load(idsArray[idsArray.length - 1])!;
 
   return order;
-}
-
+};
 
 export const removeOrderFromStack = (): void => {
   const orderStack = getOrderStack();
@@ -133,18 +140,18 @@ export const removeOrderFromStack = (): void => {
   }
 
   orderStack.save();
-}
+};
 
 export const getLastOrder = (): Order => {
   const orderStack = getOrderStack();
 
   const order = Order.load(orderStack.last!)!;
   return order;
-}
+};
 
 export const getEventUniqueId = (event: ethereum.Event): string => {
   return `${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
-}
+};
 
 export const createOffer = (
   offerId: BigInt,
@@ -197,7 +204,7 @@ export const createOffer = (
   offer.totalGot = totalGot;
   offer.save();
   return offer;
-}
+};
 
 export const createDummyOffer = (
   offerNumber: BigInt,
@@ -229,4 +236,4 @@ export const createDummyOffer = (
     BigInt.fromI32(0),
     BigInt.fromI32(0)
   )
-}
+};

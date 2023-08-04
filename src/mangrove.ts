@@ -127,7 +127,7 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   offer.totalGot = event.params.takerGives.plus(offer.totalGot);
   offer.totalGave = event.params.takerWants.plus(offer.totalGave);
 
-  const volume = getOrCreateAccountVolumeByPair(offer.maker, event.params.outbound_tkn, event.params.inbound_tkn);
+  const volume = getOrCreateAccountVolumeByPair(offer.maker, event.params.outbound_tkn, event.params.inbound_tkn, event.block.timestamp);
   increaseAccountVolume(volume, event.params.inbound_tkn, event.params.takerGives, event.params.takerWants, true);
 
   offer.save();
@@ -214,7 +214,7 @@ export function handleOrderComplete(event: OrderComplete): void {
   order.market = getMarketId(event.params.outbound_tkn, event.params.inbound_tkn);
   order.save();
 
-  const volume = getOrCreateAccountVolumeByPair(event.params.taker, event.params.outbound_tkn, event.params.inbound_tkn);
+  const volume = getOrCreateAccountVolumeByPair(event.params.taker, event.params.outbound_tkn, event.params.inbound_tkn, event.block.timestamp);
   increaseAccountVolume(volume, event.params.outbound_tkn, event.params.takerGot, event.params.takerGave, true);
 
   removeOrderFromStack();

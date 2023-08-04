@@ -10,6 +10,7 @@ type AccountVolumeByPair @entity {
   id: String!
 
   account: Account!
+  updatedDate: BigInt!
 
   token0: Bytes!
   token1: Bytes!
