@@ -767,6 +767,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', offerSuccess.params.takerWants.toI32().toString());
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', offerSuccess.params.takerGives.toI32().toString()); 
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', "0"); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'asMaker', "true"); 
 
     const offerWrite2 = createOfferWriteEvent(
       token1,
@@ -793,7 +794,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', offerSuccess.params.takerWants.toI32().toString());
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', offerSuccess.params.takerGives.toI32().toString()); 
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', offerSuccess2.params.takerWants.toI32().toString()); 
-
+    assert.fieldEquals('AccountVolumeByPair', id, 'asMaker', "true"); 
   });
 
   test('Taker volume tracking', () => {
@@ -819,6 +820,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Received', "0"); 
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', orderComplete.params.takerGave.toI32().toString()); 
     assert.fieldEquals('AccountVolumeByPair', id, 'updatedDate', orderComplete.block.timestamp.toString()); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'asMaker', "false"); 
 
     const orderStart2 =  createOrderStartEvent();
     handleOrderStart(orderStart2);
@@ -841,6 +843,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Received', orderComplete2.params.takerGot.toI32().toString()); 
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', orderComplete.params.takerGave.toI32().toString()); 
     assert.fieldEquals('AccountVolumeByPair', id, 'updatedDate', orderComplete2.block.timestamp.toString()); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'asMaker', "false"); 
   });
 
 });
