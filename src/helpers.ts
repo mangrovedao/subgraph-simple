@@ -33,6 +33,12 @@ export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnIn
 };
 
 export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, token1: Address, currentDate: BigInt): AccountVolumeByPair => {
+  if (token0.toHex() > token1.toHex()) {
+    const _token1 = token1;
+    token1 = token0;
+    token0 = _token1;
+  }
+
   const id = `${account.toHex()}-${token0.toHex()}-${token1.toHex()}`;
   let volume = AccountVolumeByPair.load(id);
   if (!volume) {
