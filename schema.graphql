@@ -20,6 +20,8 @@ type AccountVolumeByPair @entity {
 
   token1Sent: BigInt!
   token1Received: BigInt!
+
+  asMaker: Boolean!
 }
 
 type Market @entity {

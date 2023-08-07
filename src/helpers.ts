@@ -32,17 +32,18 @@ export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnIn
   return account;
 };
 
-export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, token1: Address, currentDate: BigInt): AccountVolumeByPair => {
+export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, token1: Address, currentDate: BigInt, asMaker: bool): AccountVolumeByPair => {
   if (token0.toHex() > token1.toHex()) {
     const _token1 = token1;
     token1 = token0;
     token0 = _token1;
   }
 
-  const id = `${account.toHex()}-${token0.toHex()}-${token1.toHex()}`;
+  const suffix = asMaker ? 'maker' : 'taker';
+  const id = `${account.toHex()}-${token0.toHex()}-${token1.toHex()}-${suffix}`;
   let volume = AccountVolumeByPair.load(id);
   if (!volume) {
-    volume = AccountVolumeByPair.load(`${account.toHex()}-${token1.toHex()}-${token0.toHex()}`);
+    volume = AccountVolumeByPair.load(`${account.toHex()}-${token1.toHex()}-${token0.toHex()}-${suffix}`);
     if (!volume) {
       volume = new AccountVolumeByPair(id);
       volume.account = account;
@@ -53,6 +54,7 @@ export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, 
       volume.token1Sent = BigInt.fromI32(0);
       volume.token1Received = BigInt.fromI32(0);
       volume.updatedDate = currentDate;
+      volume.asMaker = asMaker;
       volume.save();
     }
   }

@@ -727,14 +727,16 @@ describe("Describe entity assertions", () => {
     assert.entityCount('Market', 2);
   });
 
-  const getAccountVolumeByPairId = (account: Address, token0: Address, token1: Address): string => {
+  const getAccountVolumeByPairId = (account: Address, token0: Address, token1: Address, asMaker: boolean): string => {
     if (token0.toHex() > token1.toHex()) {
       const _token1 = token1;
       token1 = token0;
       token0 = _token1;
     }
 
-    return `${account.toHex()}-${token0.toHex()}-${token1.toHex()}`;
+    const suffix = asMaker ? 'maker' : 'taker';
+
+    return `${account.toHex()}-${token0.toHex()}-${token1.toHex()}-${suffix}`;
   };
 
   test('Maker volume tracking', () => {
@@ -754,7 +756,7 @@ describe("Describe entity assertions", () => {
     const offerSuccess = createOfferSuccessEvent(token0, token1, BigInt.fromI32(0), taker, BigInt.fromI32(10), BigInt.fromI32(20));
     handleOfferSuccess(offerSuccess);
 
-    let id = getAccountVolumeByPairId(maker, offerWrite.params.outbound_tkn, offerWrite.params.inbound_tkn)
+    let id = getAccountVolumeByPairId(maker, offerWrite.params.outbound_tkn, offerWrite.params.inbound_tkn, true)
 
     assert.fieldEquals('AccountVolumeByPair', id, 'account', maker.toHex());
 
@@ -804,7 +806,7 @@ describe("Describe entity assertions", () => {
     const orderComplete =  createOrderCompleteEvent(token1, token0, taker, takerGot, takerGave, BigInt.fromI32(1), BigInt.fromI32(2));
     handleOrderComplete(orderComplete);
 
-    let id = getAccountVolumeByPairId(taker, orderComplete.params.outbound_tkn, orderComplete.params.inbound_tkn)
+    let id = getAccountVolumeByPairId(taker, orderComplete.params.outbound_tkn, orderComplete.params.inbound_tkn, false)
 
     assert.fieldEquals('AccountVolumeByPair', id, 'account', taker.toHex());
 
