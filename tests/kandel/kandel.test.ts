@@ -374,18 +374,26 @@ describe("Describe entity assertions", () => {
   });
 
   test("Kandel, handleSetIndexMapping", () => {
-    const setIndexMapping1 = createSetIndexMappingEvent(1, BigInt.fromI32(1), BigInt.fromI32(10));
+    const offer10 = createDummyOffer(BigInt.fromI32(10), Address.fromBytes(token1), Address.fromBytes(token0));
+    offer10.kandel = kandelAddress;
+
+    const setIndexMapping1 = createSetIndexMappingEvent(1, BigInt.fromI32(1), offer10.offerId);
     setIndexMapping1.address = kandelAddress;
     handleSetIndexMapping(setIndexMapping1);
 
-    const setIndexMapping2 = createSetIndexMappingEvent(0, BigInt.fromI32(1), BigInt.fromI32(1000));
+    const offer1000 = createDummyOffer(BigInt.fromI32(1000), Address.fromBytes(token0), Address.fromBytes(token1));
+    offer1000.kandel = kandelAddress;
+    const setIndexMapping2 = createSetIndexMappingEvent(0, BigInt.fromI32(2), offer1000.offerId);
     setIndexMapping2.address = kandelAddress;
     handleSetIndexMapping(setIndexMapping2);
     const kandel =  Kandel.load(kandelAddress)!;
     assert.assertTrue( kandel.offerIndexes.length == 2 );
     assert.assertTrue( kandel.offerIndexes[0] == `${setIndexMapping1.params.index}-${setIndexMapping1.params.offerId}-${setIndexMapping1.params.ba}`);
     assert.assertTrue( kandel.offerIndexes[1] == `${setIndexMapping2.params.index}-${setIndexMapping2.params.offerId}-${setIndexMapping2.params.ba}`);
-  })
+
+    assert.fieldEquals("Offer", offer10.id, "kandelIndex", "1");
+    assert.fieldEquals("Offer", offer1000.id, "kandelIndex", "2");
+  });
 
   test("KandelParameters, handleSetLength", () => {
     const value = BigInt.fromI32(32);

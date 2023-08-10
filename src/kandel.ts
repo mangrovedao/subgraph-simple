@@ -209,6 +209,16 @@ export function handleSetGeometricParams(event: SetGeometricParams): void {
 
 export function handleSetIndexMapping(event: SetIndexMapping): void {
   const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
+  if (event.params.ba === 0) { // bid
+    const offer = Offer.load(getOfferId(Address.fromBytes(kandel.quote), Address.fromBytes(kandel.base), event.params.offerId))!;
+    offer.kandelIndex = event.params.index;
+    offer.save();
+  } else { // ask
+    const offer = Offer.load(getOfferId(Address.fromBytes(kandel.base), Address.fromBytes(kandel.quote), event.params.offerId))!;
+    offer.kandelIndex = event.params.index;
+    offer.save();
+  }
+
   kandel.offerIndexes = kandel.offerIndexes.concat([`${event.params.index}-${event.params.offerId}-${event.params.ba}`]);
   kandel.save();
 }
