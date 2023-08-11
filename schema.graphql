@@ -98,6 +98,10 @@ type Kandel @entity {
   quote: Bytes!
   deployer: Account!
   admin: Account!
+
+  type: String!
+
+  # Only for kandel AAVE
   reserveId: Bytes
   router: Bytes
 
