@@ -23,6 +23,10 @@ import { KandelDepositWithdraw, Kandel as KandelEntity, KandelPopulateRetract, O
 import { getEventUniqueId, getOfferId, getOrCreateAccount, getOrCreateKandelParameters } from "./helpers";
 
 export function handleCredit(event: Credit): void {
+  if (event.params.amount.equals(BigInt.fromI32(0))) {
+    return;
+  }
+
   const deposit = new KandelDepositWithdraw(
     getEventUniqueId(event),
   );
@@ -48,6 +52,10 @@ export function handleCredit(event: Credit): void {
 }
 
 export function handleDebit(event: Debit): void {
+  if (event.params.amount.equals(BigInt.fromI32(0))) {
+    return;
+  }
+
   const withdraw = new KandelDepositWithdraw(
     getEventUniqueId(event),
   );
