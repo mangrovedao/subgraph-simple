@@ -32,6 +32,18 @@ export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnIn
   return account;
 };
 
+export const getAccountVolumeByPairId = (account: Address, token0: Address, token1: Address, asMaker: boolean): string => {
+  if (token0.toHex() > token1.toHex()) {
+    const _token1 = token1;
+    token1 = token0;
+    token0 = _token1;
+  }
+
+  const suffix = asMaker ? 'maker' : 'taker';
+
+  return `${account.toHex()}-${token0.toHex()}-${token1.toHex()}-${suffix}`;
+};
+
 export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, token1: Address, currentDate: BigInt, asMaker: bool): AccountVolumeByPair => {
   if (token0.toHex() > token1.toHex()) {
     const _token1 = token1;
@@ -40,7 +52,9 @@ export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, 
   }
 
   const suffix = asMaker ? 'maker' : 'taker';
-  const id = `${account.toHex()}-${token0.toHex()}-${token1.toHex()}-${suffix}`;
+
+  const id =`${account.toHex()}-${token0.toHex()}-${token1.toHex()}-${suffix}`;
+
   let volume = AccountVolumeByPair.load(id);
   if (!volume) {
     volume = new AccountVolumeByPair(id);

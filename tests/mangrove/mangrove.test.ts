@@ -8,7 +8,7 @@ import {
   test
 } from "matchstick-as/assembly/index";
 import { Account, Kandel, LimitOrder, Market, Offer, Order } from "../../generated/schema";
-import { createOffer, getEventUniqueId, getMarketId, getOfferId } from "../../src/helpers";
+import { createOffer, getAccountVolumeByPairId, getEventUniqueId, getMarketId, getOfferId } from "../../src/helpers";
 import { createNewOffer, handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handlePosthookFail, handleSetActive, handleSetGasbase } from "../../src/mangrove";
 import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createPosthookFailEvent, createSetActiveEvent, createSetGasbaseEvent } from "./mangrove-utils";
 
@@ -727,18 +727,6 @@ describe("Describe entity assertions", () => {
     assert.entityCount('Market', 2);
   });
 
-  const getAccountVolumeByPairId = (account: Address, token0: Address, token1: Address, asMaker: boolean): string => {
-    if (token0.toHex() > token1.toHex()) {
-      const _token1 = token1;
-      token1 = token0;
-      token0 = _token1;
-    }
-
-    const suffix = asMaker ? 'maker' : 'taker';
-
-    return `${account.toHex()}-${token0.toHex()}-${token1.toHex()}-${suffix}`;
-  };
-
   test('Maker volume tracking', () => {
     const offerWrite = createOfferWriteEvent(
       token0, 
@@ -811,8 +799,8 @@ describe("Describe entity assertions", () => {
 
     assert.fieldEquals('AccountVolumeByPair', id, 'account', taker.toHex());
 
-    assert.fieldEquals('AccountVolumeByPair', id, 'token0', orderComplete.params.inbound_tkn.toHex());
-    assert.fieldEquals('AccountVolumeByPair', id, 'token1', orderComplete.params.outbound_tkn.toHex());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0', token0.toHex());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1', token1.toHex());
 
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', orderComplete.params.takerGot.toI32().toString());
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', "0");
@@ -834,8 +822,8 @@ describe("Describe entity assertions", () => {
 
     assert.fieldEquals('AccountVolumeByPair', id, 'account', taker.toHex());
 
-    assert.fieldEquals('AccountVolumeByPair', id, 'token0', orderComplete.params.inbound_tkn.toHex());
-    assert.fieldEquals('AccountVolumeByPair', id, 'token1', orderComplete.params.outbound_tkn.toHex());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0', token0.toHex());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1', token1.toHex());
 
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', orderComplete.params.takerGot.toI32().toString());
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', orderComplete2.params.takerGave.toI32().toString());
