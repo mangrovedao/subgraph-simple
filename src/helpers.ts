@@ -43,20 +43,17 @@ export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, 
   const id = `${account.toHex()}-${token0.toHex()}-${token1.toHex()}-${suffix}`;
   let volume = AccountVolumeByPair.load(id);
   if (!volume) {
-    volume = AccountVolumeByPair.load(`${account.toHex()}-${token1.toHex()}-${token0.toHex()}-${suffix}`);
-    if (!volume) {
-      volume = new AccountVolumeByPair(id);
-      volume.account = account;
-      volume.token0 = token0;
-      volume.token1 = token1;
-      volume.token0Sent = BigInt.fromI32(0);
-      volume.token0Received = BigInt.fromI32(0);
-      volume.token1Sent = BigInt.fromI32(0);
-      volume.token1Received = BigInt.fromI32(0);
-      volume.updatedDate = currentDate;
-      volume.asMaker = asMaker;
-      volume.save();
-    }
+    volume = new AccountVolumeByPair(id);
+    volume.account = account;
+    volume.token0 = token0;
+    volume.token1 = token1;
+    volume.token0Sent = BigInt.fromI32(0);
+    volume.token0Received = BigInt.fromI32(0);
+    volume.token1Sent = BigInt.fromI32(0);
+    volume.token1Received = BigInt.fromI32(0);
+    volume.updatedDate = currentDate;
+    volume.asMaker = asMaker;
+    volume.save();
   }
   volume.updatedDate = currentDate;
 
@@ -70,22 +67,19 @@ export const increaseAccountVolume = (
   volumeToken1: BigInt, 
   receivedToken0: bool,
 ): void => {
-  if (volume.token0 == token0) {
-    if (receivedToken0) {
-      volume.token0Received = volume.token0Received.plus(volumeToken0);
-      volume.token1Sent = volume.token1Sent.plus(volumeToken1);
-    } else {
-      volume.token0Sent = volume.token0Sent.plus(volumeToken0);
-      volume.token1Received = volume.token1Received.plus(volumeToken1);
-    }
+  if (volume.token0 != token0) {
+    const _volumeToken0 = volumeToken0;
+    volumeToken0 = volumeToken1;
+    volumeToken1 = _volumeToken0;
+    receivedToken0 = !receivedToken0;
+  }
+
+  if (receivedToken0) {
+    volume.token0Received = volume.token0Received.plus(volumeToken0);
+    volume.token1Sent = volume.token1Sent.plus(volumeToken1);
   } else {
-    if (receivedToken0) {
-      volume.token1Received = volume.token1Received.plus(volumeToken0);
-      volume.token0Sent = volume.token0Sent.plus(volumeToken1);
-    } else {
-      volume.token1Sent = volume.token1Sent.plus(volumeToken0);
-      volume.token0Received = volume.token0Received.plus(volumeToken1)
-    }
+    volume.token0Sent = volume.token0Sent.plus(volumeToken0);
+    volume.token1Received = volume.token1Received.plus(volumeToken1);
   }
 
   volume.save();
