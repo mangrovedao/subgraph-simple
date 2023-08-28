@@ -61,6 +61,7 @@ type Offer @entity {
   maker: Account!
   owner: Account
   kandel: Kandel
+  kandelIndex: BigInt
 }
 
 type Order @entity {
@@ -118,6 +119,10 @@ type Kandel @entity {
   quote: Bytes!
   deployer: Account!
   admin: Account!
+
+  type: String!
+
+  # Only for kandel AAVE
   reserveId: Bytes
   router: Bytes
 

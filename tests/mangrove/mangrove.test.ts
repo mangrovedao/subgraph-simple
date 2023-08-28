@@ -216,6 +216,7 @@ describe("Describe entity assertions", () => {
     kandel.address = Bytes.fromUTF8('address');
     kandel.base = token0;
     kandel.quote = token1;
+    kandel.type = "Kandel";
     kandel.depositedBase = BigInt.fromI32(0);
     kandel.depositedQuote = BigInt.fromI32(0);
     kandel.deployer = Bytes.fromUTF8('owner');
