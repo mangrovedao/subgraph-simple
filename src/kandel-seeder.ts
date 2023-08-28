@@ -25,10 +25,10 @@ export function handleNewAaveKandel(event: NewAaveKandel): void {
   kandel.depositedBase = BigInt.fromI32(0);
   kandel.depositedQuote = BigInt.fromI32(0);
 
-  const ownerAccount = getOrCreateAccount(event.params.owner);
+  const ownerAccount = getOrCreateAccount(event.params.owner, event.block.timestamp, true);
   kandel.deployer = ownerAccount.address;
 
-  const adminAcount = getOrCreateAccount(event.params.owner);
+  const adminAcount = getOrCreateAccount(event.params.owner, event.block.timestamp, true);
   kandel.admin = adminAcount.address;
 
   kandel.offerIndexes = [];
