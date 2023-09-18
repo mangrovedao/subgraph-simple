@@ -162,7 +162,7 @@ export function handleRetractStart(event: RetractStart): void {
 export function handleSetAdmin(event: SetAdmin): void {
   const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
 
-  const adminAccount = getOrCreateAccount(event.params.admin);
+  const adminAccount = getOrCreateAccount(event.params.admin, event.block.timestamp, false);
   kandel.admin = adminAccount.address;
   kandel.save();
 }

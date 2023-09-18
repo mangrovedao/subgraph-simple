@@ -189,9 +189,9 @@ describe("Describe entity assertions", () => {
 
     const kandelPopulateRetractUpdated = KandelPopulateRetract.load(offer1.latestTransactionHash.toHex())!;
     assert.assertTrue( kandelPopulateRetractUpdated.offerGives.length == 3);
-    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[0] == `${offer3.id}-${offer3.gives}-${offer3.totalGave!.toString()}-${offer3.totalGot!.toString()}`);
-    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[1] == `${offer4.id}-${offer4.gives}-${offer4.totalGave!.toString()}-${offer4.totalGot!.toString()}`);
-    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[2] == `${offer6.id}-${offer6.gives}-${offer6.totalGave!.toString()}-${offer6.totalGot!.toString()}`);
+    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[0] == `${offer3.id}-${offer3.gives}-${offer3.totalGave.toString()}-${offer3.totalGot.toString()}`);
+    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[1] == `${offer4.id}-${offer4.gives}-${offer4.totalGave.toString()}-${offer4.totalGot.toString()}`);
+    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[2] == `${offer6.id}-${offer6.gives}-${offer6.totalGave.toString()}-${offer6.totalGot.toString()}`);
   })
 
   test("getOfferIdsForKandel", () => {
@@ -279,9 +279,9 @@ describe("Describe entity assertions", () => {
 
     const kandelPopulateRetractUpdated = KandelPopulateRetract.load(offer1.latestTransactionHash.toHex())!;
     assert.assertTrue( kandelPopulateRetractUpdated.offerGives.length == 3);
-    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[0] == `${offer3.id}-${0}-${offer3.totalGave!.toString()}-${offer3.totalGot!.toString()}`);
-    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[1] == `${offer4.id}-${0}-${offer4.totalGave!.toString()}-${offer4.totalGot!.toString()}`);
-    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[2] == `${offer6.id}-${0}-${offer6.totalGave!.toString()}-${offer6.totalGot!.toString()}`);
+    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[0] == `${offer3.id}-${0}-${offer3.totalGave.toString()}-${offer3.totalGot.toString()}`);
+    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[1] == `${offer4.id}-${0}-${offer4.totalGave.toString()}-${offer4.totalGot.toString()}`);
+    assert.assertTrue( kandelPopulateRetractUpdated.offerGives[2] == `${offer6.id}-${0}-${offer6.totalGave.toString()}-${offer6.totalGot.toString()}`);
   })
 
   test("KandelPopulateRetract, handleRetractStart", () => {

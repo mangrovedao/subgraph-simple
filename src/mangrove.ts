@@ -24,7 +24,7 @@ import {
   SetUseOracle
 } from "../generated/Mangrove/Mangrove";
 import { Kandel, LimitOrder, Market, Offer, Order } from "../generated/schema";
-import { addOrderToStack, getEventUniqueId, getMarketId, getOfferId, getOrCreateAccount, getOrderFromStack, removeOrderFromStack } from "./helpers";
+import { addOrderToStack, getEventUniqueId, getMarketId, getOfferId, getOrCreateAccount, getOrCreateAccountVolumeByPair, getOrderFromStack, increaseAccountVolume, removeOrderFromStack } from "./helpers";
 
 export function handleApproval(event: Approval): void {}
 
@@ -127,6 +127,9 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   offer.totalGot = event.params.takerGives.plus(offer.totalGot);
   offer.totalGave = event.params.takerWants.plus(offer.totalGave);
 
+  const volume = getOrCreateAccountVolumeByPair(offer.owner !== null ? offer.owner! : offer.maker, event.params.outbound_tkn, event.params.inbound_tkn, event.block.timestamp, true);
+  increaseAccountVolume(volume, event.params.inbound_tkn, event.params.takerGives, event.params.takerWants, true);
+
   offer.save();
 }
 
@@ -167,7 +170,7 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.latestLogIndex = event.logIndex;
   offer.latestTransactionHash = event.transaction.hash;
 
-  const owner = getOrCreateAccount(event.params.maker);
+  const owner = getOrCreateAccount(event.params.maker, event.block.timestamp, true);
   offer.maker = owner.id;
 
   const marketId = getMarketId(
@@ -202,7 +205,7 @@ export function handleOfferWrite(event: OfferWrite): void {
 export function handleOrderComplete(event: OrderComplete): void {
   const order = getOrderFromStack();
 
-  order.taker = event.params.taker;
+  order.taker = getOrCreateAccount(event.params.taker, event.block.timestamp, true).id;
   order.takerGot = event.params.takerGot;
   order.takerGave = event.params.takerGave;
   order.penalty = event.params.penalty;
@@ -210,6 +213,9 @@ export function handleOrderComplete(event: OrderComplete): void {
 
   order.market = getMarketId(event.params.outbound_tkn, event.params.inbound_tkn);
   order.save();
+
+  const volume = getOrCreateAccountVolumeByPair(event.params.taker, event.params.outbound_tkn, event.params.inbound_tkn, event.block.timestamp, false);
+  increaseAccountVolume(volume, event.params.outbound_tkn, event.params.takerGot, event.params.takerGave, true);
 
   removeOrderFromStack();
 }

@@ -28,7 +28,7 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
     return;
   }
 
-  const owner = getOrCreateAccount(event.params.owner);
+  const owner = getOrCreateAccount(event.params.owner, event.block.timestamp, true);
   offer.owner = owner.id;
   offer.save();
 }
@@ -56,7 +56,7 @@ export function handleOrderSummary(event: OrderSummary): void {
 
   limitOrder.wants = event.params.takerWants;
   limitOrder.gives = event.params.takerGives;
-  limitOrder.realTaker = event.params.taker;
+  limitOrder.realTaker = getOrCreateAccount(event.params.taker, event.block.timestamp, true).id;
   limitOrder.expiryDate = event.params.expiryDate;
   limitOrder.fillOrKill = event.params.fillOrKill;
   limitOrder.fillWants = event.params.fillWants;
