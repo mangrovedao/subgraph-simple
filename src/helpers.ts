@@ -1,5 +1,6 @@
 import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { Account, OrderStack, Offer, Order, KandelParameters, AccountVolumeByPair } from "../generated/schema";
+import { log } from '@graphprotocol/graph-ts'
 
 export const getKandelParamsId = (txHash: Bytes, kandel:Address): string => {
   return `${txHash}-${kandel.toHex()}`;
@@ -32,28 +33,30 @@ export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnIn
   return account;
 };
 
-export const getAccountVolumeByPairId = (account: Address, token0: Address, token1: Address, asMaker: boolean): string => {
+export const getAccountVolumeByPairId = (account: Address, token0: Address, token1: Address, asMaker: boolean, asSnipe: boolean = false): string => {
   if (token0.toHex() > token1.toHex()) {
     const _token1 = token1;
     token1 = token0;
     token0 = _token1;
   }
 
-  const suffix = asMaker ? 'maker' : 'taker';
+  let suffix = asMaker ? 'maker' : 'taker';
+
+  if (asSnipe) {
+    suffix = `${suffix}-snipes`;
+  }
 
   return `${account.toHex()}-${token0.toHex()}-${token1.toHex()}-${suffix}`;
 };
 
-export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, token1: Address, currentDate: BigInt, asMaker: bool): AccountVolumeByPair => {
+export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, token1: Address, currentDate: BigInt, asMaker: boolean, asSnipe: boolean = false): AccountVolumeByPair => {
   if (token0.toHex() > token1.toHex()) {
     const _token1 = token1;
     token1 = token0;
     token0 = _token1;
   }
 
-  const suffix = asMaker ? 'maker' : 'taker';
-
-  const id =`${account.toHex()}-${token0.toHex()}-${token1.toHex()}-${suffix}`;
+  const id = getAccountVolumeByPairId(Address.fromBytes(account), token0, token1, asMaker, asSnipe);
 
   let volume = AccountVolumeByPair.load(id);
   if (!volume) {
@@ -118,6 +121,7 @@ export const getOrderStack = (): OrderStack => {
   if (orderStack === null) {
     orderStack = new OrderStack('orderStack');
     orderStack.ids = ``;
+    orderStack.nextIsSnipe = false;
 
     orderStack.save();
   }
@@ -128,7 +132,12 @@ export const getOrderStack = (): OrderStack => {
 export const addOrderToStack = (order: Order): void => {
   const orderStack = getOrderStack();
 
-  orderStack.ids = `${orderStack.ids}|${order.id}`
+  if (orderStack.nextIsSnipe) {
+    orderStack.ids = `${orderStack.ids}|${order.id}s`
+    orderStack.nextIsSnipe = false;
+  } else {
+    orderStack.ids = `${orderStack.ids}|${order.id}m`
+  }
 
   orderStack.save();
 };
@@ -138,7 +147,8 @@ export const getOrderFromStack = (): Order => {
   const ids = orderStack.ids;
 
   const idsArray = ids.split('|');
-  const order = Order.load(idsArray[idsArray.length - 1])!;
+
+  const order = Order.load(idsArray[idsArray.length - 1].slice(0, -1))!; 
 
   return order;
 };
@@ -161,8 +171,18 @@ export const removeOrderFromStack = (): void => {
 export const getLastOrder = (): Order => {
   const orderStack = getOrderStack();
 
-  const order = Order.load(orderStack.last!)!;
+  const order = Order.load(orderStack.last!.slice(0,-1)!)!;
   return order;
+};
+
+export const currentOrderIsSnipe = (): boolean => {
+  const orderStack = getOrderStack();
+
+  if (orderStack.ids.length === 0) {
+    return false;
+  }
+
+  return orderStack.ids.at(orderStack.ids.length - 1) == 's';
 };
 
 export const getEventUniqueId = (event: ethereum.Event): string => {

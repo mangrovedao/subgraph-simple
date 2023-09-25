@@ -78,8 +78,9 @@ describe("Describe entity assertions", () => {
     order.save();
     
     const orderStack = new OrderStack('orderStack')
-    orderStack.ids = ""
-    orderStack.last = order.id;
+    orderStack.ids = "";
+    orderStack.nextIsSnipe = false;
+    orderStack.last = `${order.id}m`;
     orderStack.save();
     
     const takerWants = BigInt.fromI32(1000); 
@@ -142,8 +143,9 @@ describe("Describe entity assertions", () => {
     order.save();
     
     const orderStack = new OrderStack('orderStack')
-    orderStack.ids = ""
-    orderStack.last = order.id;
+    orderStack.ids = "";
+    orderStack.nextIsSnipe = false;
+    orderStack.last = `${order.id}m`;
     orderStack.save();
     
     const takerWants = BigInt.fromI32(1000); 
@@ -231,8 +233,9 @@ describe("Describe entity assertions", () => {
     order.save();
     
     const orderStack = new OrderStack('orderStack')
-    orderStack.ids = ""
-    orderStack.last = order.id;
+    orderStack.ids = "";
+    orderStack.nextIsSnipe = false;
+    orderStack.last = `${order.id}m`;
     orderStack.save();
     
     const takerWants = BigInt.fromI32(1000); 
@@ -322,7 +325,8 @@ describe("Describe entity assertions", () => {
     
     const orderStack = new OrderStack('orderStack')
     orderStack.ids = ""
-    orderStack.last = order.id;
+    orderStack.nextIsSnipe = false;
+    orderStack.last = `${order.id}m`;
     orderStack.save();
     
     const takerWants = BigInt.fromI32(1000); 
@@ -412,8 +416,9 @@ describe("Describe entity assertions", () => {
     order.save();
     
     const orderStack = new OrderStack('orderStack')
-    orderStack.ids = ""
-    orderStack.last = order.id;
+    orderStack.ids = "";
+    orderStack.nextIsSnipe = false;
+    orderStack.last = `${order.id}m`;
     orderStack.save();
     
     const takerWants = BigInt.fromI32(1000); 
@@ -506,7 +511,8 @@ describe("Describe entity assertions", () => {
     
     const orderStack = new OrderStack('orderStack')
     orderStack.ids = ""
-    orderStack.last = order.id;
+    orderStack.nextIsSnipe = false;
+    orderStack.last = `${order.id}m`;
     orderStack.save();
 
     const takerWants = BigInt.fromI32(1000); 

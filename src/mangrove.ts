@@ -21,10 +21,12 @@ import {
   SetGovernance,
   SetMonitor,
   SetNotify,
-  SetUseOracle
+  SetUseOracle,
+  SnipesCall,
+  SnipesForCall,
 } from "../generated/Mangrove/Mangrove";
 import { Kandel, LimitOrder, Market, Offer, Order } from "../generated/schema";
-import { addOrderToStack, getEventUniqueId, getMarketId, getOfferId, getOrCreateAccount, getOrCreateAccountVolumeByPair, getOrderFromStack, increaseAccountVolume, removeOrderFromStack } from "./helpers";
+import { addOrderToStack, currentOrderIsSnipe, getEventUniqueId, getMarketId, getOfferId, getOrCreateAccount, getOrCreateAccountVolumeByPair, getOrderFromStack, getOrderStack, increaseAccountVolume, removeOrderFromStack } from "./helpers";
 
 export function handleApproval(event: Approval): void {}
 
@@ -214,7 +216,14 @@ export function handleOrderComplete(event: OrderComplete): void {
   order.market = getMarketId(event.params.outbound_tkn, event.params.inbound_tkn);
   order.save();
 
-  const volume = getOrCreateAccountVolumeByPair(event.params.taker, event.params.outbound_tkn, event.params.inbound_tkn, event.block.timestamp, false);
+  const volume = getOrCreateAccountVolumeByPair(
+    event.params.taker, 
+    event.params.outbound_tkn, 
+    event.params.inbound_tkn, 
+    event.block.timestamp, 
+    false,
+    currentOrderIsSnipe(),
+  );
   increaseAccountVolume(volume, event.params.outbound_tkn, event.params.takerGot, event.params.takerGave, true);
 
   removeOrderFromStack();
@@ -292,3 +301,17 @@ export function handleSetMonitor(event: SetMonitor): void {}
 export function handleSetNotify(event: SetNotify): void {}
 
 export function handleSetUseOracle(event: SetUseOracle): void {}
+
+export function snipes(call: SnipesCall): void {
+  const orderStack = getOrderStack();
+  orderStack.nextIsSnipe = true;
+
+  orderStack.save();
+}
+
+export function snipesFor(call: SnipesForCall): void {
+  const orderStack = getOrderStack();
+  orderStack.nextIsSnipe = true;
+
+  orderStack.save();
+}

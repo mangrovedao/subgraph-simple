@@ -8,7 +8,7 @@ import {
 } from "matchstick-as/assembly/index"
 import { BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { Order } from "../../generated/schema";
-import { addOrderToStack, getLastOrder, getOrderFromStack, removeOrderFromStack } from "../../src/helpers";
+import { addOrderToStack, currentOrderIsSnipe, getLastOrder, getOrderFromStack, getOrderStack, removeOrderFromStack } from "../../src/helpers";
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
@@ -51,6 +51,17 @@ describe("Describe entity assertions", () => {
 
     const lastOrder = getLastOrder();
     assert.assertTrue(lastOrder.id.toString() == order1.id.toString());
+
+    const orderStack = getOrderStack();
+    orderStack.nextIsSnipe = true;
+    orderStack.save();
+
+    const order3 = new Order("order3");
+    order3.transactionHash = Bytes.fromUTF8("0x2");
+    order3.creationDate = BigInt.fromI32(3);
+    addOrderToStack(order3);
+
+    assert.assertTrue(currentOrderIsSnipe());
   });
 
 

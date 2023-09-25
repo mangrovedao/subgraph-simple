@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Bytes, log } from "@graphprotocol/graph-ts";
 import {
   afterEach,
   assert,
@@ -8,7 +8,7 @@ import {
   test
 } from "matchstick-as/assembly/index";
 import { Account, Kandel, LimitOrder, Market, Offer, Order } from "../../generated/schema";
-import { createOffer, getAccountVolumeByPairId, getEventUniqueId, getMarketId, getOfferId } from "../../src/helpers";
+import { createOffer, getAccountVolumeByPairId, getEventUniqueId, getMarketId, getOfferId, getOrderStack } from "../../src/helpers";
 import { createNewOffer, handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handlePosthookFail, handleSetActive, handleSetGasbase } from "../../src/mangrove";
 import { createOfferFailEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createPosthookFailEvent, createSetActiveEvent, createSetGasbaseEvent } from "./mangrove-utils";
 
@@ -680,7 +680,7 @@ describe("Describe entity assertions", () => {
     const orderId = getEventUniqueId(orderStart);
     assert.fieldEquals('Order', orderId, 'transactionHash', orderStart.transaction.hash.toHex());
 
-    assert.fieldEquals('OrderStack', 'orderStack', 'ids',  `|${orderId}`);
+    assert.fieldEquals('OrderStack', 'orderStack', 'ids',  `|${orderId}m`);
   });
 
   test('Order, handleOrderComplete', () => {
@@ -811,6 +811,61 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('AccountVolumeByPair', id, 'updatedDate', orderComplete.block.timestamp.toString()); 
     assert.fieldEquals('AccountVolumeByPair', id, 'asMaker', "false"); 
 
+    const orderStart2 =  createOrderStartEvent();
+    handleOrderStart(orderStart2);
+
+    const takerGot2 = BigInt.fromI32(100);
+    const takerGave2 = BigInt.fromI32(200);
+
+    const orderComplete2 =  createOrderCompleteEvent(token0, token1, taker, takerGot2, takerGave2, BigInt.fromI32(1), BigInt.fromI32(2));
+    orderComplete2.block.timestamp = orderComplete2.block.timestamp.plus(BigInt.fromI32(1));
+    handleOrderComplete(orderComplete2);
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'account', taker.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0', token0.toHex());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1', token1.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', orderComplete.params.takerGot.toI32().toString());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', orderComplete2.params.takerGave.toI32().toString());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Received', orderComplete2.params.takerGot.toI32().toString()); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', orderComplete.params.takerGave.toI32().toString()); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'updatedDate', orderComplete2.block.timestamp.toString()); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'asMaker', "false"); 
+  });
+
+  test('Taker volume tracking, snipes', () => {
+    const orderStack = getOrderStack();
+    orderStack.nextIsSnipe = true;
+    orderStack.save();
+
+    const orderStart =  createOrderStartEvent();
+    handleOrderStart(orderStart);
+
+    const takerGot = BigInt.fromI32(20);
+    const takerGave = BigInt.fromI32(40);
+
+    const orderComplete =  createOrderCompleteEvent(token1, token0, taker, takerGot, takerGave, BigInt.fromI32(1), BigInt.fromI32(2));
+    handleOrderComplete(orderComplete);
+
+    let id = getAccountVolumeByPairId(taker, orderComplete.params.outbound_tkn, orderComplete.params.inbound_tkn, false, true)
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'account', taker.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0', token0.toHex());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1', token1.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', orderComplete.params.takerGot.toI32().toString());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', "0");
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Received', "0"); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', orderComplete.params.takerGave.toI32().toString()); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'updatedDate', orderComplete.block.timestamp.toString()); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'asMaker', "false"); 
+
+    orderStack.nextIsSnipe = true;
+    orderStack.save();
     const orderStart2 =  createOrderStartEvent();
     handleOrderStart(orderStart2);
 

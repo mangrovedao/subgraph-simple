@@ -176,5 +176,6 @@ type KandelParameters @entity {
 type OrderStack @entity {
   id: String!
   ids: String!
+  nextIsSnipe: Boolean!
   last: Order
 }
