@@ -111,9 +111,9 @@ dataSources:
         - name: Mangrove
           file: ./abis/Mangrove.json
       callHandlers:
-        - function: snipes(address,address,uint[4][],bool)
+        - function: snipes(address,address,uint256[4][],bool)
           handler: handleSnipes
-        - function: snipesFor(address,address,uint[4][],bool)
+        - function: snipesFor(address,address,uint256[4][],bool,address)
           handler: handleSnipesFor
       eventHandlers:
         - event: Approval(indexed address,indexed address,address,address,uint256)

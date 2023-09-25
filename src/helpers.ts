@@ -1,6 +1,5 @@
 import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { Account, OrderStack, Offer, Order, KandelParameters, AccountVolumeByPair } from "../generated/schema";
-import { log } from '@graphprotocol/graph-ts'
 
 export const getKandelParamsId = (txHash: Bytes, kandel:Address): string => {
   return `${txHash}-${kandel.toHex()}`;
