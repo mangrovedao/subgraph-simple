@@ -302,14 +302,14 @@ export function handleSetNotify(event: SetNotify): void {}
 
 export function handleSetUseOracle(event: SetUseOracle): void {}
 
-export function snipes(call: SnipesCall): void {
+export function handleSnipes(call: SnipesCall): void {
   const orderStack = getOrderStack();
   orderStack.nextIsSnipe = true;
 
   orderStack.save();
 }
 
-export function snipesFor(call: SnipesForCall): void {
+export function handleSnipesFor(call: SnipesForCall): void {
   const orderStack = getOrderStack();
   orderStack.nextIsSnipe = true;
 
