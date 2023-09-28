@@ -6,6 +6,12 @@ type Account @entity {
   volumes: [AccountVolumeByPair!]! @derivedFrom(field: "account")
 }
 
+enum VolumeType {
+  Maker,
+  Taker,
+  TakerSnipe,
+}
+
 type AccountVolumeByPair @entity {
   id: String!
 
@@ -21,7 +27,7 @@ type AccountVolumeByPair @entity {
   token1Sent: BigInt!
   token1Received: BigInt!
 
-  asMaker: Boolean!
+  volumeType: VolumeType!
 }
 
 type Market @entity {

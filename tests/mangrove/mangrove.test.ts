@@ -745,7 +745,7 @@ describe("Describe entity assertions", () => {
     const offerSuccess = createOfferSuccessEvent(token0, token1, BigInt.fromI32(0), taker, BigInt.fromI32(10), BigInt.fromI32(20));
     handleOfferSuccess(offerSuccess);
 
-    let id = getAccountVolumeByPairId(maker, offerWrite.params.outbound_tkn, offerWrite.params.inbound_tkn, true)
+    let id = getAccountVolumeByPairId(maker, offerWrite.params.outbound_tkn, offerWrite.params.inbound_tkn, "Maker")
 
     assert.fieldEquals('AccountVolumeByPair', id, 'account', maker.toHex());
 
@@ -756,7 +756,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', offerSuccess.params.takerWants.toI32().toString());
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', offerSuccess.params.takerGives.toI32().toString()); 
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', "0"); 
-    assert.fieldEquals('AccountVolumeByPair', id, 'asMaker', "true"); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'volumeType', "Maker"); 
 
     const offerWrite2 = createOfferWriteEvent(
       token1,
@@ -783,7 +783,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', offerSuccess.params.takerWants.toI32().toString());
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', offerSuccess.params.takerGives.toI32().toString()); 
     assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', offerSuccess2.params.takerWants.toI32().toString()); 
-    assert.fieldEquals('AccountVolumeByPair', id, 'asMaker', "true"); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'volumeType', "Maker"); 
   });
 
   test('Taker volume tracking', () => {
@@ -796,7 +796,7 @@ describe("Describe entity assertions", () => {
     const orderComplete =  createOrderCompleteEvent(token1, token0, taker, takerGot, takerGave, BigInt.fromI32(1), BigInt.fromI32(2));
     handleOrderComplete(orderComplete);
 
-    let id = getAccountVolumeByPairId(taker, orderComplete.params.outbound_tkn, orderComplete.params.inbound_tkn, false)
+    let id = getAccountVolumeByPairId(taker, orderComplete.params.outbound_tkn, orderComplete.params.inbound_tkn, "Taker")
 
     assert.fieldEquals('AccountVolumeByPair', id, 'account', taker.toHex());
 
@@ -809,7 +809,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Received', "0"); 
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', orderComplete.params.takerGave.toI32().toString()); 
     assert.fieldEquals('AccountVolumeByPair', id, 'updatedDate', orderComplete.block.timestamp.toString()); 
-    assert.fieldEquals('AccountVolumeByPair', id, 'asMaker', "false"); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'volumeType', "Taker"); 
 
     const orderStart2 =  createOrderStartEvent();
     handleOrderStart(orderStart2);
@@ -832,7 +832,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Received', orderComplete2.params.takerGot.toI32().toString()); 
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', orderComplete.params.takerGave.toI32().toString()); 
     assert.fieldEquals('AccountVolumeByPair', id, 'updatedDate', orderComplete2.block.timestamp.toString()); 
-    assert.fieldEquals('AccountVolumeByPair', id, 'asMaker', "false"); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'volumeType', "Taker");
   });
 
   test('Taker volume tracking, snipes', () => {
@@ -849,7 +849,7 @@ describe("Describe entity assertions", () => {
     const orderComplete =  createOrderCompleteEvent(token1, token0, taker, takerGot, takerGave, BigInt.fromI32(1), BigInt.fromI32(2));
     handleOrderComplete(orderComplete);
 
-    let id = getAccountVolumeByPairId(taker, orderComplete.params.outbound_tkn, orderComplete.params.inbound_tkn, false, true)
+    let id = getAccountVolumeByPairId(taker, orderComplete.params.outbound_tkn, orderComplete.params.inbound_tkn, "TakerSnipe")
 
     assert.fieldEquals('AccountVolumeByPair', id, 'account', taker.toHex());
 
@@ -862,7 +862,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Received', "0"); 
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', orderComplete.params.takerGave.toI32().toString()); 
     assert.fieldEquals('AccountVolumeByPair', id, 'updatedDate', orderComplete.block.timestamp.toString()); 
-    assert.fieldEquals('AccountVolumeByPair', id, 'asMaker', "false"); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'volumeType', "TakerSnipe"); 
 
     orderStack.nextIsSnipe = true;
     orderStack.save();
@@ -887,7 +887,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Received', orderComplete2.params.takerGot.toI32().toString()); 
     assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', orderComplete.params.takerGave.toI32().toString()); 
     assert.fieldEquals('AccountVolumeByPair', id, 'updatedDate', orderComplete2.block.timestamp.toString()); 
-    assert.fieldEquals('AccountVolumeByPair', id, 'asMaker', "false"); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'volumeType', "TakerSnipe"); 
   });
 
 });

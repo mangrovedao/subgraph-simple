@@ -1,5 +1,6 @@
 import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { Account, OrderStack, Offer, Order, KandelParameters, AccountVolumeByPair } from "../generated/schema";
+import { log } from "matchstick-as";
 
 export const getKandelParamsId = (txHash: Bytes, kandel:Address): string => {
   return `${txHash}-${kandel.toHex()}`;
@@ -32,30 +33,24 @@ export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnIn
   return account;
 };
 
-export const getAccountVolumeByPairId = (account: Address, token0: Address, token1: Address, asMaker: boolean, asSnipe: boolean = false): string => {
+export const getAccountVolumeByPairId = (account: Address, token0: Address, token1: Address, volumeType: string): string => {
   if (token0.toHex() > token1.toHex()) {
     const _token1 = token1;
     token1 = token0;
     token0 = _token1;
   }
 
-  let suffix = asMaker ? 'maker' : 'taker';
-
-  if (asSnipe) {
-    suffix = `${suffix}-snipes`;
-  }
-
-  return `${account.toHex()}-${token0.toHex()}-${token1.toHex()}-${suffix}`;
+  return `${account.toHex()}-${token0.toHex()}-${token1.toHex()}-${volumeType}`;
 };
 
-export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, token1: Address, currentDate: BigInt, asMaker: boolean, asSnipe: boolean = false): AccountVolumeByPair => {
+export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, token1: Address, currentDate: BigInt, volumeType: string): AccountVolumeByPair => {
   if (token0.toHex() > token1.toHex()) {
     const _token1 = token1;
     token1 = token0;
     token0 = _token1;
   }
 
-  const id = getAccountVolumeByPairId(Address.fromBytes(account), token0, token1, asMaker, asSnipe);
+  const id = getAccountVolumeByPairId(Address.fromBytes(account), token0, token1, volumeType);
 
   let volume = AccountVolumeByPair.load(id);
   if (!volume) {
@@ -68,7 +63,7 @@ export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Address, 
     volume.token1Sent = BigInt.fromI32(0);
     volume.token1Received = BigInt.fromI32(0);
     volume.updatedDate = currentDate;
-    volume.asMaker = asMaker;
+    volume.volumeType = volumeType;
     volume.save();
   }
   volume.updatedDate = currentDate;

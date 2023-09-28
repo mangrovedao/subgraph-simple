@@ -129,7 +129,7 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   offer.totalGot = event.params.takerGives.plus(offer.totalGot);
   offer.totalGave = event.params.takerWants.plus(offer.totalGave);
 
-  const volume = getOrCreateAccountVolumeByPair(offer.owner !== null ? offer.owner! : offer.maker, event.params.outbound_tkn, event.params.inbound_tkn, event.block.timestamp, true);
+  const volume = getOrCreateAccountVolumeByPair(offer.owner !== null ? offer.owner! : offer.maker, event.params.outbound_tkn, event.params.inbound_tkn, event.block.timestamp, "Maker");
   increaseAccountVolume(volume, event.params.inbound_tkn, event.params.takerGives, event.params.takerWants, true);
 
   offer.save();
@@ -221,8 +221,7 @@ export function handleOrderComplete(event: OrderComplete): void {
     event.params.outbound_tkn, 
     event.params.inbound_tkn, 
     event.block.timestamp, 
-    false,
-    currentOrderIsSnipe(),
+    currentOrderIsSnipe() ? "TakerSnipe": "Taker",
   );
   increaseAccountVolume(volume, event.params.outbound_tkn, event.params.takerGot, event.params.takerGave, true);
 
