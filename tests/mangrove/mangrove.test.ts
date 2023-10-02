@@ -786,6 +786,71 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('AccountVolumeByPair', id, 'volumeType', "Maker"); 
   });
 
+  test('Maker volume tracking sniped', () => {
+    const orderStack = getOrderStack();
+    orderStack.nextIsSnipe = true;
+    orderStack.save();
+
+    const orderStart = createOrderStartEvent();
+    handleOrderStart(orderStart);
+
+    const offerWrite = createOfferWriteEvent(
+      token0, 
+      token1,
+      maker,
+      BigInt.fromI32(1000),
+      BigInt.fromI32(2000),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+    );
+    handleOfferWrite(offerWrite);
+
+    const offerSuccess = createOfferSuccessEvent(token0, token1, BigInt.fromI32(0), taker, BigInt.fromI32(10), BigInt.fromI32(20));
+    handleOfferSuccess(offerSuccess);
+
+    let id = getAccountVolumeByPairId(maker, offerWrite.params.outbound_tkn, offerWrite.params.inbound_tkn, "MakerSniped")
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'account', maker.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0', offerWrite.params.outbound_tkn.toHex());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1', offerWrite.params.inbound_tkn.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Received', "0");
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', offerSuccess.params.takerWants.toI32().toString());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', offerSuccess.params.takerGives.toI32().toString()); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', "0"); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'volumeType', "MakerSniped"); 
+
+    const offerWrite2 = createOfferWriteEvent(
+      token1,
+      token0, 
+      maker,
+      BigInt.fromI32(1000),
+      BigInt.fromI32(2000),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      BigInt.fromI32(1),
+      BigInt.fromI32(0),
+    );
+    handleOfferWrite(offerWrite2);
+
+    const offerSuccess2 = createOfferSuccessEvent(token1, token0, BigInt.fromI32(1), taker, BigInt.fromI32(100), BigInt.fromI32(200));
+    handleOfferSuccess(offerSuccess2);
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'account', maker.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0', offerWrite2.params.inbound_tkn.toHex());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1', offerWrite2.params.outbound_tkn.toHex());
+
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Received', offerSuccess2.params.takerGives.toI32().toString());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token0Sent', offerSuccess.params.takerWants.toI32().toString());
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Received', offerSuccess.params.takerGives.toI32().toString()); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'token1Sent', offerSuccess2.params.takerWants.toI32().toString()); 
+    assert.fieldEquals('AccountVolumeByPair', id, 'volumeType', "MakerSniped"); 
+  });
+
   test('Taker volume tracking', () => {
     const orderStart =  createOrderStartEvent();
     handleOrderStart(orderStart);
