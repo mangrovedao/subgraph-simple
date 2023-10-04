@@ -10,6 +10,7 @@ enum VolumeType {
   Maker,
   Taker,
   TakerSnipe,
+  MakerSniped,
 }
 
 type AccountVolumeByPair @entity {
