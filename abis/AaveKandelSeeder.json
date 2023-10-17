@@ -7,8 +7,18 @@
         "type": "address"
       },
       {
+        "internalType": "address",
+        "name": "addressesProvider",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
-        "name": "kandelGasreq",
+        "name": "routerGasreq",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "aaveKandelGasreq",
         "type": "uint256"
       }
     ],
@@ -33,12 +43,31 @@
       {
         "indexed": false,
         "internalType": "address",
-        "name": "kandel",
+        "name": "aaveKandel",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "reserveId",
         "type": "address"
       }
     ],
-    "name": "NewKandel",
+    "name": "NewAaveKandel",
     "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "AAVE_ROUTER",
+    "outputs": [
+      {
+        "internalType": "contract AavePooledRouter",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [],

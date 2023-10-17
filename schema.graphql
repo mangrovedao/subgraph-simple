@@ -28,6 +28,7 @@ type Market @entity {
   id: String!
   outbound_tkn: Bytes! # address
   inbound_tkn: Bytes! # address
+  tickSpacing: BigInt!
   active: Boolean!
   gasbase: BigInt!
 }
@@ -39,12 +40,11 @@ type Offer @entity {
   creationDate: BigInt!
   latestUpdateDate: BigInt!
   offerId: BigInt!
-  wants: BigInt!
+  tick: BigInt!
   gives: BigInt!
   gasprice: BigInt!
   gasreq: BigInt!
   gasBase: BigInt!
-  prev: BigInt!
   isOpen: Boolean!
   isFailed: Boolean!
   isFilled: Boolean!
@@ -52,16 +52,32 @@ type Offer @entity {
   failedReason: Bytes
   posthookFailReason: Bytes
   deprovisioned: Boolean!
+  latestPenalty: BigInt!
+  totalPentalty: BigInt!
   totalGot: BigInt!
   totalGave: BigInt!
   prevGives: BigInt
-  prevWants: BigInt
+  prevTick: BigInt
 
   market: Market!
   maker: Account!
   owner: Account
+  limitOrder: LimitOrder
   kandel: Kandel
   kandelIndex: BigInt
+}
+
+type CleanOrder @entity {
+  id: String!
+  transactionHash: Bytes!
+  creationDate: BigInt!
+
+  taker: Account!
+  offersToBeCleaned: BigInt!
+  orders: [Order!]!
+  bounty: BigInt!
+
+  market: Market
 }
 
 type Order @entity {
@@ -69,24 +85,25 @@ type Order @entity {
   transactionHash: Bytes!
   creationDate: BigInt!
 
+  fillVolume: BigInt!
+  fillWants: Boolean!
+  maxTick: BigInt!
   taker: Account
-  takerGot: BigInt
-  takerGave: BigInt
-  penalty: BigInt
-  feePaid: BigInt
+  takerGot: BigInt!
+  takerGave: BigInt!
+  penalty: BigInt!
+  feePaid: BigInt!
 
   market: Market
   limitOrder: LimitOrder 
+  cleanOrder: CleanOrder
 }
 
 type LimitOrder @entity {
   id: String!
   creationDate: BigInt!
   latestUpdateDate: BigInt!
-  wants: BigInt!
-  gives: BigInt!
   expiryDate: BigInt
-  fillWants: Boolean!
   fillOrKill: Boolean!
   restingOrder: Boolean!
   realTaker: Account 
@@ -173,8 +190,7 @@ type KandelParameters @entity {
   kandel: Kandel!
 }
 
-type OrderStack @entity {
+type Stack @entity {
   id: String!
   ids: String!
-  last: Order
 }

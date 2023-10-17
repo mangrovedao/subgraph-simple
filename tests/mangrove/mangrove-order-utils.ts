@@ -4,16 +4,16 @@ import {
   LogIncident,
   Mgv,
   NewOwnedOffer,
-  OrderSummary,
+  MangroveOrderStart,
   SetAdmin,
   SetExpiry,
-  SetRouter
+  SetRouter,
+  MangroveOrderComplete
 } from "../../generated/MangroveOrder/MangroveOrder"
 
 export function createLogIncidentEvent(
   mangrove: Address,
-  outbound_tkn: Address,
-  inbound_tkn: Address,
+  olKeyHash: Bytes,
   offerId: BigInt,
   makerData: Bytes,
   mgvData: Bytes
@@ -27,14 +27,8 @@ export function createLogIncidentEvent(
   )
   logIncidentEvent.parameters.push(
     new ethereum.EventParam(
-      "outbound_tkn",
-      ethereum.Value.fromAddress(outbound_tkn)
-    )
-  )
-  logIncidentEvent.parameters.push(
-    new ethereum.EventParam(
-      "inbound_tkn",
-      ethereum.Value.fromAddress(inbound_tkn)
+      "olKeyHash",
+      ethereum.Value.fromAddress(olKeyHash)
     )
   )
   logIncidentEvent.parameters.push(
@@ -56,6 +50,74 @@ export function createLogIncidentEvent(
   return logIncidentEvent
 }
 
+export function createMangroveOrderCompleteEvent(): MangroveOrderComplete {
+  let mangroveOrderCompleteEvent = changetype<MangroveOrderComplete>(
+    newMockEvent()
+  )
+  return mangroveOrderCompleteEvent
+}
+
+export function createMangroveOrderStartEvent(
+  olKeyHash: Bytes,
+  taker: Address,
+  fillOrKill: boolean,
+  tick: BigInt,
+  fillVolume: BigInt,
+  fillWants: boolean,
+  resitingOrder: boolean,
+  offerId: BigInt,
+): MangroveOrderStart {
+  let mangroveOrderStartEvent = changetype<MangroveOrderStart>(newMockEvent())
+
+  mangroveOrderStartEvent.parameters = new Array()
+
+  mangroveOrderStartEvent.parameters.push(
+    new ethereum.EventParam(
+      "olKeyHash",
+      ethereum.Value.fromBytes(olKeyHash)
+    )
+  )
+  mangroveOrderStartEvent.parameters.push(
+    new ethereum.EventParam("taker", ethereum.Value.fromAddress(taker))
+  )
+  mangroveOrderStartEvent.parameters.push(
+    new ethereum.EventParam(
+      "fillOrKill",
+      ethereum.Value.fromBoolean(fillOrKill)
+    )
+  )
+  mangroveOrderStartEvent.parameters.push(
+    new ethereum.EventParam("tick", ethereum.Value.fromUnsignedBigInt(tick))
+  )
+  mangroveOrderStartEvent.parameters.push(
+    new ethereum.EventParam(
+      "fillVolume",
+      ethereum.Value.fromUnsignedBigInt(fillVolume)
+    )
+  )
+  mangroveOrderStartEvent.parameters.push(
+    new ethereum.EventParam(
+      "fillWants",
+      ethereum.Value.fromBoolean(fillWants)
+    )
+  )
+  mangroveOrderStartEvent.parameters.push(
+    new ethereum.EventParam(
+      "resitingOrder",
+      ethereum.Value.fromBoolean(resitingOrder)
+    )
+  )
+  mangroveOrderStartEvent.parameters.push(
+    new ethereum.EventParam(
+      "offerId",
+      ethereum.Value.fromUnsignedBigInt(offerId)
+    )
+  )
+
+
+  return mangroveOrderStartEvent
+}
+
 export function createMgvEvent(mgv: Address): Mgv {
   let mgvEvent = changetype<Mgv>(newMockEvent())
 
@@ -69,9 +131,7 @@ export function createMgvEvent(mgv: Address): Mgv {
 }
 
 export function createNewOwnedOfferEvent(
-  mangrove: Address,
-  outbound_tkn: Address,
-  inbound_tkn: Address,
+  olKeyHash: Bytes,
   offerId: BigInt,
   owner: Address
 ): NewOwnedOffer {
@@ -80,18 +140,9 @@ export function createNewOwnedOfferEvent(
   newOwnedOfferEvent.parameters = new Array()
 
   newOwnedOfferEvent.parameters.push(
-    new ethereum.EventParam("mangrove", ethereum.Value.fromAddress(mangrove))
-  )
-  newOwnedOfferEvent.parameters.push(
     new ethereum.EventParam(
-      "outbound_tkn",
-      ethereum.Value.fromAddress(outbound_tkn)
-    )
-  )
-  newOwnedOfferEvent.parameters.push(
-    new ethereum.EventParam(
-      "inbound_tkn",
-      ethereum.Value.fromAddress(inbound_tkn)
+      "olKeyHash",
+      ethereum.Value.fromBytes(olKeyHash)
     )
   )
   newOwnedOfferEvent.parameters.push(
@@ -107,106 +158,6 @@ export function createNewOwnedOfferEvent(
   return newOwnedOfferEvent
 }
 
-export function createOrderSummaryEvent(
-  mangrove: Address,
-  outbound_tkn: Address,
-  inbound_tkn: Address,
-  taker: Address,
-  fillOrKill: boolean,
-  takerWants: BigInt,
-  takerGives: BigInt,
-  fillWants: boolean,
-  restingOrder: boolean,
-  expiryDate: BigInt,
-  takerGot: BigInt,
-  takerGave: BigInt,
-  bounty: BigInt,
-  fee: BigInt,
-  restingOrderId: BigInt
-): OrderSummary {
-  let orderSummaryEvent = changetype<OrderSummary>(newMockEvent())
-
-  orderSummaryEvent.parameters = new Array()
-
-  orderSummaryEvent.parameters.push(
-    new ethereum.EventParam("mangrove", ethereum.Value.fromAddress(mangrove))
-  )
-  orderSummaryEvent.parameters.push(
-    new ethereum.EventParam(
-      "outbound_tkn",
-      ethereum.Value.fromAddress(outbound_tkn)
-    )
-  )
-  orderSummaryEvent.parameters.push(
-    new ethereum.EventParam(
-      "inbound_tkn",
-      ethereum.Value.fromAddress(inbound_tkn)
-    )
-  )
-  orderSummaryEvent.parameters.push(
-    new ethereum.EventParam("taker", ethereum.Value.fromAddress(taker))
-  )
-  orderSummaryEvent.parameters.push(
-    new ethereum.EventParam(
-      "fillOrKill",
-      ethereum.Value.fromBoolean(fillOrKill)
-    )
-  )
-  orderSummaryEvent.parameters.push(
-    new ethereum.EventParam(
-      "takerWants",
-      ethereum.Value.fromUnsignedBigInt(takerWants)
-    )
-  )
-  orderSummaryEvent.parameters.push(
-    new ethereum.EventParam(
-      "takerGives",
-      ethereum.Value.fromUnsignedBigInt(takerGives)
-    )
-  )
-  orderSummaryEvent.parameters.push(
-    new ethereum.EventParam("fillWants", ethereum.Value.fromBoolean(fillWants))
-  )
-  orderSummaryEvent.parameters.push(
-    new ethereum.EventParam(
-      "restingOrder",
-      ethereum.Value.fromBoolean(restingOrder)
-    )
-  )
-  orderSummaryEvent.parameters.push(
-    new ethereum.EventParam(
-      "expiryDate",
-      ethereum.Value.fromUnsignedBigInt(expiryDate)
-    )
-  )
-  orderSummaryEvent.parameters.push(
-    new ethereum.EventParam(
-      "takerGot",
-      ethereum.Value.fromUnsignedBigInt(takerGot)
-    )
-  )
-  orderSummaryEvent.parameters.push(
-    new ethereum.EventParam(
-      "takerGave",
-      ethereum.Value.fromUnsignedBigInt(takerGave)
-    )
-  )
-  orderSummaryEvent.parameters.push(
-    new ethereum.EventParam("bounty", ethereum.Value.fromUnsignedBigInt(bounty))
-  )
-  orderSummaryEvent.parameters.push(
-    new ethereum.EventParam("fee", ethereum.Value.fromUnsignedBigInt(fee))
-  )
-  orderSummaryEvent.parameters.push(
-    new ethereum.EventParam(
-      "restingOrderId",
-      ethereum.Value.fromUnsignedBigInt(restingOrderId)
-    )
-  )
-
-  return orderSummaryEvent
-}
-
 export function createSetAdminEvent(admin: Address): SetAdmin {
   let setAdminEvent = changetype<SetAdmin>(newMockEvent())
 
@@ -220,8 +171,7 @@ export function createSetAdminEvent(admin: Address): SetAdmin {
 }
 
 export function createSetExpiryEvent(
-  outbound_tkn: Address,
-  inbound_tkn: Address,
+  olKeyHash: Bytes,
   offerId: BigInt,
   date: BigInt
 ): SetExpiry {
@@ -231,14 +181,8 @@ export function createSetExpiryEvent(
 
   setExpiryEvent.parameters.push(
     new ethereum.EventParam(
-      "outbound_tkn",
-      ethereum.Value.fromAddress(outbound_tkn)
-    )
-  )
-  setExpiryEvent.parameters.push(
-    new ethereum.EventParam(
-      "inbound_tkn",
-      ethereum.Value.fromAddress(inbound_tkn)
+      "olKeyHash",
+      ethereum.Value.fromBytes(olKeyHash)
     )
   )
   setExpiryEvent.parameters.push(
