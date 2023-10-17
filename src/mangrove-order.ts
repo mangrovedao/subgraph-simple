@@ -1,4 +1,3 @@
-import { BigInt } from "@graphprotocol/graph-ts";
 import { log } from "matchstick-as";
 import {
   LogIncident,
@@ -12,7 +11,7 @@ import {
 } from "../generated/MangroveOrder/MangroveOrder";
 import { LimitOrder, Offer } from "../generated/schema";
 import { getEventUniqueId, getOfferId, getOrCreateAccount } from "./helpers";
-import { addLimitOrderToStack, getLatestLimitOrderFromStack, getLatestOrderFromStack, removeLatestLimitOrderFromStack } from "./stack";
+import { addLimitOrderToStack, getLatestLimitOrderFromStack, removeLatestLimitOrderFromStack } from "./stack";
 
 export function handleLogIncident(event: LogIncident): void {}
 
@@ -50,6 +49,8 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
     limitOrder.isOpen = true;
     offer.limitOrder = limitOrder.id;
     limitOrder.save();
+  } else {
+    throw new Error(`Missing limit order for offer id:${offer.offerId} - market: ${offer.market} - tx: ${event.transaction.hash.toHex()}`);
   }
   offer.save();
   
@@ -81,7 +82,7 @@ export function handleSetExpiry(event: SetExpiry): void {
     event.params.olKeyHash,
     event.params.offerId,
   );
-  const limitOrder = LimitOrder.load(offerId);
+  const limitOrder = getLatestLimitOrderFromStack();
   if (!limitOrder) {
     log.debug("Missing limit order for offerId {}", [offerId]);
     return;

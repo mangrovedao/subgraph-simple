@@ -7,7 +7,7 @@ export const getKandelParamsId = (txHash: Bytes, kandel:Address): string => {
 
 
 export const getOfferId = (olKeyHash: Bytes, id: BigInt): string => {
-  return "";// `${olKeyHash.toHexString()}-${id.toString()}`;
+  return `${olKeyHash.toHexString()}-${id.toString()}`;
 };
 
 export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnInteraction: bool): Account => {
