@@ -1,5 +1,5 @@
 import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
-import { Account, Stack as Stack, Offer, Order, KandelParameters, AccountVolumeByPair } from "../generated/schema";
+import { Account, Stack as Stack, Offer, Order, KandelParameters, AccountVolumeByPair, LimitOrder } from "../generated/schema";
 
 export const getKandelParamsId = (txHash: Bytes, kandel:Address): string => {
   return `${txHash}-${kandel.toHex()}`;
@@ -41,16 +41,14 @@ export const getAccountVolumeByPairId = (account: Address, token0: Bytes, token1
   return `${account.toHex()}-${token0.toHex()}-${token1.toHex()}-${suffix}`;
 };
 
-export const getOrCreateAccountVolumeByPair = (account: Bytes, token0: Bytes, token1: Bytes, currentDate: BigInt, asMaker: boolean): AccountVolumeByPair => {
+export const getOrCreateAccountVolumeByPair = (account: Address, token0: Bytes, token1: Bytes, currentDate: BigInt, asMaker: boolean): AccountVolumeByPair => {
   if (token0.toHex() > token1.toHex()) {
     const _token1 = token1;
     token1 = token0;
     token0 = _token1;
   }
 
-  const suffix = asMaker ? 'maker' : 'taker';
-
-  const id =`${account.toHex()}-${token0.toHex()}-${token1.toHex()}-${suffix}`;
+  const id = getAccountVolumeByPairId(account, token0, token1, asMaker);
 
   let volume = AccountVolumeByPair.load(id);
   if (!volume) {
@@ -76,7 +74,7 @@ export const increaseAccountVolume = (
   token0: Bytes, 
   volumeToken0: BigInt, 
   volumeToken1: BigInt, 
-  receivedToken0: bool,
+  receivedToken0: boolean,
 ): void => {
   if (volume.token0 != token0) {
     const _volumeToken0 = volumeToken0;
@@ -116,6 +114,29 @@ export const getEventUniqueId = (event: ethereum.Event): string => {
   return `${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
 };
 
+export const createLimitOrder = (
+  id: string,
+  realTaker: Address,
+  fillOrKill: boolean,
+  restingOrder: boolean,
+  creationDate: BigInt,
+  latestUpdateDate: BigInt,
+  isOpen: boolean,
+  offer: string
+): LimitOrder => {
+  let limitOrder = new LimitOrder(id);
+  limitOrder.realTaker = realTaker;
+  limitOrder.fillOrKill = fillOrKill;
+  limitOrder.restingOrder = restingOrder;
+  limitOrder.creationDate = creationDate;
+  limitOrder.latestUpdateDate = latestUpdateDate;
+  limitOrder.isOpen = isOpen;
+  limitOrder.offer = offer;
+  limitOrder.order = "";
+  limitOrder.save();
+  return limitOrder;
+}
+
 export const createOffer = (
   offerId: BigInt,
   olKeyHash: Bytes,
@@ -137,7 +158,7 @@ export const createOffer = (
   creationDate: BigInt,
   latestUpdateDate: BigInt,
   latestPenalty: BigInt,
-  totalPentalty: BigInt,
+  totalPenalty: BigInt,
   totalGot: BigInt,
   totalGave: BigInt
 ): Offer => {
@@ -163,7 +184,7 @@ export const createOffer = (
   offer.creationDate = creationDate;
   offer.latestUpdateDate = latestUpdateDate;
   offer.latestPenalty = latestPenalty;
-  offer.totalPentalty = totalPentalty;
+  offer.totalPenalty = totalPenalty;
   offer.totalGave = totalGave;
   offer.totalGot = totalGot;
   offer.save();

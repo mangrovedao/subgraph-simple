@@ -18,6 +18,19 @@ export function handleLogIncident(event: LogIncident): void {}
 
 export function handleMgv(event: Mgv): void {}
 
+export const limitOrderSetIsOpen = (limitOrderId: string | null, value: boolean): void => {
+  if(limitOrderId === null){
+    return;
+  }
+  const limitOrder = LimitOrder.load(limitOrderId);
+  if (!limitOrder) {
+    return;
+  }
+  limitOrder.isOpen = value;
+
+  limitOrder.save();
+}
+
 export function handleNewOwnedOffer(event: NewOwnedOffer): void {
   const offerId = getOfferId(
     event.params.olKeyHash, 

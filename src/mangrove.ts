@@ -1,4 +1,4 @@
-import { BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {
   Approval,
   CleanComplete,
@@ -29,6 +29,7 @@ import {
 import { CleanOrder, Kandel, LimitOrder, Market, Offer, Order } from "../generated/schema";
 import { getEventUniqueId, getOfferId, getOrCreateAccount, getOrCreateAccountVolumeByPair, increaseAccountVolume } from "./helpers";
 import {  addCleanOrderToStack, addOrderToStack, getLatestCleanOrderFromStack, getLatestLimitOrderFromStack, getLatestOrderFromStack, removeLatestCleanOrderFromStack, removeLatestOrderFromStack} from "./stack";
+import { limitOrderSetIsOpen } from "./mangrove-order";
 
 export function handleApproval(event: Approval): void {}
 
@@ -40,18 +41,6 @@ export function handleKill(event: Kill): void {}
 
 export function handleNewMgv(event: NewMgv): void {}
 
-export const limitOrderSetIsOpen = (limitOrderId: string | null, value: boolean): void => {
-  if(limitOrderId === null){
-    return;
-  }
-  const limitOrder = LimitOrder.load(limitOrderId);
-  if (!limitOrder) {
-    return;
-  }
-  limitOrder.isOpen = value;
-
-  limitOrder.save();
-}
 
 export function handleOfferFailWithPosthookData(event: OfferFailWithPosthookData): void {
   handleOfferFailEvent( changetype<OfferFail>(event), event.params.posthookData);
@@ -60,7 +49,6 @@ export function handleOfferFailWithPosthookData(event: OfferFailWithPosthookData
 export function handleOfferFail(event: OfferFail): void {
   handleOfferFailEvent(event);
 }
-
 
 export function handleOfferFailEvent(event: OfferFail, posthookData: Bytes | null = null): void {
   const offerId = getOfferId(
@@ -82,13 +70,14 @@ export function handleOfferFailEvent(event: OfferFail, posthookData: Bytes | nul
   offer.latestTransactionHash = event.transaction.hash;
   offer.posthookFailReason = posthookData;
   offer.latestPenalty = event.params.penalty;
-  offer.totalPentalty = offer.totalPentalty === null ?  event.params.penalty : offer.totalPentalty.plus( event.params.penalty )
+  offer.totalPenalty = offer.totalPenalty.plus( event.params.penalty )
   limitOrderSetIsOpen(offer.limitOrder, false); 
   offer.save();
 
   const order = getLatestOrderFromStack();
   order.penalty = order.penalty !== null ? order.penalty.plus( event.params.penalty ) : event.params.penalty
   order.save();
+
 
 }
 
@@ -155,12 +144,10 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
   offer.posthookFailReason = posthookData;
   offer.latestPenalty = BigInt.fromI32(0);
 
-  let market = Market.load(event.params.olKeyHash.toHex());
+  let market = Market.load(event.params.olKeyHash.toHex())!;
 
-  if(market){
-    const volume = getOrCreateAccountVolumeByPair(offer.owner !== null ? offer.owner! : offer.maker, market.outbound_tkn, market.inbound_tkn, event.block.timestamp, true);
-    increaseAccountVolume(volume, market.inbound_tkn, event.params.takerGives, event.params.takerWants, true);
-  }
+  const volume = getOrCreateAccountVolumeByPair(Address.fromBytes( offer.owner !== null ? offer.owner! : offer.maker ), market.outbound_tkn, market.inbound_tkn, event.block.timestamp, true);
+  increaseAccountVolume(volume, market.inbound_tkn, event.params.takerGives, event.params.takerWants, true);
 
   let order = getLatestOrderFromStack();
   order.takerGot = order.takerGot ? order.takerGot.plus( event.params.takerWants ) : event.params.takerWants
@@ -199,6 +186,7 @@ export function handleOfferWrite(event: OfferWrite): void {
     offer.creationDate = event.block.timestamp;
     offer.totalGot = BigInt.fromI32(0);
     offer.totalGave = BigInt.fromI32(0);
+    offer.totalPenalty = BigInt.fromI32(0);
   }
 
   offer.latestUpdateDate = event.block.timestamp;
@@ -228,7 +216,6 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.failedReason = null;
   offer.posthookFailReason = null;
   offer.latestPenalty = BigInt.fromI32(0);
-  offer.totalPentalty = BigInt.fromI32(0);
   limitOrderSetIsOpen(offer.limitOrder, true);
 
   offer.save();
@@ -253,12 +240,6 @@ export function handleOrderStart(event: OrderStart): void {
   const cleanOrder = getLatestCleanOrderFromStack();
   if(cleanOrder != null){
     order.cleanOrder = cleanOrder.id;
-    if( cleanOrder.orders.length == 0){
-      cleanOrder.orders = [order.id]
-    } else {
-      cleanOrder.orders.push(order.id)
-    }
-    cleanOrder.save();
   }
   
   const limitOrder = getLatestLimitOrderFromStack();
@@ -278,12 +259,10 @@ export function handleOrderComplete(event: OrderComplete): void {
   order.feePaid = event.params.fee;
   order.save();
 
-  let market = Market.load(event.params.olKeyHash.toHex());
+  let market = Market.load(event.params.olKeyHash.toHex())!;
+  const volume = getOrCreateAccountVolumeByPair(event.params.taker, market.outbound_tkn, market.inbound_tkn, event.block.timestamp, false);
+  increaseAccountVolume(volume, market.outbound_tkn, order.takerGot, order.takerGave, true);
 
-  if(market && order.takerGave && order.takerGot){
-    const volume = getOrCreateAccountVolumeByPair(event.params.taker, market.outbound_tkn, market.inbound_tkn, event.block.timestamp, false);
-    increaseAccountVolume(volume, market.outbound_tkn, order.takerGot, order.takerGave, true);
-  }
   removeLatestOrderFromStack();
 }
 

@@ -2,6 +2,8 @@ import { newMockEvent } from "matchstick-as"
 import { ethereum, Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
 import {
   Approval,
+  CleanComplete,
+  CleanStart,
   Credit,
   Debit,
   Kill,
@@ -64,7 +66,7 @@ export function createApprovalEvent(
   return approvalEvent
 }
 
-export function createCreditEvent(maker: Address, amount: BigInt): Credit {
+export function reditEvent(maker: Address, amount: BigInt): Credit {
   let creditEvent = changetype<Credit>(newMockEvent())
 
   creditEvent.parameters = new Array()
@@ -283,7 +285,7 @@ export function createOfferSuccessWithPosthookDataEvent(
   takerWants: BigInt,
   takerGives: BigInt,
   posthookData: Bytes
-): OfferSuccess {
+): OfferSuccessWithPosthookData {
   const offerSuccessEvent = createOfferSuccessEvent(
     olKeyHash,
     id,
@@ -413,6 +415,40 @@ export function createOrderStartEvent(
 
   return orderStartEvent
 }
+
+export function createCleanOrderStartEvent(
+  olKeyHash: Bytes,
+  taker: Address,
+  ordersToBeCleaned: BigInt,
+): CleanStart {
+  let cleanStart = changetype<CleanStart>(newMockEvent())
+
+  cleanStart.parameters = new Array()
+
+  cleanStart.parameters.push(
+    new ethereum.EventParam(
+      "olKeyHash",
+      ethereum.Value.fromBytes(olKeyHash)
+    )
+  )
+  cleanStart.parameters.push(
+    new ethereum.EventParam("taker", ethereum.Value.fromAddress(taker))
+  )
+  cleanStart.parameters.push(
+    new ethereum.EventParam(
+      "ordersToBeCleaned",
+      ethereum.Value.fromUnsignedBigInt(ordersToBeCleaned)
+    )
+  )
+
+
+  return cleanStart
+}
+
+export function createCleanCompleteEvent(): CleanComplete {
+  return changetype<CleanComplete>(newMockEvent())
+}
+
 
 
 export function createSetActiveEvent(
