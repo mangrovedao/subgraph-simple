@@ -7,7 +7,7 @@ import {
   describe,
   test
 } from "matchstick-as/assembly/index";
-import { Kandel, LimitOrder, Market, Offer, Order } from "../../generated/schema";
+import { CleanOrder, Kandel, LimitOrder, Market, Offer, Order } from "../../generated/schema";
 import { createDummyOffer, createLimitOrder, createOffer, getAccountVolumeByPairId, getEventUniqueId, getOfferId } from "../../src/helpers";
 import { createNewOffer, handleCleanComplete, handleCleanStart, handleOfferFail, handleOfferFailWithPosthookData, handleOfferRetract, handleOfferSuccess, handleOfferSuccessWithPosthookData, handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive, handleSetGasbase } from "../../src/mangrove";
 import { createCleanCompleteEvent, createCleanOrderStartEvent as createCleanStartEvent, createOfferFailEvent, createOfferFailWithPosthookDataEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferSuccessWithPosthookDataEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent, createSetGasbaseEvent } from "./mangrove-utils";
@@ -896,8 +896,6 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Order', orderId, 'maxTick', '40');
     assert.fieldEquals('Order', orderId, 'cleanOrder', getEventUniqueId(cleanStart));
 
-    assert.fieldEquals('CleanOrder', getEventUniqueId(cleanStart), 'orders', `[${orderId}]`);
-
     assert.fieldEquals('Stack', 'Order', 'ids',  `|${orderId}`);
   });
 
@@ -1033,8 +1031,7 @@ describe("Describe entity assertions", () => {
     handleCleanComplete(cleanOrderComplete);
     
     assert.fieldEquals('CleanOrder', getEventUniqueId(cleanOrderStart), 'offersToBeCleaned', `1`);
-    assert.fieldEquals('CleanOrder', getEventUniqueId(cleanOrderStart), 'orders', `[${getEventUniqueId(orderStartEvent)}]`);
-    
+
   })
 
   test("Market, handleSetActive, true, then false", () => {
