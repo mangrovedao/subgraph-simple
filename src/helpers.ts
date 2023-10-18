@@ -1,5 +1,5 @@
 import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
-import { Account, Stack as Stack, Offer, Order, KandelParameters, AccountVolumeByPair, LimitOrder } from "../generated/schema";
+import { Account, AccountVolumeByPair, KandelParameters, LimitOrder, Offer } from "../generated/schema";
 
 export const getKandelParamsId = (txHash: Bytes, kandel:Address): string => {
   return `${txHash}-${kandel.toHex()}`;
@@ -10,7 +10,7 @@ export const getOfferId = (olKeyHash: Bytes, id: BigInt): string => {
   return `${olKeyHash.toHexString()}-${id.toString()}`;
 };
 
-export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnInteraction: bool): Account => {
+export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnInteraction: boolean): Account => {
   let account = Account.load(address);
 
   if (!account) {
