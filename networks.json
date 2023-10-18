@@ -8,6 +8,10 @@
       "address": "0xb4A9Ac8Ae5b405193271A0e62682c9be47d578B9",
       "startBlock": 35666000
     },
+    "AaveKandelSeeder": {
+      "address": "0x0295a7f3093Fb656d982B6E2c52B07699aDA9594",
+      "startBlock": 35666000
+    },
     "MangroveOrder": {
       "address": "0x756fAc8bb6fb96A3b005ad7b3337052aE69aAf65",
       "startBlock": 35666000
@@ -20,6 +24,10 @@
     },
     "KandelSeeder": {
       "address": "0xA48B36E01919472fcdA56CAD574433BeCB7A87C5",
+      "startBlock": 43091477
+    },
+    "AaveKandelSeeder": {
+      "address": "0xded8E2fac702646dafE51d496d1217A837b0a424",
       "startBlock": 43091477
     },
     "MangroveOrder": {

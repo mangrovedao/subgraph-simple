@@ -185,6 +185,30 @@ dataSources:
           handler: handleNewKandel
       file: ./src/kandel-seeder.ts
   - kind: ethereum
+    name: AaveKandelSeeder
+    network: matic
+    source:
+      abi: KandelSeeder
+      address: "0xded8E2fac702646dafE51d496d1217A837b0a424"
+      startBlock: 43091477
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - NewAaveKandel
+        - NewKandel
+      abis:
+        - name: KandelSeeder
+          file: ./abis/KandelSeeder.json
+      eventHandlers:
+        - event: NewAaveKandel(indexed address,indexed address,indexed
+            address,address,address)
+          handler: handleNewAaveKandel
+        - event: NewKandel(indexed address,indexed address,indexed address,address)
+          handler: handleNewKandel
+      file: ./src/kandel-seeder.ts
+  - kind: ethereum
     name: MangroveOrder
     network: matic
     source:
