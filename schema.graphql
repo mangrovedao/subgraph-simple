@@ -133,6 +133,8 @@ type Kandel @entity {
 
   base: Bytes! 
   quote: Bytes!
+  baseQuoteOlKeyHash: Bytes!
+  quoteBaseOlKeyHash: Bytes!
   deployer: Account!
   admin: Account!
 
@@ -148,10 +150,8 @@ type Kandel @entity {
   # Parameters
   gasprice: BigInt
   gasreq: BigInt
-  compoundRateBase: BigInt
-  compoundRateQuote: BigInt
-  spread: BigInt
-  ratio: BigInt
+  stepSize: BigInt
+  baseQuoteTickOffset: BigInt
   length: BigInt
 
   offerIndexes: [String!]!
@@ -180,10 +180,8 @@ type KandelParameters @entity {
 
   gasprice: BigInt
   gasreq: BigInt
-  compoundRateBase: BigInt
-  compoundRateQuote: BigInt
-  spread: BigInt
-  ratio: BigInt
+  baseQuoteTickOffset: BigInt
+  stepSize: BigInt
   length: BigInt
 
   kandel: Kandel!

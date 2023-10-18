@@ -187,7 +187,7 @@ dataSources:
         - name: KandelSeeder
           file: ./abis/KandelSeeder.json
       eventHandlers:
-        - event: NewKandel(indexed address,indexed bytes32,address)
+        - event: NewKandel(indexed address,indexed bytes32,indexed bytes32,address)
           handler: handleNewKandel
       file: ./src/kandel-seeder.ts
   - kind: ethereum
@@ -202,12 +202,12 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - NewKandel
+        - NewAaveKandel
       abis:
         - name: AaveKandelSeeder
           file: ./abis/AaveKandelSeeder.json
       eventHandlers:
-        - event: NewAaveKandel(indexed address,indexed bytes32,address,address)
+        - event: NewAaveKandel(indexed address,indexed bytes32,indexed bytes32,address,address)
           handler: handleNewAaveKandel
       file: ./src/kandel-seeder.ts
   - kind: ethereum

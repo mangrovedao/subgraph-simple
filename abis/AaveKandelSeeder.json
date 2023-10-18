@@ -37,7 +37,13 @@
       {
         "indexed": true,
         "internalType": "bytes32",
-        "name": "olKeyHash",
+        "name": "baseQuoteOlKeyHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "quoteBaseOlKeyHash",
         "type": "bytes32"
       },
       {
@@ -101,12 +107,12 @@
         "components": [
           {
             "internalType": "address",
-            "name": "outbound",
+            "name": "outbound_tkn",
             "type": "address"
           },
           {
             "internalType": "address",
-            "name": "inbound",
+            "name": "inbound_tkn",
             "type": "address"
           },
           {
