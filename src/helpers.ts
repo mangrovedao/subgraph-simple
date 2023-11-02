@@ -150,7 +150,12 @@ export const removeOrderFromStack = (): void => {
   for (let i = ids.length - 1 ; i >= 0 ; --i) {
     if (ids.at(i) == '|' || i == 0) {
       orderStack.ids = ids.slice(0, i);
-      orderStack.last = ids.slice(i + 1);
+      if (orderStack.ids.length !== 0) {
+        orderStack.last = ids.slice(i + 1);
+      } else {
+        orderStack.last = "";
+      }
+
       break;
     }
   }
