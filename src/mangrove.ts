@@ -22,6 +22,8 @@ import {
   SetGasmax,
   SetGasprice,
   SetGovernance,
+  SetMaxGasreqForFailingOffers,
+  SetMaxRecursionDepth,
   SetMonitor,
   SetNotify,
   SetUseOracle
@@ -327,3 +329,12 @@ export function handleSetMonitor(event: SetMonitor): void {}
 export function handleSetNotify(event: SetNotify): void {}
 
 export function handleSetUseOracle(event: SetUseOracle): void {}
+
+export function handleSetMaxGasreqForFailingOffers(event: SetMaxGasreqForFailingOffers): void {
+
+}
+
+
+export function handleSetMaxRecursionDepth(event: SetMaxRecursionDepth): void {
+
+}
