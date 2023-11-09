@@ -206,10 +206,10 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.offerId = event.params.id;
 
   offer.tick = event.params.tick
-  offer.gives = event.params.gives,
+  offer.gives = event.params.gives;
 
-  offer.gasprice = event.params.gasprice,
-  offer.gasreq = event.params.gasreq,
+  offer.gasprice = event.params.gasprice;
+  offer.gasreq = event.params.gasreq;
   offer.isOpen = true;
   offer.isFailed = false;
   offer.isFilled = false;
