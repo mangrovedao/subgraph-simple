@@ -1,4 +1,4 @@
-specVersion: 0.0.5
+specVersion: 0.0.6
 schema:
   file: ./schema.graphql
 templates:
@@ -16,20 +16,20 @@ templates:
         - Debit
         - LogIncident
         - Mgv
-        - Pair
+        - OfferListKey
         - PopulateEnd
         - PopulateStart
         - RetractEnd
         - RetractStart
         - SetAdmin
-        - SetCompoundRates
+        - SetBaseQuoteTickOffset
         - SetGasprice
         - SetGasreq
-        - SetGeometricParams
         - SetIndexMapping
         - SetLength
         - SetReserveId
         - SetRouter
+        - SetStepSize
       abis:
         - name: Kandel
           file: ./abis/Kandel.json
@@ -38,13 +38,12 @@ templates:
           handler: handleCredit
         - event: Debit(indexed address,uint256)
           handler: handleDebit
-        - event: LogIncident(address,indexed address,indexed address,indexed
-            uint256,bytes32,bytes32)
+        - event: LogIncident(indexed bytes32,indexed uint256,bytes32,bytes32)
           handler: handleLogIncident
         - event: Mgv(address)
           handler: handleMgv
-        - event: Pair(address,address)
-          handler: handlePair
+        - event: OfferListKey(bytes32)
+          handler: handleOfferListKey
         - event: PopulateEnd()
           handler: handlePopulateEnd
         - event: PopulateStart()
@@ -55,14 +54,12 @@ templates:
           handler: handleRetractStart
         - event: SetAdmin(address)
           handler: handleSetAdmin
-        - event: SetCompoundRates(uint256,uint256)
-          handler: handleSetCompoundRates
+        - event: SetBaseQuoteTickOffset(uint256)
+          handler: handleSetBaseQuoteTickOffset
         - event: SetGasprice(uint256)
           handler: handleSetGasprice
         - event: SetGasreq(uint256)
           handler: handleSetGasreq
-        - event: SetGeometricParams(uint256,uint256)
-          handler: handleSetGeometricParams
         - event: SetIndexMapping(indexed uint8,uint256,uint256)
           handler: handleSetIndexMapping
         - event: SetLength(uint256)
@@ -71,6 +68,8 @@ templates:
           handler: handleSetReserveId
         - event: SetRouter(address)
           handler: handleSetRouter
+        - event: SetStepSize(uint256)
+          handler: handleSetStepSize
       file: ./src/kandel.ts
 dataSources:
   - kind: ethereum
@@ -86,24 +85,29 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - Approval
+        - CleanComplete
+        - CleanStart
         - Credit
         - Debit
         - Kill
         - NewMgv
         - OfferFail
+        - OfferFailWithPosthookData
         - OfferRetract
         - OfferSuccess
+        - OfferSuccessWithPosthookData
         - OfferWrite
         - OrderComplete
         - OrderStart
-        - PosthookFail
         - SetActive
-        - SetDensity
+        - SetDensity96X32
         - SetFee
         - SetGasbase
         - SetGasmax
         - SetGasprice
         - SetGovernance
+        - SetMaxGasreqForFailingOffers
+        - SetMaxRecursionDepth
         - SetMonitor
         - SetNotify
         - SetUseOracle
@@ -111,8 +115,12 @@ dataSources:
         - name: Mangrove
           file: ./abis/Mangrove.json
       eventHandlers:
-        - event: Approval(indexed address,indexed address,address,address,uint256)
+        - event: Approval(indexed address,indexed address,indexed address,address,uint256)
           handler: handleApproval
+        - event: CleanComplete()
+          handler: handleCleanComplete
+        - event: CleanStart(indexed bytes32,indexed address,uint256)  
+          handler: handleCleanStart
         - event: Credit(indexed address,uint256)
           handler: handleCredit
         - event: Debit(indexed address,uint256)
@@ -121,31 +129,29 @@ dataSources:
           handler: handleKill
         - event: NewMgv()
           handler: handleNewMgv
-        - event: OfferFail(indexed address,indexed
-            address,uint256,address,uint256,uint256,bytes32)
+        - event: OfferFail(indexed bytes32,indexed address,indexed uint256,uint256,uint256,uint256,bytes32)
           handler: handleOfferFail
-        - event: OfferRetract(indexed address,indexed address,uint256,bool)
+        - event: OfferFailWithPosthookData(indexed bytes32,indexed address,indexed uint256,uint256,uint256,uint256,bytes32,bytes32)
+          handler: handleOfferFailWithPosthookData
+        - event: OfferRetract(indexed bytes32,indexed address,uint256,bool)
           handler: handleOfferRetract
-        - event: OfferSuccess(indexed address,indexed
-            address,uint256,address,uint256,uint256)
+        - event: OfferSuccess(indexed bytes32,indexed address,indexed uint256,uint256,uint256)
           handler: handleOfferSuccess
-        - event: OfferWrite(indexed address,indexed
-            address,address,uint256,uint256,uint256,uint256,uint256,uint256)
+        - event: OfferSuccessWithPosthookData(indexed bytes32,indexed address,indexed uint256,uint256,uint256,bytes32)
+          handler: handleOfferSuccessWithPosthookData
+        - event: OfferWrite(indexed bytes32,indexed address,int256,uint256,uint256,uint256,uint256)
           handler: handleOfferWrite
-        - event: OrderComplete(indexed address,indexed address,indexed
-            address,uint256,uint256,uint256,uint256)
+        - event: OrderComplete(indexed bytes32,indexed address,uint256)
           handler: handleOrderComplete
-        - event: OrderStart()
+        - event: OrderStart(indexed bytes32,indexed address,int256,uint256,bool)
           handler: handleOrderStart
-        - event: PosthookFail(indexed address,indexed address,uint256,bytes32)
-          handler: handlePosthookFail
-        - event: SetActive(indexed address,indexed address,bool)
+        - event: SetActive(indexed bytes32,indexed address,indexed address,uint256,bool)
           handler: handleSetActive
-        - event: SetDensity(indexed address,indexed address,uint256)
+        - event: SetDensity96X32(indexed bytes32,uint256)
           handler: handleSetDensity
-        - event: SetFee(indexed address,indexed address,uint256)
+        - event: SetFee(indexed bytes32,uint256)
           handler: handleSetFee
-        - event: SetGasbase(indexed address,indexed address,uint256)
+        - event: SetGasbase(indexed bytes32,uint256)
           handler: handleSetGasbase
         - event: SetGasmax(uint256)
           handler: handleSetGasmax
@@ -153,6 +159,10 @@ dataSources:
           handler: handleSetGasprice
         - event: SetGovernance(address)
           handler: handleSetGovernance
+        - event: SetMaxGasreqForFailingOffers(uint256)
+          handler: handleSetMaxGasreqForFailingOffers
+        - event: SetMaxRecursionDepth(uint256)
+          handler: handleSetMaxRecursionDepth
         - event: SetMonitor(address)
           handler: handleSetMonitor
         - event: SetNotify(bool)
@@ -172,17 +182,33 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - NewAaveKandel
         - NewKandel
       abis:
         - name: KandelSeeder
           file: ./abis/KandelSeeder.json
       eventHandlers:
-        - event: NewAaveKandel(indexed address,indexed address,indexed
-            address,address,address)
-          handler: handleNewAaveKandel
-        - event: NewKandel(indexed address,indexed address,indexed address,address)
+        - event: NewKandel(indexed address,indexed bytes32,indexed bytes32,address)
           handler: handleNewKandel
+      file: ./src/kandel-seeder.ts
+  - kind: ethereum
+    name: AaveKandelSeeder
+    network: matic
+    source:
+      abi: AaveKandelSeeder
+      address: "0xA48B36E01919472fcdA56CAD574433BeCB7A87C5"
+      startBlock: 43091477
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - NewAaveKandel
+      abis:
+        - name: AaveKandelSeeder
+          file: ./abis/AaveKandelSeeder.json
+      eventHandlers:
+        - event: NewAaveKandel(indexed address,indexed bytes32,indexed bytes32,address,address)
+          handler: handleNewAaveKandel
       file: ./src/kandel-seeder.ts
   - kind: ethereum
     name: MangroveOrder
@@ -197,9 +223,10 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - LogIncident
+        - MangroveOrderStart
+        - MangroveOrderComplete
         - Mgv
         - NewOwnedOffer
-        - OrderSummary
         - SetAdmin
         - SetExpiry
         - SetRouter
@@ -207,20 +234,19 @@ dataSources:
         - name: MangroveOrder
           file: ./abis/MangroveOrder.json
       eventHandlers:
-        - event: LogIncident(address,indexed address,indexed address,indexed
-            uint256,bytes32,bytes32)
+        - event: LogIncident(indexed bytes32,indexed uint256,bytes32,bytes32)
           handler: handleLogIncident
+        - event: MangroveOrderStart(indexed bytes32,indexed address,bool,int256,uint256,bool,bool,uint256)
+          handler: handleMangroveOrderStart
+        - event: MangroveOrderComplete()
+          handler: handleMangroveOrderComplete
         - event: Mgv(address)
           handler: handleMgv
-        - event: NewOwnedOffer(address,indexed address,indexed address,indexed
-            uint256,address)
+        - event: NewOwnedOffer(indexed bytes32,indexed uint256,indexed address)
           handler: handleNewOwnedOffer
-        - event: OrderSummary(address,indexed address,indexed address,indexed
-            address,bool,uint256,uint256,bool,bool,uint256,uint256,uint256,uint256,uint256,uint256)
-          handler: handleOrderSummary
         - event: SetAdmin(address)
           handler: handleSetAdmin
-        - event: SetExpiry(indexed address,indexed address,uint256,uint256)
+        - event: SetExpiry(indexed bytes32,indexed uint256,uint256)
           handler: handleSetExpiry
         - event: SetRouter(address)
           handler: handleSetRouter

@@ -5,20 +5,19 @@ import {
   Debit,
   LogIncident,
   Mgv,
-  Pair,
   PopulateEnd,
   PopulateStart,
   RetractEnd,
   RetractStart,
   SetAdmin,
-  SetCompoundRates,
+  SetBaseQuoteTickOffset,
   SetGasprice,
   SetGasreq,
-  SetGeometricParams,
   SetIndexMapping,
   SetLength,
   SetReserveId,
-  SetRouter
+  SetRouter,
+  SetStepSize
 } from "../../generated/templates/Kandel/Kandel"
 
 export function createCreditEvent(token: Address, amount: BigInt): Credit {
@@ -109,16 +108,13 @@ export function createMgvEvent(mgv: Address): Mgv {
   return mgvEvent
 }
 
-export function createPairEvent(base: Address, quote: Address): Pair {
+export function createOfferListKeyEvent(olKeyHash: Bytes): Pair {
   let pairEvent = changetype<Pair>(newMockEvent())
 
   pairEvent.parameters = new Array()
 
   pairEvent.parameters.push(
-    new ethereum.EventParam("base", ethereum.Value.fromAddress(base))
-  )
-  pairEvent.parameters.push(
-    new ethereum.EventParam("quote", ethereum.Value.fromAddress(quote))
+    new ethereum.EventParam("olKeyHash", ethereum.Value.fromBytes(olKeyHash))
   )
 
   return pairEvent
@@ -168,24 +164,17 @@ export function createSetAdminEvent(admin: Address): SetAdmin {
   return setAdminEvent
 }
 
-export function createSetCompoundRatesEvent(
-  compoundRateBase: BigInt,
-  compoundRateQuote: BigInt
-): SetCompoundRates {
-  let setCompoundRatesEvent = changetype<SetCompoundRates>(newMockEvent())
+export function createSetBaseQuoteTickOffsetEvent(
+  baseQuoteTickOffset: BigInt
+): SetBaseQuoteTickOffset {
+  let setCompoundRatesEvent = changetype<SetBaseQuoteTickOffset>(newMockEvent())
 
   setCompoundRatesEvent.parameters = new Array()
 
   setCompoundRatesEvent.parameters.push(
     new ethereum.EventParam(
-      "compoundRateBase",
-      ethereum.Value.fromUnsignedBigInt(compoundRateBase)
-    )
-  )
-  setCompoundRatesEvent.parameters.push(
-    new ethereum.EventParam(
-      "compoundRateQuote",
-      ethereum.Value.fromUnsignedBigInt(compoundRateQuote)
+      "value",
+      ethereum.Value.fromUnsignedBigInt(baseQuoteTickOffset)
     )
   )
 
@@ -214,24 +203,6 @@ export function createSetGasreqEvent(value: BigInt): SetGasreq {
   )
 
   return setGasreqEvent
-}
-
-export function createSetGeometricParamsEvent(
-  spread: BigInt,
-  ratio: BigInt
-): SetGeometricParams {
-  let setGeometricParamsEvent = changetype<SetGeometricParams>(newMockEvent())
-
-  setGeometricParamsEvent.parameters = new Array()
-
-  setGeometricParamsEvent.parameters.push(
-    new ethereum.EventParam("spread", ethereum.Value.fromUnsignedBigInt(spread))
-  )
-  setGeometricParamsEvent.parameters.push(
-    new ethereum.EventParam("ratio", ethereum.Value.fromUnsignedBigInt(ratio))
-  )
-
-  return setGeometricParamsEvent
 }
 
 export function createSetIndexMappingEvent(
@@ -296,4 +267,17 @@ export function createSetRouterEvent(router: Address): SetRouter {
   )
 
   return setRouterEvent
+}
+
+// setStepSize
+export function createSetStepSizeEvent(value: BigInt): SetStepSize {
+    let setStepSizeEvent = changetype<SetStepSize>(newMockEvent())
+    
+    setStepSizeEvent.parameters = new Array()
+    
+    setStepSizeEvent.parameters.push(
+        new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(value))
+    )
+    
+    return setStepSizeEvent
 }

@@ -28,6 +28,7 @@ type Market @entity {
   id: String!
   outbound_tkn: Bytes! # address
   inbound_tkn: Bytes! # address
+  tickSpacing: BigInt!
   active: Boolean!
   gasbase: BigInt!
 }
@@ -39,12 +40,11 @@ type Offer @entity {
   creationDate: BigInt!
   latestUpdateDate: BigInt!
   offerId: BigInt!
-  wants: BigInt!
+  tick: BigInt!
   gives: BigInt!
   gasprice: BigInt!
   gasreq: BigInt!
   gasBase: BigInt!
-  prev: BigInt!
   isOpen: Boolean!
   isFailed: Boolean!
   isFilled: Boolean!
@@ -52,16 +52,31 @@ type Offer @entity {
   failedReason: Bytes
   posthookFailReason: Bytes
   deprovisioned: Boolean!
+  latestPenalty: BigInt!
+  totalPenalty: BigInt!
   totalGot: BigInt!
   totalGave: BigInt!
   prevGives: BigInt
-  prevWants: BigInt
+  prevTick: BigInt
 
   market: Market!
   maker: Account!
   owner: Account
+  limitOrder: LimitOrder
   kandel: Kandel
   kandelIndex: BigInt
+}
+
+type CleanOrder @entity {
+  id: String!
+  transactionHash: Bytes!
+  creationDate: BigInt!
+
+  taker: Account!
+  offersToBeCleaned: BigInt!
+  orders: [Order!]!  @derivedFrom(field: "cleanOrder")
+
+  market: Market
 }
 
 type Order @entity {
@@ -69,24 +84,25 @@ type Order @entity {
   transactionHash: Bytes!
   creationDate: BigInt!
 
+  fillVolume: BigInt!
+  fillWants: Boolean!
+  maxTick: BigInt!
   taker: Account
-  takerGot: BigInt
-  takerGave: BigInt
-  penalty: BigInt
-  feePaid: BigInt
+  takerGot: BigInt!
+  takerGave: BigInt!
+  penalty: BigInt!
+  feePaid: BigInt!
 
   market: Market
   limitOrder: LimitOrder 
+  cleanOrder: CleanOrder
 }
 
 type LimitOrder @entity {
   id: String!
   creationDate: BigInt!
   latestUpdateDate: BigInt!
-  wants: BigInt!
-  gives: BigInt!
   expiryDate: BigInt
-  fillWants: Boolean!
   fillOrKill: Boolean!
   restingOrder: Boolean!
   realTaker: Account 
@@ -117,6 +133,8 @@ type Kandel @entity {
 
   base: Bytes! 
   quote: Bytes!
+  baseQuoteOlKeyHash: Bytes!
+  quoteBaseOlKeyHash: Bytes!
   deployer: Account!
   admin: Account!
 
@@ -132,10 +150,8 @@ type Kandel @entity {
   # Parameters
   gasprice: BigInt
   gasreq: BigInt
-  compoundRateBase: BigInt
-  compoundRateQuote: BigInt
-  spread: BigInt
-  ratio: BigInt
+  stepSize: BigInt
+  baseQuoteTickOffset: BigInt
   length: BigInt
 
   offerIndexes: [String!]!
@@ -164,17 +180,14 @@ type KandelParameters @entity {
 
   gasprice: BigInt
   gasreq: BigInt
-  compoundRateBase: BigInt
-  compoundRateQuote: BigInt
-  spread: BigInt
-  ratio: BigInt
+  baseQuoteTickOffset: BigInt
+  stepSize: BigInt
   length: BigInt
 
   kandel: Kandel!
 }
 
-type OrderStack @entity {
+type Stack @entity {
   id: String!
   ids: String!
-  last: Order
 }

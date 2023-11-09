@@ -6,8 +6,16 @@
         "name": "mgv",
         "type": "address"
       },
-      { "internalType": "address", "name": "deployer", "type": "address" },
-      { "internalType": "uint256", "name": "gasreq", "type": "uint256" }
+      {
+        "internalType": "address",
+        "name": "deployer",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gasreq",
+        "type": "uint256"
+      }
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
@@ -16,22 +24,10 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "contract IMangrove",
-        "name": "mangrove",
-        "type": "address"
-      },
-      {
         "indexed": true,
-        "internalType": "contract IERC20",
-        "name": "outbound_tkn",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "contract IERC20",
-        "name": "inbound_tkn",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
       },
       {
         "indexed": true,
@@ -57,74 +53,18 @@
   },
   {
     "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "contract IMangrove",
-        "name": "mgv",
-        "type": "address"
-      }
-    ],
-    "name": "Mgv",
+    "inputs": [],
+    "name": "MangroveOrderComplete",
     "type": "event"
   },
   {
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "contract IMangrove",
-        "name": "mangrove",
-        "type": "address"
-      },
-      {
         "indexed": true,
-        "internalType": "contract IERC20",
-        "name": "outbound_tkn",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "contract IERC20",
-        "name": "inbound_tkn",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "offerId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      }
-    ],
-    "name": "NewOwnedOffer",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "contract IMangrove",
-        "name": "mangrove",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "contract IERC20",
-        "name": "outbound_tkn",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "contract IERC20",
-        "name": "inbound_tkn",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
       },
       {
         "indexed": true,
@@ -140,14 +80,14 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "takerWants",
-        "type": "uint256"
+        "internalType": "Tick",
+        "name": "tick",
+        "type": "int256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "takerGives",
+        "name": "fillVolume",
         "type": "uint256"
       },
       {
@@ -165,41 +105,49 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "expiryDate",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "takerGot",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "takerGave",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "bounty",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "fee",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "restingOrderId",
+        "name": "offerId",
         "type": "uint256"
       }
     ],
-    "name": "OrderSummary",
+    "name": "MangroveOrderStart",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "contract IMangrove",
+        "name": "mgv",
+        "type": "address"
+      }
+    ],
+    "name": "Mgv",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "offerId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "NewOwnedOffer",
     "type": "event"
   },
   {
@@ -220,18 +168,12 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "outbound_tkn",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
       },
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "inbound_tkn",
-        "type": "address"
-      },
-      {
-        "indexed": false,
         "internalType": "uint256",
         "name": "offerId",
         "type": "uint256"
@@ -261,9 +203,26 @@
   },
   {
     "inputs": [],
+    "name": "CONSTANT_GASREQ",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "MGV",
     "outputs": [
-      { "internalType": "contract IMangrove", "name": "", "type": "address" }
+      {
+        "internalType": "contract IMangrove",
+        "name": "",
+        "type": "address"
+      }
     ],
     "stateMutability": "view",
     "type": "function"
@@ -278,13 +237,6 @@
         "type": "address"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "OFFER_GASREQ",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -305,19 +257,41 @@
     "inputs": [],
     "name": "admin",
     "outputs": [
-      { "internalType": "address", "name": "current", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "current",
+        "type": "address"
+      }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "contract IERC20", "name": "token", "type": "address" },
-      { "internalType": "address", "name": "spender", "type": "address" },
-      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+      {
+        "internalType": "contract IERC20",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "spender",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
     ],
     "name": "approve",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -336,12 +310,25 @@
   },
   {
     "inputs": [
-      { "internalType": "contract IERC20", "name": "", "type": "address" },
-      { "internalType": "contract IERC20", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      {
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "offerId",
+        "type": "uint256"
+      }
     ],
     "name": "expiring",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "expiry",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
@@ -350,30 +337,62 @@
       {
         "components": [
           {
-            "internalType": "address",
-            "name": "outbound_tkn",
-            "type": "address"
+            "components": [
+              {
+                "internalType": "address",
+                "name": "outbound_tkn",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "inbound_tkn",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "tickSpacing",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct OLKey",
+            "name": "olKey",
+            "type": "tuple"
           },
           {
-            "internalType": "address",
-            "name": "inbound_tkn",
-            "type": "address"
+            "internalType": "uint256",
+            "name": "offerId",
+            "type": "uint256"
           },
-          { "internalType": "uint256", "name": "offerId", "type": "uint256" },
-          { "internalType": "OfferPacked", "name": "offer", "type": "uint256" },
-          { "internalType": "uint256", "name": "wants", "type": "uint256" },
-          { "internalType": "uint256", "name": "gives", "type": "uint256" },
           {
-            "internalType": "OfferDetailPacked",
+            "internalType": "Offer",
+            "name": "offer",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "takerWants",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "takerGives",
+            "type": "uint256"
+          },
+          {
+            "internalType": "OfferDetail",
             "name": "offerDetail",
             "type": "uint256"
           },
           {
-            "internalType": "GlobalPacked",
+            "internalType": "Global",
             "name": "global",
             "type": "uint256"
           },
-          { "internalType": "LocalPacked", "name": "local", "type": "uint256" }
+          {
+            "internalType": "Local",
+            "name": "local",
+            "type": "uint256"
+          }
         ],
         "internalType": "struct MgvLib.SingleOrder",
         "name": "order",
@@ -382,7 +401,11 @@
     ],
     "name": "makerExecute",
     "outputs": [
-      { "internalType": "bytes32", "name": "ret", "type": "bytes32" }
+      {
+        "internalType": "bytes32",
+        "name": "ret",
+        "type": "bytes32"
+      }
     ],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -392,30 +415,62 @@
       {
         "components": [
           {
-            "internalType": "address",
-            "name": "outbound_tkn",
-            "type": "address"
+            "components": [
+              {
+                "internalType": "address",
+                "name": "outbound_tkn",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "inbound_tkn",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "tickSpacing",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct OLKey",
+            "name": "olKey",
+            "type": "tuple"
           },
           {
-            "internalType": "address",
-            "name": "inbound_tkn",
-            "type": "address"
+            "internalType": "uint256",
+            "name": "offerId",
+            "type": "uint256"
           },
-          { "internalType": "uint256", "name": "offerId", "type": "uint256" },
-          { "internalType": "OfferPacked", "name": "offer", "type": "uint256" },
-          { "internalType": "uint256", "name": "wants", "type": "uint256" },
-          { "internalType": "uint256", "name": "gives", "type": "uint256" },
           {
-            "internalType": "OfferDetailPacked",
+            "internalType": "Offer",
+            "name": "offer",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "takerWants",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "takerGives",
+            "type": "uint256"
+          },
+          {
+            "internalType": "OfferDetail",
             "name": "offerDetail",
             "type": "uint256"
           },
           {
-            "internalType": "GlobalPacked",
+            "internalType": "Global",
             "name": "global",
             "type": "uint256"
           },
-          { "internalType": "LocalPacked", "name": "local", "type": "uint256" }
+          {
+            "internalType": "Local",
+            "name": "local",
+            "type": "uint256"
+          }
         ],
         "internalType": "struct MgvLib.SingleOrder",
         "name": "order",
@@ -423,8 +478,16 @@
       },
       {
         "components": [
-          { "internalType": "bytes32", "name": "makerData", "type": "bytes32" },
-          { "internalType": "bytes32", "name": "mgvData", "type": "bytes32" }
+          {
+            "internalType": "bytes32",
+            "name": "makerData",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "mgvData",
+            "type": "bytes32"
+          }
         ],
         "internalType": "struct MgvLib.OrderResult",
         "name": "result",
@@ -437,25 +500,54 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "reserveId",
+        "type": "address"
+      }
+    ],
+    "name": "offerGasreq",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "offerGasreq",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
       {
-        "internalType": "contract IERC20",
-        "name": "outbound_tkn",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
       },
       {
-        "internalType": "contract IERC20",
-        "name": "inbound_tkn",
-        "type": "address"
-      },
-      { "internalType": "uint256[]", "name": "offerIds", "type": "uint256[]" }
+        "internalType": "uint256[]",
+        "name": "offerIds",
+        "type": "uint256[]"
+      }
     ],
     "name": "offerOwners",
     "outputs": [
@@ -471,20 +563,23 @@
   {
     "inputs": [
       {
-        "internalType": "contract IERC20",
-        "name": "outbound_tkn",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
       },
       {
-        "internalType": "contract IERC20",
-        "name": "inbound_tkn",
-        "type": "address"
-      },
-      { "internalType": "uint256", "name": "offerId", "type": "uint256" }
+        "internalType": "uint256",
+        "name": "offerId",
+        "type": "uint256"
+      }
     ],
     "name": "ownerOf",
     "outputs": [
-      { "internalType": "address", "name": "owner", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
     ],
     "stateMutability": "view",
     "type": "function"
@@ -492,20 +587,40 @@
   {
     "inputs": [
       {
-        "internalType": "contract IERC20",
-        "name": "outbound_tkn",
-        "type": "address"
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tickSpacing",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct OLKey",
+        "name": "olKey",
+        "type": "tuple"
       },
       {
-        "internalType": "contract IERC20",
-        "name": "inbound_tkn",
-        "type": "address"
-      },
-      { "internalType": "uint256", "name": "offerId", "type": "uint256" }
+        "internalType": "uint256",
+        "name": "offerId",
+        "type": "uint256"
+      }
     ],
     "name": "provisionOf",
     "outputs": [
-      { "internalType": "uint256", "name": "provision", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "provision",
+        "type": "uint256"
+      }
     ],
     "stateMutability": "view",
     "type": "function"
@@ -513,21 +628,45 @@
   {
     "inputs": [
       {
-        "internalType": "contract IERC20",
-        "name": "outbound_tkn",
-        "type": "address"
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tickSpacing",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct OLKey",
+        "name": "olKey",
+        "type": "tuple"
       },
       {
-        "internalType": "contract IERC20",
-        "name": "inbound_tkn",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "offerId",
+        "type": "uint256"
       },
-      { "internalType": "uint256", "name": "offerId", "type": "uint256" },
-      { "internalType": "bool", "name": "deprovision", "type": "bool" }
+      {
+        "internalType": "bool",
+        "name": "deprovision",
+        "type": "bool"
+      }
     ],
     "name": "retractOffer",
     "outputs": [
-      { "internalType": "uint256", "name": "freeWei", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "freeWei",
+        "type": "uint256"
+      }
     ],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -547,7 +686,11 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "admin_", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "admin_",
+        "type": "address"
+      }
     ],
     "name": "setAdmin",
     "outputs": [],
@@ -557,17 +700,20 @@
   {
     "inputs": [
       {
-        "internalType": "contract IERC20",
-        "name": "outbound_tkn",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
       },
       {
-        "internalType": "contract IERC20",
-        "name": "inbound_tkn",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "offerId",
+        "type": "uint256"
       },
-      { "internalType": "uint256", "name": "offerId", "type": "uint256" },
-      { "internalType": "uint256", "name": "date", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "date",
+        "type": "uint256"
+      }
     ],
     "name": "setExpiry",
     "outputs": [],
@@ -592,30 +738,62 @@
       {
         "components": [
           {
-            "internalType": "contract IERC20",
-            "name": "outbound_tkn",
-            "type": "address"
+            "components": [
+              {
+                "internalType": "address",
+                "name": "outbound_tkn",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "inbound_tkn",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "tickSpacing",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct OLKey",
+            "name": "olKey",
+            "type": "tuple"
           },
           {
-            "internalType": "contract IERC20",
-            "name": "inbound_tkn",
-            "type": "address"
+            "internalType": "bool",
+            "name": "fillOrKill",
+            "type": "bool"
           },
-          { "internalType": "bool", "name": "fillOrKill", "type": "bool" },
+          {
+            "internalType": "Tick",
+            "name": "tick",
+            "type": "int256"
+          },
           {
             "internalType": "uint256",
-            "name": "takerWants",
+            "name": "fillVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "fillWants",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "restingOrder",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "expiryDate",
             "type": "uint256"
           },
           {
             "internalType": "uint256",
-            "name": "takerGives",
+            "name": "offerId",
             "type": "uint256"
-          },
-          { "internalType": "bool", "name": "fillWants", "type": "bool" },
-          { "internalType": "bool", "name": "restingOrder", "type": "bool" },
-          { "internalType": "uint256", "name": "pivotId", "type": "uint256" },
-          { "internalType": "uint256", "name": "expiryDate", "type": "uint256" }
+          }
         ],
         "internalType": "struct IOrderLogic.TakerOrder",
         "name": "tko",
@@ -626,11 +804,36 @@
     "outputs": [
       {
         "components": [
-          { "internalType": "uint256", "name": "takerGot", "type": "uint256" },
-          { "internalType": "uint256", "name": "takerGave", "type": "uint256" },
-          { "internalType": "uint256", "name": "bounty", "type": "uint256" },
-          { "internalType": "uint256", "name": "fee", "type": "uint256" },
-          { "internalType": "uint256", "name": "offerId", "type": "uint256" }
+          {
+            "internalType": "uint256",
+            "name": "takerGot",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "takerGave",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "bounty",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "fee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "offerId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "offerWriteData",
+            "type": "bytes32"
+          }
         ],
         "internalType": "struct IOrderLogic.TakerOrderResult",
         "name": "res",
@@ -643,19 +846,42 @@
   {
     "inputs": [
       {
-        "internalType": "contract IERC20",
-        "name": "outbound_tkn",
-        "type": "address"
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tickSpacing",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct OLKey",
+        "name": "olKey",
+        "type": "tuple"
       },
       {
-        "internalType": "contract IERC20",
-        "name": "inbound_tkn",
-        "type": "address"
+        "internalType": "Tick",
+        "name": "tick",
+        "type": "int256"
       },
-      { "internalType": "uint256", "name": "wants", "type": "uint256" },
-      { "internalType": "uint256", "name": "gives", "type": "uint256" },
-      { "internalType": "uint256", "name": "pivotId", "type": "uint256" },
-      { "internalType": "uint256", "name": "offerId", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "gives",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "offerId",
+        "type": "uint256"
+      }
     ],
     "name": "updateOffer",
     "outputs": [],
@@ -664,7 +890,11 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "amount", "type": "uint256" },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
       {
         "internalType": "address payable",
         "name": "receiver",
@@ -676,5 +906,8 @@
     "stateMutability": "nonpayable",
     "type": "function"
   },
-  { "stateMutability": "payable", "type": "receive" }
+  {
+    "stateMutability": "payable",
+    "type": "receive"
+  }
 ]

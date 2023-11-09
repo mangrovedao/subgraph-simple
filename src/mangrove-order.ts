@@ -1,25 +1,38 @@
 import { log } from "matchstick-as";
 import {
   LogIncident,
+  MangroveOrderComplete,
+  MangroveOrderStart,
   Mgv,
   NewOwnedOffer,
-  OrderSummary,
   SetAdmin,
   SetExpiry,
   SetRouter
-} from "../generated/MangroveOrder/MangroveOrder"
-import { LimitOrder, Offer } from "../generated/schema"
-import { getEventUniqueId, getLastOrder, getOfferId, getOrCreateAccount } from "./helpers"
-import { BigInt } from "@graphprotocol/graph-ts";
+} from "../generated/MangroveOrder/MangroveOrder";
+import { LimitOrder, Offer } from "../generated/schema";
+import { getEventUniqueId, getOfferId, getOrCreateAccount } from "./helpers";
+import { addLimitOrderToStack, getLatestLimitOrderFromStack, removeLatestLimitOrderFromStack } from "./stack";
 
 export function handleLogIncident(event: LogIncident): void {}
 
 export function handleMgv(event: Mgv): void {}
 
+export const limitOrderSetIsOpen = (limitOrderId: string | null, value: boolean): void => {
+  if(limitOrderId === null){
+    return;
+  }
+  const limitOrder = LimitOrder.load(limitOrderId);
+  if (!limitOrder) {
+    return;
+  }
+  limitOrder.isOpen = value;
+
+  limitOrder.save();
+}
+
 export function handleNewOwnedOffer(event: NewOwnedOffer): void {
   const offerId = getOfferId(
-    event.params.outbound_tkn, 
-    event.params.inbound_tkn, 
+    event.params.olKeyHash, 
     event.params.offerId
   );
   const offer = Offer.load(offerId);
@@ -30,58 +43,46 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
 
   const owner = getOrCreateAccount(event.params.owner, event.block.timestamp, true);
   offer.owner = owner.id;
+  const limitOrder = getLatestLimitOrderFromStack();
+  if( limitOrder !== null){
+    limitOrder.offer = offer.id;
+    limitOrder.isOpen = true;
+    offer.limitOrder = limitOrder.id;
+    limitOrder.save();
+  } else {
+    throw new Error(`Missing limit order for offer id:${offer.offerId} - market: ${offer.market} - tx: ${event.transaction.hash.toHex()}`);
+  }
   offer.save();
+  
 }
 
-export function handleOrderSummary(event: OrderSummary): void {
-  const order = getLastOrder();
-  let limitOrder = null as LimitOrder | null;
+export function handleMangroveOrderStart(event: MangroveOrderStart): void {
+  let limitOrder = new LimitOrder(getEventUniqueId(event));
   
-  if (event.params.restingOrderId != BigInt.fromI32(0)) {
-    const offerId = getOfferId(
-      event.params.inbound_tkn, // reverse inbound_tkn and outbound_tkn because we are in Order
-      event.params.outbound_tkn,
-      event.params.restingOrderId,
-    );
-    const offer = Offer.load(offerId);
-    if (!offer) {
-      log.error("Missing offerId {} {}", [offerId, event.transaction.hash.toHex()]);
-      return;
-    }
-    limitOrder = new LimitOrder(offerId);
-    limitOrder.offer = offer.id;
-  } else {
-    limitOrder = new LimitOrder(getEventUniqueId(event));
-  }
 
-  limitOrder.wants = event.params.takerWants;
-  limitOrder.gives = event.params.takerGives;
   limitOrder.realTaker = getOrCreateAccount(event.params.taker, event.block.timestamp, true).id;
-  limitOrder.expiryDate = event.params.expiryDate;
   limitOrder.fillOrKill = event.params.fillOrKill;
-  limitOrder.fillWants = event.params.fillWants;
   limitOrder.restingOrder = event.params.restingOrder;
   limitOrder.creationDate = event.block.timestamp;
   limitOrder.latestUpdateDate = event.block.timestamp;
-  limitOrder.order = order.id;
-
-  limitOrder.isOpen = event.params.restingOrderId != BigInt.fromI32(0);
-
-  order.limitOrder  = limitOrder.id;
-
-  order.save();
+  limitOrder.isOpen = false;
+  limitOrder.order = "";
   limitOrder.save();
+  addLimitOrderToStack(limitOrder);
+}
+
+export function handleMangroveOrderComplete(event: MangroveOrderComplete): void {
+  removeLatestLimitOrderFromStack();
 }
 
 export function handleSetAdmin(event: SetAdmin): void {}
 
 export function handleSetExpiry(event: SetExpiry): void {
   const offerId = getOfferId(
-    event.params.outbound_tkn,
-    event.params.inbound_tkn,
+    event.params.olKeyHash,
     event.params.offerId,
   );
-  const limitOrder = LimitOrder.load(offerId);
+  const limitOrder = getLatestLimitOrderFromStack();
   if (!limitOrder) {
     log.debug("Missing limit order for offerId {}", [offerId]);
     return;

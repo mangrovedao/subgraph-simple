@@ -7,13 +7,14 @@ import {
   afterEach
 } from "matchstick-as/assembly/index"
 import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
-import {handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleSetActive } from "../../src/mangrove";
-import { createOfferFailEvent, createOfferSuccessEvent, createOfferWriteEvent, createSetActiveEvent } from "./mangrove-utils";
-import { createNewOwnedOfferEvent, createOrderSummaryEvent, createSetExpiryEvent } from "./mangrove-order-utils";
-import { handleNewOwnedOffer, handleOrderSummary, handleSetExpiry } from "../../src/mangrove-order";
+import { handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive } from "../../src/mangrove";
+import { createOfferFailEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils";
+import { createNewOwnedOfferEvent, createMangroveOrderStartEvent, createSetExpiryEvent, createMangroveOrderCompleteEvent } from "./mangrove-order-utils";
+import { handleNewOwnedOffer, handleMangroveOrderStart, handleSetExpiry, limitOrderSetIsOpen, handleMangroveOrderComplete } from "../../src/mangrove-order";
 import { createDummyOffer, createOffer, getEventUniqueId, getOfferId } from "../../src/helpers";
-import { OrderStack, LimitOrder, Order } from "../../generated/schema";
+import { Stack, LimitOrder, Order } from "../../generated/schema";
 import { createOfferRetractEvent } from "./mangrove-utils";
+import { getLatestLimitOrderFromStack } from "../../src/stack";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -24,10 +25,13 @@ const maker = Address.fromString("0x0000000000000000000000000000000000000002")
 const taker = Address.fromString("0x0000000000000000000000000000000000000003")
 const owner = Address.fromString("0x0000000000000000000000000000000000000004")
 const mgv = Address.fromString("0x0000000000000000000000000000000000000005");
+const olKeyHash01 = Bytes.fromHexString(token0.toHex() + token1.toHex());
+const olKeyHash10 = Bytes.fromHexString(token1.toHex() + token0.toHex());
+
 
 describe("Describe entity assertions", () => {
   beforeEach(() => {
-    const setActiveEvent = createSetActiveEvent(token0, token1, true);
+    const setActiveEvent = createSetActiveEvent(olKeyHash01, token0, token1, BigInt.fromI32(1), true);
     handleSetActive(setActiveEvent);
     assert.entityCount("Market", 1);
   })
@@ -36,570 +40,183 @@ describe("Describe entity assertions", () => {
     clearStore()
   });
 
+  test("LimitOrder, limitOrderSetIsOpen, id is null", () => {
+    limitOrderSetIsOpen(null, true); // should not throw
+  })
+
+  test("LimitOrder, limitOrderSetIsOpen, id is not null, id does not exist", () => {
+    limitOrderSetIsOpen("limitOrder1", true); // should not throw
+  })
+
+  test("LimitOrder, limitOrderSetIsOpen, id is not null, id exists", () => {
+    const limitOrder = new LimitOrder("limitOrder");
+    limitOrder.isOpen = false;
+    limitOrder.creationDate = BigInt.fromI32(0);
+    limitOrder.latestUpdateDate = BigInt.fromI32(0);
+    limitOrder.fillOrKill = false;
+    limitOrder.restingOrder = false;
+    limitOrder.order = "";
+    limitOrder.save();
+
+    limitOrderSetIsOpen("limitOrder", true);
+
+    assert.fieldEquals('LimitOrder', "limitOrder", 'isOpen', 'true');
+  })
+
   test("Offer, handleNewOwnedOffer, offer exists", () => {
     const id = BigInt.fromI32(1);
-    createDummyOffer(
+    const offer = createDummyOffer(
       id,
-      token1,
-      token0,
+      olKeyHash01,
     )
 
+    const orderStartEvent = createMangroveOrderStartEvent(
+      olKeyHash01,
+      taker,
+      false,
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      false,
+      false,
+      id,
+    )
+    handleMangroveOrderStart(orderStartEvent);
+
     const newOwnerOffer = createNewOwnedOfferEvent(
-      mgv,
-      token0,
-      token1,
+      olKeyHash01,
       id,
       owner,
     );
     handleNewOwnedOffer(newOwnerOffer);
 
-    const offerId = getOfferId(token0, token1, id);
+    const offerId = getOfferId(olKeyHash01, id);
+    const limitOrderId = getEventUniqueId(orderStartEvent);
 
     assert.fieldEquals('Offer', offerId, 'owner', owner.toHex());
+    assert.fieldEquals('Offer', offerId, 'limitOrder', limitOrderId);
+    assert.fieldEquals('LimitOrder', limitOrderId, 'offer', offer.id);
+    assert.fieldEquals('LimitOrder', limitOrderId, 'isOpen', 'true');
   });
 
-  //TODO: would like to test negative case, where the offer does not exist. How?
+  // test("Offer, handleNewOwnedOffer, limit order does exist", () => {
+  //   const id = BigInt.fromI32(1);
+  //   createDummyOffer(
+  //     id,
+  //     olKeyHash01,
+  //   )
 
-  test("LimitOrder, handleOrderSummary, posting resting order", () => {
-    let setActiveEvent = createSetActiveEvent(token0, token1, true);
+  //   const newOwnerOffer = createNewOwnedOfferEvent(
+  //     olKeyHash01,
+  //     id,
+  //     owner,
+  //   );
+  //   let error = false;
+  //   try {
+  //     handleNewOwnedOffer(newOwnerOffer);
+  //   } catch (error) {
+  //     error = true;
+  //   }
+  //   assert.assertTrue(error); // should have thrown
+
+  // });
+
+  //TODO: would like to test negative case, where the offer does not exist. And where limit order does not exists How?
+
+  test("LimitOrder, handleMangroveOrderStart, posting resting order", () => {
+    let setActiveEvent = createSetActiveEvent(olKeyHash01, token0, token1, BigInt.fromI32(1), true);
     handleSetActive(setActiveEvent);
     assert.entityCount("Market", 1);
-    
+
     const id = BigInt.fromI32(1);
     createDummyOffer(
       id,
-      token1,
-      token0,
-    )
-    const orderId ="orderId"
-    const order = new Order(orderId);
-    order.transactionHash = Bytes.fromUTF8("0x0");
-    order.creationDate = BigInt.fromI32(1);
-    order.save();
-    
-    const orderStack = new OrderStack('orderStack')
-    orderStack.ids = ""
-    orderStack.last = order.id;
-    orderStack.save();
-    
-    const takerWants = BigInt.fromI32(1000); 
-    const takerGave = BigInt.fromI32(500);
-    const takerGives = BigInt.fromI32(2000);
-    const takerGot = BigInt.fromI32(1000);
-    const expiryDate = BigInt.fromI32(1686754719);
+      olKeyHash01,
+    );
 
-    const orderSummaryEvent = createOrderSummaryEvent(
-      mgv,
-      token1,
-      token0,
+    const tick = BigInt.fromI32(1000);
+    const fillVolume = BigInt.fromI32(2000);
+    const fillOrKill = false;
+    const fillWants = false;
+    const restingOrder = true;
+
+    const orderStartEvent = createMangroveOrderStartEvent(
+      olKeyHash01,
       taker,
-      false,
-      takerWants, // takerWants,
-      takerGives, // takerGives
-      false,
-      true, 
-      expiryDate,
-      takerGot, // takerGot
-      takerGave, // takerGave
-      BigInt.fromI32(0),
-      BigInt.fromI32(0),
+      fillOrKill,
+      tick,
+      fillVolume,
+      fillWants,
+      restingOrder,
       id,
     );
-    handleOrderSummary(orderSummaryEvent);
+    handleMangroveOrderStart(orderStartEvent);
 
-    const offerId = getOfferId(token0, token1, id);
-
-    assert.fieldEquals('Order', orderId, 'limitOrder', offerId);
-    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'true');
-    assert.fieldEquals('LimitOrder', offerId, 'wants', takerWants.toString());
-    assert.fieldEquals('LimitOrder', offerId, 'gives', takerGives.toString());
-    assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
-    assert.fieldEquals('LimitOrder', offerId, 'expiryDate', expiryDate.toI32().toString());
-    assert.fieldEquals('LimitOrder', offerId, 'fillOrKill', 'false');
-    assert.fieldEquals('LimitOrder', offerId, 'fillWants', 'false');
-    assert.fieldEquals('LimitOrder', offerId, 'restingOrder', 'true');
-    assert.fieldEquals('LimitOrder', offerId, 'offer', offerId);
-    assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
-    assert.fieldEquals('LimitOrder', offerId, 'creationDate', '1');
-    assert.fieldEquals('LimitOrder', offerId, 'latestUpdateDate', '1');
-
-    assert.fieldEquals('Account', taker.toHex(), 'latestInteractionDate', orderSummaryEvent.block.timestamp.toI32().toString());
-  });
-
-  //TODO: would like to test negative path, where the offer does not exist. How?
-
-  test("LimitOrder, handleOrderSummary, not posting resting order", () => {
-    let setActiveEvent = createSetActiveEvent(token0, token1, true);
-    handleSetActive(setActiveEvent);
-    assert.entityCount("Market", 1);
-    
-    const id = BigInt.fromI32(0);
-
-    const orderId ="orderId"
-    const order = new Order(orderId);
-    order.transactionHash = Bytes.fromUTF8("0x0");
-    order.creationDate = BigInt.fromI32(1);
-    order.save();
-    
-    const orderStack = new OrderStack('orderStack')
-    orderStack.ids = ""
-    orderStack.last = order.id;
-    orderStack.save();
-    
-    const takerWants = BigInt.fromI32(1000); 
-    const takerGave = BigInt.fromI32(500);
-    const takerGives = BigInt.fromI32(2000);
-    const takerGot = BigInt.fromI32(1000);
-    const expiryDate = BigInt.fromI32(0);
-
-    const orderSummaryEvent = createOrderSummaryEvent(
-      mgv,
-      token1,
-      token0,
-      taker,
-      true,
-      takerWants, // takerWants,
-      takerGives, // takerGives
-      true,
-      false, 
-      expiryDate,
-      takerGot, // takerGot
-      takerGave, // takerGave
-      BigInt.fromI32(0),
-      BigInt.fromI32(0),
-      id,
-    );
-    handleOrderSummary(orderSummaryEvent);
-    
-    const limitOrderId = getEventUniqueId(orderSummaryEvent);
-    assert.fieldEquals('Order', orderId, 'limitOrder', limitOrderId);
+    const limitOrderId = getEventUniqueId(orderStartEvent);
 
     assert.fieldEquals('LimitOrder', limitOrderId, 'isOpen', 'false');
-    assert.fieldEquals('LimitOrder', limitOrderId, 'wants', takerWants.toString());
-    assert.fieldEquals('LimitOrder', limitOrderId, 'gives', takerGives.toString());
     assert.fieldEquals('LimitOrder', limitOrderId, 'realTaker', taker.toHex());
-    assert.fieldEquals('LimitOrder', limitOrderId, 'expiryDate', expiryDate.toI32().toString());
-    assert.fieldEquals('LimitOrder', limitOrderId, 'fillOrKill', 'true');
-    assert.fieldEquals('LimitOrder', limitOrderId, 'fillWants', 'true');
-    assert.fieldEquals('LimitOrder', limitOrderId, 'restingOrder', 'false');
-    assert.fieldEquals('LimitOrder', limitOrderId, 'realTaker', taker.toHex());
+    assert.fieldEquals('LimitOrder', limitOrderId, 'fillOrKill', 'false');
+    assert.fieldEquals('LimitOrder', limitOrderId, 'restingOrder', 'true');
     assert.fieldEquals('LimitOrder', limitOrderId, 'creationDate', '1');
     assert.fieldEquals('LimitOrder', limitOrderId, 'latestUpdateDate', '1');
 
-    const limitOrder = LimitOrder.load(limitOrderId)!
-    assert.assertTrue(limitOrder.offer === null)
+    assert.fieldEquals('Account', taker.toHex(), 'latestInteractionDate', orderStartEvent.block.timestamp.toI32().toString());
+  });
+
+  test("LimitOrder, handleMangroveOrderComplete", () => {
+    let setActiveEvent = createSetActiveEvent(olKeyHash01, token0, token1, BigInt.fromI32(1), true);
+    handleSetActive(setActiveEvent);
+    assert.entityCount("Market", 1);
+
+
+    const tick = BigInt.fromI32(1000);
+    const fillVolume = BigInt.fromI32(2000);
+    const fillOrKill = false;
+    const fillWants = false;
+    const restingOrder = true;
+
+    const orderStartEvent = createMangroveOrderStartEvent(
+      olKeyHash01,
+      taker,
+      fillOrKill,
+      tick,
+      fillVolume,
+      fillWants,
+      restingOrder,
+      BigInt.fromI32(0),
+    );
+    handleMangroveOrderStart(orderStartEvent);
+
+    const limitOrder = getLatestLimitOrderFromStack();
+    assert.assertTrue(limitOrder!.id == getEventUniqueId(orderStartEvent));
+
+    const orderCompleteEvent = createMangroveOrderCompleteEvent()
+    handleMangroveOrderComplete(orderCompleteEvent);
+
+    assert.assertNull(getLatestLimitOrderFromStack());
   });
 
   test("LimitOrder, handleSetExpiry, setting expiry date", () => {
-    const offerId = getOfferId(token0, token1, BigInt.fromI32(1));
-    const limitOrder = new LimitOrder(offerId)
-    limitOrder.wants = BigInt.fromI32(1000);
-    limitOrder.gives = BigInt.fromI32(500);
-    limitOrder.realTaker = taker;
-    limitOrder.expiryDate = BigInt.fromI32(0);
-    limitOrder.fillOrKill = false;
-    limitOrder.fillWants = false;
-    limitOrder.restingOrder = true;
-    limitOrder.offer = offerId;
-    limitOrder.creationDate = BigInt.fromI32(0);
-    limitOrder.latestUpdateDate = BigInt.fromI32(0);
-    limitOrder.order = "order";
-    limitOrder.save();
+    const mangroveOrderStartEvent = createMangroveOrderStartEvent(
+      olKeyHash01,
+      taker,
+      false,
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      false,
+      false,
+      BigInt.fromI32(1),
+    )
 
-    const setExpiryEvent = createSetExpiryEvent(token0, token1, BigInt.fromI32(1), BigInt.fromI32(1000));
+    handleMangroveOrderStart(mangroveOrderStartEvent);
+
+    const setExpiryEvent = createSetExpiryEvent(olKeyHash01, BigInt.fromI32(1), BigInt.fromI32(1000));
     handleSetExpiry(setExpiryEvent);
 
-    assert.fieldEquals('LimitOrder', offerId, 'expiryDate', '1000');
-    assert.fieldEquals('LimitOrder', offerId, 'latestUpdateDate', '1');
+    const limitOrderId = getEventUniqueId(mangroveOrderStartEvent);
+    assert.fieldEquals('LimitOrder', limitOrderId, 'expiryDate', '1000');
+    assert.fieldEquals('LimitOrder', limitOrderId, 'latestUpdateDate', '1');
   })
 
-  test("LimitOrder, handleOrderSummary, posting resting order with success", () => {
-    let setActiveEvent = createSetActiveEvent(token0, token1, true);
-    handleSetActive(setActiveEvent);
-    assert.entityCount("Market", 1);
-    
-    const id = BigInt.fromI32(1);
-    createDummyOffer(
-      id,
-      token1,
-      token0,
-    )
-    const orderId ="orderId"
-    const order = new Order(orderId);
-    order.transactionHash = Bytes.fromUTF8("0x0");
-    order.creationDate = BigInt.fromI32(1);
-    order.save();
-    
-    const orderStack = new OrderStack('orderStack')
-    orderStack.ids = ""
-    orderStack.last = order.id;
-    orderStack.save();
-    
-    const takerWants = BigInt.fromI32(1000); 
-    const takerGave = BigInt.fromI32(500);
-
-    const takerGives = BigInt.fromI32(2000);
-    const takerGot = BigInt.fromI32(1000);
-
-    const expiryDate = BigInt.fromI32(1686754719);
-
-    const orderSummaryEvent = createOrderSummaryEvent(
-      mgv,
-      token1,
-      token0,
-      taker,
-      false,
-      takerWants, // takerWants,
-      takerGives, // takerGives
-      false,
-      true, 
-      expiryDate,
-      takerGot, // takerGot
-      takerGave, // takerGave
-      BigInt.fromI32(0),
-      BigInt.fromI32(0),
-      id,
-    );
-    handleOrderSummary(orderSummaryEvent);
-
-    const offerId = getOfferId(token0, token1, id);
-
-    assert.fieldEquals('Order', orderId, 'limitOrder', offerId);
-    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'true');
-    assert.fieldEquals('LimitOrder', offerId, 'wants', takerWants.toString());
-    assert.fieldEquals('LimitOrder', offerId, 'gives', takerGives.toString());
-    assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
-    assert.fieldEquals('LimitOrder', offerId, 'expiryDate', expiryDate.toI32().toString());
-    assert.fieldEquals('LimitOrder', offerId, 'fillOrKill', 'false');
-    assert.fieldEquals('LimitOrder', offerId, 'fillWants', 'false');
-    assert.fieldEquals('LimitOrder', offerId, 'restingOrder', 'true');
-    assert.fieldEquals('LimitOrder', offerId, 'offer', offerId);
-    assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
-    assert.fieldEquals('LimitOrder', offerId, 'creationDate', '1');
-    assert.fieldEquals('LimitOrder', offerId, 'latestUpdateDate', '1');
-
-    const wants = takerWants;
-    const gives = takerGives;
-    
-    const offerWrite = createOfferWriteEvent(
-      token0, 
-      token1,
-      maker,
-      wants,
-      gives,
-      BigInt.fromI32(0),
-      BigInt.fromI32(0),
-      id,
-      BigInt.fromI32(0),
-    );
-    handleOfferWrite(offerWrite);
-
-    const offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, gives, wants);
-    handleOfferSuccess(offerSuccess);
-
-    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'false');
-    assert.fieldEquals('Offer', offerId, 'isFilled', 'true');
-    assert.fieldEquals('Offer', offerId, 'isFailed', 'false');
-    assert.fieldEquals('Offer', offerId, 'isRetracted', 'false');
-  });
-
-  test("LimitOrder, handleOrderSummary, posting resting order with retract", () => {
-    let setActiveEvent = createSetActiveEvent(token0, token1, true);
-    handleSetActive(setActiveEvent);
-    assert.entityCount("Market", 1);
-    
-    const id = BigInt.fromI32(1);
-    createDummyOffer(
-      id,
-      token1,
-      token0,
-    )
-    const orderId ="orderId"
-    const order = new Order(orderId);
-    order.transactionHash = Bytes.fromUTF8("0x0");
-    order.creationDate = BigInt.fromI32(1);
-    order.save();
-    
-    const orderStack = new OrderStack('orderStack')
-    orderStack.ids = ""
-    orderStack.last = order.id;
-    orderStack.save();
-    
-    const takerWants = BigInt.fromI32(1000); 
-    const takerGave = BigInt.fromI32(500);
-
-    const takerGives = BigInt.fromI32(2000);
-    const takerGot = BigInt.fromI32(1000);
-
-    const expiryDate = BigInt.fromI32(1686754719);
-
-    const orderSummaryEvent = createOrderSummaryEvent(
-      mgv,
-      token1,
-      token0,
-      taker,
-      false,
-      takerWants, // takerWants,
-      takerGives, // takerGives
-      false,
-      true, 
-      expiryDate,
-      takerGot, // takerGot
-      takerGave, // takerGave
-      BigInt.fromI32(0),
-      BigInt.fromI32(0),
-      id,
-    );
-    handleOrderSummary(orderSummaryEvent);
-
-    const offerId = getOfferId(token0, token1, id);
-
-    assert.fieldEquals('Order', orderId, 'limitOrder', offerId);
-    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'true');
-    assert.fieldEquals('LimitOrder', offerId, 'wants', takerWants.toString());
-    assert.fieldEquals('LimitOrder', offerId, 'gives', takerGives.toString());
-    assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
-    assert.fieldEquals('LimitOrder', offerId, 'expiryDate', expiryDate.toI32().toString());
-    assert.fieldEquals('LimitOrder', offerId, 'fillOrKill', 'false');
-    assert.fieldEquals('LimitOrder', offerId, 'fillWants', 'false');
-    assert.fieldEquals('LimitOrder', offerId, 'restingOrder', 'true');
-    assert.fieldEquals('LimitOrder', offerId, 'offer', offerId);
-    assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
-    assert.fieldEquals('LimitOrder', offerId, 'creationDate', '1');
-    assert.fieldEquals('LimitOrder', offerId, 'latestUpdateDate', '1');
-
-    const wants = takerWants;
-    const gives = takerGives;
-    
-    const offerWrite = createOfferWriteEvent(
-      token0, 
-      token1,
-      maker,
-      wants,
-      gives,
-      BigInt.fromI32(0),
-      BigInt.fromI32(0),
-      id,
-      BigInt.fromI32(0),
-    );
-    handleOfferWrite(offerWrite);
-
-    const offerRetract = createOfferRetractEvent(token0, token1, id, false);
-    handleOfferRetract(offerRetract);
-
-    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'false');
-
-    assert.fieldEquals('Offer', offerId, 'isFilled', 'false');
-    assert.fieldEquals('Offer', offerId, 'isFailed', 'false');
-    assert.fieldEquals('Offer', offerId, 'isRetracted', 'true');
-  });
-
-  test("LimitOrder, handleOrderSummary, posting resting order with fail", () => {
-    let setActiveEvent = createSetActiveEvent(token0, token1, true);
-    handleSetActive(setActiveEvent);
-    assert.entityCount("Market", 1);
-    
-    const id = BigInt.fromI32(1);
-    createDummyOffer(
-      id,
-      token1,
-      token0,
-    )
-    const orderId ="orderId"
-    const order = new Order(orderId);
-    order.transactionHash = Bytes.fromUTF8("0x0");
-    order.creationDate = BigInt.fromI32(1);
-    order.save();
-    
-    const orderStack = new OrderStack('orderStack')
-    orderStack.ids = ""
-    orderStack.last = order.id;
-    orderStack.save();
-    
-    const takerWants = BigInt.fromI32(1000); 
-    const takerGave = BigInt.fromI32(500);
-
-    const takerGives = BigInt.fromI32(2000);
-    const takerGot = BigInt.fromI32(1000);
-
-    const expiryDate = BigInt.fromI32(1686754719);
-
-    const orderSummaryEvent = createOrderSummaryEvent(
-      mgv,
-      token1,
-      token0,
-      taker,
-      false,
-      takerWants, // takerWants,
-      takerGives, // takerGives
-      false,
-      true, 
-      expiryDate,
-      takerGot, // takerGot
-      takerGave, // takerGave
-      BigInt.fromI32(0),
-      BigInt.fromI32(0),
-      id,
-    );
-    handleOrderSummary(orderSummaryEvent);
-
-    const offerId = getOfferId(token0, token1, id);
-
-    assert.fieldEquals('Order', orderId, 'limitOrder', offerId);
-    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'true');
-    assert.fieldEquals('LimitOrder', offerId, 'wants', takerWants.toString());
-    assert.fieldEquals('LimitOrder', offerId, 'gives', takerGives.toString());
-    assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
-    assert.fieldEquals('LimitOrder', offerId, 'expiryDate', expiryDate.toI32().toString());
-    assert.fieldEquals('LimitOrder', offerId, 'fillOrKill', 'false');
-    assert.fieldEquals('LimitOrder', offerId, 'fillWants', 'false');
-    assert.fieldEquals('LimitOrder', offerId, 'restingOrder', 'true');
-    assert.fieldEquals('LimitOrder', offerId, 'offer', offerId);
-    assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
-    assert.fieldEquals('LimitOrder', offerId, 'creationDate', '1');
-    assert.fieldEquals('LimitOrder', offerId, 'latestUpdateDate', '1');
-
-    const wants = takerWants;
-    const gives = takerGives;
-    
-    const offerWrite = createOfferWriteEvent(
-      token0, 
-      token1,
-      maker,
-      wants,
-      gives,
-      BigInt.fromI32(0),
-      BigInt.fromI32(0),
-      id,
-      BigInt.fromI32(0),
-    );
-    handleOfferWrite(offerWrite);
-
-    const failedReason = Bytes.fromUTF8("Test");
-    const offerFail = createOfferFailEvent(token0, token1, id, taker, gives, wants, failedReason);
-    handleOfferFail(offerFail);
-
-    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'false');
-
-    assert.fieldEquals('Offer', offerId, 'isFilled', 'false');
-    assert.fieldEquals('Offer', offerId, 'isFailed', 'true');
-    assert.fieldEquals('Offer', offerId, 'failedReason', failedReason.toHex());
-    assert.fieldEquals('Offer', offerId, 'isRetracted', 'false');
-  });
-
-  test("LimitOrder partially fileld, with fail", () => {
-    let setActiveEvent = createSetActiveEvent(token0, token1, true);
-    handleSetActive(setActiveEvent);
-    assert.entityCount("Market", 1);
-    
-    const id = BigInt.fromI32(1);
-    createDummyOffer(
-      id,
-      token1,
-      token0,
-    )
-    const orderId ="orderId"
-    const order = new Order(orderId);
-    order.transactionHash = Bytes.fromUTF8("0x0");
-    order.creationDate = BigInt.fromI32(1);
-    order.save();
-    
-    const orderStack = new OrderStack('orderStack')
-    orderStack.ids = ""
-    orderStack.last = order.id;
-    orderStack.save();
-
-    const takerWants = BigInt.fromI32(1000); 
-    const takerGave = BigInt.fromI32(500);
-
-    const takerGives = BigInt.fromI32(2000);
-    const takerGot = BigInt.fromI32(1000);
-
-    const expiryDate = BigInt.fromI32(1686754719);
-
-    const orderSummaryEvent = createOrderSummaryEvent(
-      mgv,
-      token1,
-      token0,
-      taker,
-      false,
-      takerWants, // takerWants,
-      takerGives, // takerGives
-      false,
-      true, 
-      expiryDate,
-      takerGot, // takerGot
-      takerGave, // takerGave
-      BigInt.fromI32(0),
-      BigInt.fromI32(0),
-      id,
-    );
-    handleOrderSummary(orderSummaryEvent);
-
-    assert.fieldEquals('Account', taker.toHex(), 'creationDate', orderSummaryEvent.block.timestamp.toI32().toString());
-    assert.fieldEquals('Account', taker.toHex(), 'latestInteractionDate', orderSummaryEvent.block.timestamp.toI32().toString());
-
-    const offerId = getOfferId(token0, token1, id);
-
-    assert.fieldEquals('Order', orderId, 'limitOrder', offerId);
-    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'true');
-    assert.fieldEquals('LimitOrder', offerId, 'wants', takerWants.toString());
-    assert.fieldEquals('LimitOrder', offerId, 'gives', takerGives.toString());
-    assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
-    assert.fieldEquals('LimitOrder', offerId, 'expiryDate', expiryDate.toI32().toString());
-    assert.fieldEquals('LimitOrder', offerId, 'fillOrKill', 'false');
-    assert.fieldEquals('LimitOrder', offerId, 'fillWants', 'false');
-    assert.fieldEquals('LimitOrder', offerId, 'restingOrder', 'true');
-    assert.fieldEquals('LimitOrder', offerId, 'offer', offerId);
-    assert.fieldEquals('LimitOrder', offerId, 'realTaker', taker.toHex());
-    assert.fieldEquals('LimitOrder', offerId, 'creationDate', '1');
-    assert.fieldEquals('LimitOrder', offerId, 'latestUpdateDate', '1');
-
-    const wants = takerWants;
-    const gives = takerGives;
-    
-    const offerWrite = createOfferWriteEvent(
-      token0, 
-      token1,
-      maker,
-      wants,
-      gives,
-      BigInt.fromI32(0),
-      BigInt.fromI32(0),
-      id,
-      BigInt.fromI32(0),
-    );
-    handleOfferWrite(offerWrite);
-
-    assert.fieldEquals('Account', maker.toHex(), 'creationDate', offerWrite.block.timestamp.toI32().toString());
-    assert.fieldEquals('Account', maker.toHex(), 'latestInteractionDate', offerWrite.block.timestamp.toI32().toString());
-
-    const offerSuccess = createOfferSuccessEvent(token0, token1, id, taker, gives, wants);
-    handleOfferSuccess(offerSuccess);
-
-    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'false');
-    assert.fieldEquals('Offer', offerId, 'isFilled', 'true');
-    assert.fieldEquals('Offer', offerId, 'isFailed', 'false');
-    assert.fieldEquals('Offer', offerId, 'isRetracted', 'false');
-
-    const offerWrite2 = createOfferWriteEvent(
-      token0, 
-      token1,
-      maker,
-      wants,
-      gives,
-      BigInt.fromI32(0),
-      BigInt.fromI32(0),
-      id,
-      BigInt.fromI32(0),
-    );
-    offerWrite2.block.timestamp = offerWrite2.block.timestamp.plus(BigInt.fromI32(1));
-    handleOfferWrite(offerWrite2);
-
-    assert.fieldEquals('LimitOrder', offerId, 'isOpen', 'true');
-    assert.fieldEquals('Account', maker.toHex(), 'creationDate', offerWrite.block.timestamp.toI32().toString());
-    assert.fieldEquals('Account', maker.toHex(), 'latestInteractionDate', offerWrite2.block.timestamp.toI32().toString());
-
-  });
   //TODO: would like to test negative path, where the LimitOrder does not exist. How?
 });

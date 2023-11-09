@@ -1,16 +1,20 @@
 {
   "mumbai": {
     "Mangrove": {
-      "address": "0xd1805f6Fe12aFF69D4264aE3e49ef320895e2D8b",
-      "startBlock": 35666000
+      "address": "0x4EFA71AFC806112AE91b54F05bc33a1F7D397B08",
+      "startBlock": 41920036
     },
     "KandelSeeder": {
-      "address": "0xb4A9Ac8Ae5b405193271A0e62682c9be47d578B9",
-      "startBlock": 35666000
+      "address": "0xFBB5dca5019A77500F96C08fD01A51e8A83040b7",
+      "startBlock": 41920053
+    },
+    "AaveKandelSeeder": {
+      "address": "0xbb5E5CC0a5d2aA029dBA602338eFC36B8494D39C",
+      "startBlock": 41920061
     },
     "MangroveOrder": {
-      "address": "0x756fAc8bb6fb96A3b005ad7b3337052aE69aAf65",
-      "startBlock": 35666000
+      "address": "0x0443FAe884911b0221d75c86ED60b2E535a6a7D7",
+      "startBlock": 41920048
     }
   },
   "matic": {

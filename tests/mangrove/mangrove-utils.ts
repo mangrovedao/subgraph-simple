@@ -2,24 +2,29 @@ import { newMockEvent } from "matchstick-as"
 import { ethereum, Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
 import {
   Approval,
+  CleanComplete,
+  CleanStart,
   Credit,
   Debit,
   Kill,
   NewMgv,
   OfferFail,
+  OfferFailWithPosthookData,
   OfferRetract,
   OfferSuccess,
+  OfferSuccessWithPosthookData,
   OfferWrite,
   OrderComplete,
   OrderStart,
-  PosthookFail,
   SetActive,
-  SetDensity,
+  SetDensity96X32,
   SetFee,
   SetGasbase,
   SetGasmax,
   SetGasprice,
   SetGovernance,
+  SetMaxGasreqForFailingOffers,
+  SetMaxRecursionDepth,
   SetMonitor,
   SetNotify,
   SetUseOracle
@@ -61,7 +66,7 @@ export function createApprovalEvent(
   return approvalEvent
 }
 
-export function createCreditEvent(maker: Address, amount: BigInt): Credit {
+export function reditEvent(maker: Address, amount: BigInt): Credit {
   let creditEvent = changetype<Credit>(newMockEvent())
 
   creditEvent.parameters = new Array()
@@ -108,13 +113,17 @@ export function createNewMgvEvent(): NewMgv {
 }
 
 export function createOfferFailEvent(
-  outbound_tkn: Address,
-  inbound_tkn: Address,
+  olKeyHash: Bytes,
   id: BigInt,
   taker: Address,
   takerWants: BigInt,
   takerGives: BigInt,
-  mgvData: Bytes
+  penalty: BigInt,
+  mgvData: Bytes,
+  transactionHash: Bytes,
+  logIndex: BigInt,
+  timestamp: BigInt
+
 ): OfferFail {
   let offerFailEvent = changetype<OfferFail>(newMockEvent())
 
@@ -122,21 +131,15 @@ export function createOfferFailEvent(
 
   offerFailEvent.parameters.push(
     new ethereum.EventParam(
-      "outbound_tkn",
-      ethereum.Value.fromAddress(outbound_tkn)
+      "olKeyHash",
+      ethereum.Value.fromBytes(olKeyHash)
     )
-  )
-  offerFailEvent.parameters.push(
-    new ethereum.EventParam(
-      "inbound_tkn",
-      ethereum.Value.fromAddress(inbound_tkn)
-    )
-  )
-  offerFailEvent.parameters.push(
-    new ethereum.EventParam("id", ethereum.Value.fromUnsignedBigInt(id))
   )
   offerFailEvent.parameters.push(
     new ethereum.EventParam("taker", ethereum.Value.fromAddress(taker))
+  )
+  offerFailEvent.parameters.push(
+    new ethereum.EventParam("id", ethereum.Value.fromUnsignedBigInt(id))
   )
   offerFailEvent.parameters.push(
     new ethereum.EventParam(
@@ -151,15 +154,62 @@ export function createOfferFailEvent(
     )
   )
   offerFailEvent.parameters.push(
-    new ethereum.EventParam("mgvData", ethereum.Value.fromFixedBytes(mgvData))
+    new ethereum.EventParam(
+      "penalty",
+      ethereum.Value.fromUnsignedBigInt(penalty)
+    )
   )
+
+  offerFailEvent.parameters.push(
+    new ethereum.EventParam("mgvData", ethereum.Value.fromBytes(mgvData))
+  )
+
+  // push optional parameters
+  offerFailEvent.transaction.hash = transactionHash
+  offerFailEvent.logIndex = logIndex
+  offerFailEvent.block.timestamp = timestamp
 
   return offerFailEvent
 }
 
+export function createOfferFailWithPosthookDataEvent(
+  olKeyHash: Bytes,
+  id: BigInt,
+  taker: Address,
+  takerWants: BigInt,
+  takerGives: BigInt,
+  penalty: BigInt,
+  mgvData: Bytes,
+  posthookData: Bytes,
+  transactionHash: Bytes,
+  logIndex: BigInt,
+  timestamp: BigInt
+): OfferFailWithPosthookData {
+  const offerFailEvent = createOfferFailEvent(
+    olKeyHash,
+    id,
+    taker,
+    takerWants,
+    takerGives,
+    penalty,
+    mgvData,
+    transactionHash,
+    logIndex,
+    timestamp
+  )
+  let offerFailWithPosthookDataEvent = changetype<OfferFailWithPosthookData>(offerFailEvent);
+  offerFailWithPosthookDataEvent.parameters.push(
+    new ethereum.EventParam(
+      "posthookData",
+      ethereum.Value.fromBytes(posthookData)
+    )
+  )
+  return offerFailWithPosthookDataEvent;
+}
+
 export function createOfferRetractEvent(
-  outbound_tkn: Address,
-  inbound_tkn: Address,
+  olKeyHash: Bytes,
+  maker: Address,
   id: BigInt,
   deprovision: boolean
 ): OfferRetract {
@@ -170,14 +220,11 @@ export function createOfferRetractEvent(
   offerRetractEvent.parameters.push(
     new ethereum.EventParam(
       "outbound_tkn",
-      ethereum.Value.fromAddress(outbound_tkn)
+      ethereum.Value.fromBytes(olKeyHash)
     )
   )
   offerRetractEvent.parameters.push(
-    new ethereum.EventParam(
-      "inbound_tkn",
-      ethereum.Value.fromAddress(inbound_tkn)
-    )
+    new ethereum.EventParam("maker", ethereum.Value.fromAddress(maker))
   )
   offerRetractEvent.parameters.push(
     new ethereum.EventParam("id", ethereum.Value.fromUnsignedBigInt(id))
@@ -193,8 +240,7 @@ export function createOfferRetractEvent(
 }
 
 export function createOfferSuccessEvent(
-  outbound_tkn: Address,
-  inbound_tkn: Address,
+  olKeyHash: Bytes,
   id: BigInt,
   taker: Address,
   takerWants: BigInt,
@@ -206,21 +252,15 @@ export function createOfferSuccessEvent(
 
   offerSuccessEvent.parameters.push(
     new ethereum.EventParam(
-      "outbound_tkn",
-      ethereum.Value.fromAddress(outbound_tkn)
+      "olKeyHash",
+      ethereum.Value.fromBytes(olKeyHash)
     )
-  )
-  offerSuccessEvent.parameters.push(
-    new ethereum.EventParam(
-      "inbound_tkn",
-      ethereum.Value.fromAddress(inbound_tkn)
-    )
-  )
-  offerSuccessEvent.parameters.push(
-    new ethereum.EventParam("id", ethereum.Value.fromUnsignedBigInt(id))
   )
   offerSuccessEvent.parameters.push(
     new ethereum.EventParam("taker", ethereum.Value.fromAddress(taker))
+  )
+  offerSuccessEvent.parameters.push(
+    new ethereum.EventParam("id", ethereum.Value.fromUnsignedBigInt(id))
   )
   offerSuccessEvent.parameters.push(
     new ethereum.EventParam(
@@ -238,16 +278,39 @@ export function createOfferSuccessEvent(
   return offerSuccessEvent
 }
 
+export function createOfferSuccessWithPosthookDataEvent(
+  olKeyHash: Bytes,
+  id: BigInt,
+  taker: Address,
+  takerWants: BigInt,
+  takerGives: BigInt,
+  posthookData: Bytes
+): OfferSuccessWithPosthookData {
+  const offerSuccessEvent = createOfferSuccessEvent(
+    olKeyHash,
+    id,
+    taker,
+    takerWants,
+    takerGives
+  )
+  let offerSuccessWithPosthookDataEvent = changetype<OfferSuccessWithPosthookData>(offerSuccessEvent);
+  offerSuccessWithPosthookDataEvent.parameters.push(
+    new ethereum.EventParam(
+      "posthookData",
+      ethereum.Value.fromBytes(posthookData)
+    )
+  )
+  return offerSuccessWithPosthookDataEvent;
+}
+
 export function createOfferWriteEvent(
-  outbound_tkn: Address,
-  inbound_tkn: Address,
+  olKeyHash: Bytes,
   maker: Address,
-  wants: BigInt,
+  tick: BigInt,
   gives: BigInt,
   gasprice: BigInt,
   gasreq: BigInt,
   id: BigInt,
-  prev: BigInt
 ): OfferWrite {
   let offerWriteEvent = changetype<OfferWrite>(newMockEvent())
 
@@ -255,21 +318,15 @@ export function createOfferWriteEvent(
 
   offerWriteEvent.parameters.push(
     new ethereum.EventParam(
-      "outbound_tkn",
-      ethereum.Value.fromAddress(outbound_tkn)
-    )
-  )
-  offerWriteEvent.parameters.push(
-    new ethereum.EventParam(
-      "inbound_tkn",
-      ethereum.Value.fromAddress(inbound_tkn)
+      "olKeyHash",
+      ethereum.Value.fromBytes(olKeyHash)
     )
   )
   offerWriteEvent.parameters.push(
     new ethereum.EventParam("maker", ethereum.Value.fromAddress(maker))
   )
   offerWriteEvent.parameters.push(
-    new ethereum.EventParam("wants", ethereum.Value.fromUnsignedBigInt(wants))
+    new ethereum.EventParam("tick", ethereum.Value.fromSignedBigInt(tick))
   )
   offerWriteEvent.parameters.push(
     new ethereum.EventParam("gives", ethereum.Value.fromUnsignedBigInt(gives))
@@ -286,21 +343,13 @@ export function createOfferWriteEvent(
   offerWriteEvent.parameters.push(
     new ethereum.EventParam("id", ethereum.Value.fromUnsignedBigInt(id))
   )
-  offerWriteEvent.parameters.push(
-    new ethereum.EventParam("prev", ethereum.Value.fromUnsignedBigInt(prev))
-  )
-
   return offerWriteEvent
 }
 
 export function createOrderCompleteEvent(
-  outbound_tkn: Address,
-  inbound_tkn: Address,
+  olKeyHash: Bytes,
   taker: Address,
-  takerGot: BigInt,
-  takerGave: BigInt,
-  penalty: BigInt,
-  feePaid: BigInt
+  fee: BigInt
 ): OrderComplete {
   let orderCompleteEvent = changetype<OrderComplete>(newMockEvent())
 
@@ -308,96 +357,105 @@ export function createOrderCompleteEvent(
 
   orderCompleteEvent.parameters.push(
     new ethereum.EventParam(
-      "outbound_tkn",
-      ethereum.Value.fromAddress(outbound_tkn)
+      "olKeyHash",
+      ethereum.Value.fromBytes(olKeyHash)
     )
   )
-  orderCompleteEvent.parameters.push(
-    new ethereum.EventParam(
-      "inbound_tkn",
-      ethereum.Value.fromAddress(inbound_tkn)
-    )
-  )
+
   orderCompleteEvent.parameters.push(
     new ethereum.EventParam("taker", ethereum.Value.fromAddress(taker))
   )
+
   orderCompleteEvent.parameters.push(
-    new ethereum.EventParam(
-      "takerGot",
-      ethereum.Value.fromUnsignedBigInt(takerGot)
-    )
-  )
-  orderCompleteEvent.parameters.push(
-    new ethereum.EventParam(
-      "takerGave",
-      ethereum.Value.fromUnsignedBigInt(takerGave)
-    )
-  )
-  orderCompleteEvent.parameters.push(
-    new ethereum.EventParam(
-      "penalty",
-      ethereum.Value.fromUnsignedBigInt(penalty)
-    )
-  )
-  orderCompleteEvent.parameters.push(
-    new ethereum.EventParam(
-      "feePaid",
-      ethereum.Value.fromUnsignedBigInt(feePaid)
-    )
+    new ethereum.EventParam("fee", ethereum.Value.fromUnsignedBigInt(fee))
   )
 
   return orderCompleteEvent
 }
 
-export function createOrderStartEvent(): OrderStart {
+export function createOrderStartEvent(
+  olKeyHash: Bytes,
+  taker: Address,
+  maxTick: BigInt,
+  fillVolume: BigInt,
+  fillWants: boolean,
+): OrderStart {
   let orderStartEvent = changetype<OrderStart>(newMockEvent())
 
   orderStartEvent.parameters = new Array()
 
+  orderStartEvent.parameters.push(
+    new ethereum.EventParam(
+      "olKeyHash",
+      ethereum.Value.fromBytes(olKeyHash)
+    )
+  )
+
+  orderStartEvent.parameters.push(
+    new ethereum.EventParam("taker", ethereum.Value.fromAddress(taker))
+  )
+
+  orderStartEvent.parameters.push(
+    new ethereum.EventParam("maxTick", ethereum.Value.fromSignedBigInt(maxTick))
+  )
+
+  orderStartEvent.parameters.push(
+    new ethereum.EventParam(
+      "fillVolume",
+      ethereum.Value.fromUnsignedBigInt(fillVolume)
+    )
+  )
+
+  orderStartEvent.parameters.push(
+    new ethereum.EventParam(
+      "fillWants",
+      ethereum.Value.fromBoolean(fillWants)
+    )
+  )
+
   return orderStartEvent
 }
 
-export function createPosthookFailEvent(
-  outbound_tkn: Address,
-  inbound_tkn: Address,
-  offerId: BigInt,
-  posthookData: Bytes
-): PosthookFail {
-  let posthookFailEvent = changetype<PosthookFail>(newMockEvent())
+export function createCleanOrderStartEvent(
+  olKeyHash: Bytes,
+  taker: Address,
+  ordersToBeCleaned: BigInt,
+): CleanStart {
+  let cleanStart = changetype<CleanStart>(newMockEvent())
 
-  posthookFailEvent.parameters = new Array()
+  cleanStart.parameters = new Array()
 
-  posthookFailEvent.parameters.push(
+  cleanStart.parameters.push(
     new ethereum.EventParam(
-      "outbound_tkn",
-      ethereum.Value.fromAddress(outbound_tkn)
+      "olKeyHash",
+      ethereum.Value.fromBytes(olKeyHash)
     )
   )
-  posthookFailEvent.parameters.push(
-    new ethereum.EventParam(
-      "inbound_tkn",
-      ethereum.Value.fromAddress(inbound_tkn)
-    )
+  cleanStart.parameters.push(
+    new ethereum.EventParam("taker", ethereum.Value.fromAddress(taker))
   )
-  posthookFailEvent.parameters.push(
+  cleanStart.parameters.push(
     new ethereum.EventParam(
-      "offerId",
-      ethereum.Value.fromUnsignedBigInt(offerId)
-    )
-  )
-  posthookFailEvent.parameters.push(
-    new ethereum.EventParam(
-      "posthookData",
-      ethereum.Value.fromFixedBytes(posthookData)
+      "ordersToBeCleaned",
+      ethereum.Value.fromUnsignedBigInt(ordersToBeCleaned)
     )
   )
 
-  return posthookFailEvent
+
+  return cleanStart
 }
 
+export function createCleanCompleteEvent(): CleanComplete {
+  return changetype<CleanComplete>(newMockEvent())
+}
+
+
+
 export function createSetActiveEvent(
+  olKeyHash: Bytes,
   outbound_tkn: Address,
   inbound_tkn: Address,
+  tickSpacing: BigInt,
   value: boolean
 ): SetActive {
   let setActiveEvent = changetype<SetActive>(newMockEvent())
@@ -406,6 +464,13 @@ export function createSetActiveEvent(
 
   setActiveEvent.parameters.push(
     new ethereum.EventParam(
+      "olKeyHash",
+      ethereum.Value.fromBytes(olKeyHash)
+    )
+  )
+
+  setActiveEvent.parameters.push(
+    new ethereum.EventParam(
       "outbound_tkn",
       ethereum.Value.fromAddress(outbound_tkn)
     )
@@ -416,6 +481,14 @@ export function createSetActiveEvent(
       ethereum.Value.fromAddress(inbound_tkn)
     )
   )
+
+  setActiveEvent.parameters.push(
+    new ethereum.EventParam(
+      "tickSpacing",
+      ethereum.Value.fromSignedBigInt(tickSpacing)
+    )
+  )
+
   setActiveEvent.parameters.push(
     new ethereum.EventParam("value", ethereum.Value.fromBoolean(value))
   )
@@ -424,26 +497,20 @@ export function createSetActiveEvent(
 }
 
 export function createSetDensityEvent(
-  outbound_tkn: Address,
-  inbound_tkn: Address,
+  olKeyHash: Bytes,
   value: BigInt
-): SetDensity {
-  let setDensityEvent = changetype<SetDensity>(newMockEvent())
+): SetDensity96X32 {
+  let setDensityEvent = changetype<SetDensity96X32>(newMockEvent())
 
   setDensityEvent.parameters = new Array()
 
   setDensityEvent.parameters.push(
     new ethereum.EventParam(
-      "outbound_tkn",
-      ethereum.Value.fromAddress(outbound_tkn)
+      "olKeyHash",
+      ethereum.Value.fromBytes(olKeyHash)
     )
   )
-  setDensityEvent.parameters.push(
-    new ethereum.EventParam(
-      "inbound_tkn",
-      ethereum.Value.fromAddress(inbound_tkn)
-    )
-  )
+
   setDensityEvent.parameters.push(
     new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(value))
   )
@@ -452,8 +519,7 @@ export function createSetDensityEvent(
 }
 
 export function createSetFeeEvent(
-  outbound_tkn: Address,
-  inbound_tkn: Address,
+  olKeyHash: Bytes,
   value: BigInt
 ): SetFee {
   let setFeeEvent = changetype<SetFee>(newMockEvent())
@@ -462,16 +528,11 @@ export function createSetFeeEvent(
 
   setFeeEvent.parameters.push(
     new ethereum.EventParam(
-      "outbound_tkn",
-      ethereum.Value.fromAddress(outbound_tkn)
+      "olKeyHash",
+      ethereum.Value.fromBytes(olKeyHash)
     )
   )
-  setFeeEvent.parameters.push(
-    new ethereum.EventParam(
-      "inbound_tkn",
-      ethereum.Value.fromAddress(inbound_tkn)
-    )
-  )
+
   setFeeEvent.parameters.push(
     new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(value))
   )
@@ -480,8 +541,7 @@ export function createSetFeeEvent(
 }
 
 export function createSetGasbaseEvent(
-  outbound_tkn: Address,
-  inbound_tkn: Address,
+  olKeyHash: Bytes,
   offer_gasbase: BigInt
 ): SetGasbase {
   let setGasbaseEvent = changetype<SetGasbase>(newMockEvent())
@@ -490,16 +550,11 @@ export function createSetGasbaseEvent(
 
   setGasbaseEvent.parameters.push(
     new ethereum.EventParam(
-      "outbound_tkn",
-      ethereum.Value.fromAddress(outbound_tkn)
+      "olKeyHash",
+      ethereum.Value.fromBytes(olKeyHash)
     )
   )
-  setGasbaseEvent.parameters.push(
-    new ethereum.EventParam(
-      "inbound_tkn",
-      ethereum.Value.fromAddress(inbound_tkn)
-    )
-  )
+
   setGasbaseEvent.parameters.push(
     new ethereum.EventParam(
       "offer_gasbase",
@@ -545,6 +600,35 @@ export function createSetGovernanceEvent(value: Address): SetGovernance {
 
   return setGovernanceEvent
 }
+
+export function createSetMaxGasreqForFailingOffersEvent(
+  value: BigInt
+): SetMaxGasreqForFailingOffers {
+  let setMaxGasreqForFailingOffers = changetype<SetMaxGasreqForFailingOffers>(newMockEvent())
+
+  setMaxGasreqForFailingOffers.parameters = new Array()
+
+  setMaxGasreqForFailingOffers.parameters.push(
+    new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(value))
+  )
+
+  return setMaxGasreqForFailingOffers
+}
+
+export function createSetMaxRecursionDepthEvent(
+  value: BigInt
+): SetMaxRecursionDepth {
+  let setMaxRecursionDepth = changetype<SetMaxRecursionDepth>(newMockEvent())
+
+  setMaxRecursionDepth.parameters = new Array()
+
+  setMaxRecursionDepth.parameters.push(
+    new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(value))
+  )
+
+  return setMaxRecursionDepth
+}
+
 
 export function createSetMonitorEvent(value: Address): SetMonitor {
   let setMonitorEvent = changetype<SetMonitor>(newMockEvent())

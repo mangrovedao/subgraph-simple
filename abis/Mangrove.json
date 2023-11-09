@@ -1,9 +1,21 @@
 [
   {
     "inputs": [
-      { "internalType": "address", "name": "governance", "type": "address" },
-      { "internalType": "uint256", "name": "gasprice", "type": "uint256" },
-      { "internalType": "uint256", "name": "gasmax", "type": "uint256" }
+      {
+        "internalType": "address",
+        "name": "governance",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gasprice",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gasmax",
+        "type": "uint256"
+      }
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
@@ -24,7 +36,7 @@
         "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "owner",
         "type": "address"
@@ -43,6 +55,37 @@
       }
     ],
     "name": "Approval",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [],
+    "name": "CleanComplete",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "taker",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "offersToBeCleaned",
+        "type": "uint256"
+      }
+    ],
+    "name": "CleanStart",
     "type": "event"
   },
   {
@@ -83,34 +126,38 @@
     "name": "Debit",
     "type": "event"
   },
-  { "anonymous": false, "inputs": [], "name": "Kill", "type": "event" },
-  { "anonymous": false, "inputs": [], "name": "NewMgv", "type": "event" },
+  {
+    "anonymous": false,
+    "inputs": [],
+    "name": "Kill",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [],
+    "name": "NewMgv",
+    "type": "event"
+  },
   {
     "anonymous": false,
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "outbound_tkn",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "inbound_tkn",
+        "name": "taker",
         "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "uint256",
         "name": "id",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "taker",
-        "type": "address"
       },
       {
         "indexed": false,
@@ -122,6 +169,12 @@
         "indexed": false,
         "internalType": "uint256",
         "name": "takerGives",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "penalty",
         "type": "uint256"
       },
       {
@@ -139,14 +192,69 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "outbound_tkn",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "inbound_tkn",
+        "name": "taker",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "takerWants",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "takerGives",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "penalty",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "mgvData",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "posthookData",
+        "type": "bytes32"
+      }
+    ],
+    "name": "OfferFailWithPosthookData",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "maker",
         "type": "address"
       },
       {
@@ -170,27 +278,21 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "outbound_tkn",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "inbound_tkn",
+        "name": "taker",
         "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "uint256",
         "name": "id",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "taker",
-        "type": "address"
       },
       {
         "indexed": false,
@@ -213,27 +315,64 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "outbound_tkn",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "inbound_tkn",
+        "name": "taker",
         "type": "address"
       },
       {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
         "indexed": false,
+        "internalType": "uint256",
+        "name": "takerWants",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "takerGives",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "posthookData",
+        "type": "bytes32"
+      }
+    ],
+    "name": "OfferSuccessWithPosthookData",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
         "internalType": "address",
         "name": "maker",
         "type": "address"
       },
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "wants",
-        "type": "uint256"
+        "internalType": "int256",
+        "name": "tick",
+        "type": "int256"
       },
       {
         "indexed": false,
@@ -258,12 +397,6 @@
         "internalType": "uint256",
         "name": "id",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "prev",
-        "type": "uint256"
       }
     ],
     "name": "OfferWrite",
@@ -274,15 +407,9 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "outbound_tkn",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "inbound_tkn",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
       },
       {
         "indexed": true,
@@ -293,35 +420,59 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "takerGot",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "takerGave",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "penalty",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "feePaid",
+        "name": "fee",
         "type": "uint256"
       }
     ],
     "name": "OrderComplete",
     "type": "event"
   },
-  { "anonymous": false, "inputs": [], "name": "OrderStart", "type": "event" },
   {
     "anonymous": false,
     "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "taker",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "Tick",
+        "name": "maxTick",
+        "type": "int256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fillVolume",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "fillWants",
+        "type": "bool"
+      }
+    ],
+    "name": "OrderStart",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
+      },
       {
         "indexed": true,
         "internalType": "address",
@@ -337,33 +488,8 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "offerId",
+        "name": "tickSpacing",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes32",
-        "name": "posthookData",
-        "type": "bytes32"
-      }
-    ],
-    "name": "PosthookFail",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "outbound_tkn",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "inbound_tkn",
-        "type": "address"
       },
       {
         "indexed": false,
@@ -380,15 +506,9 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "outbound_tkn",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "inbound_tkn",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
       },
       {
         "indexed": false,
@@ -397,7 +517,7 @@
         "type": "uint256"
       }
     ],
-    "name": "SetDensity",
+    "name": "SetDensity96X32",
     "type": "event"
   },
   {
@@ -405,15 +525,9 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "outbound_tkn",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "inbound_tkn",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
       },
       {
         "indexed": false,
@@ -430,15 +544,9 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "outbound_tkn",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "inbound_tkn",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "olKeyHash",
+        "type": "bytes32"
       },
       {
         "indexed": false,
@@ -494,6 +602,32 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "SetMaxGasreqForFailingOffers",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "SetMaxRecursionDepth",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "address",
         "name": "value",
         "type": "address"
@@ -529,123 +663,17 @@
     "type": "event"
   },
   {
-    "inputs": [],
-    "name": "DOMAIN_SEPARATOR",
-    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
-    "stateMutability": "view",
-    "type": "function"
+    "stateMutability": "nonpayable",
+    "type": "fallback"
   },
   {
     "inputs": [],
-    "name": "PERMIT_TYPEHASH",
-    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" },
-      { "internalType": "uint256", "name": "fee", "type": "uint256" },
-      { "internalType": "uint256", "name": "density", "type": "uint256" },
-      { "internalType": "uint256", "name": "offer_gasbase", "type": "uint256" }
-    ],
-    "name": "activate",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "address", "name": "", "type": "address" }
-    ],
-    "name": "allowances",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "spender", "type": "address" },
-      { "internalType": "uint256", "name": "value", "type": "uint256" }
-    ],
-    "name": "approve",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "name": "balanceOf",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" }
-    ],
-    "name": "best",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" }
-    ],
-    "name": "config",
-    "outputs": [
-      { "internalType": "GlobalPacked", "name": "_global", "type": "uint256" },
-      { "internalType": "LocalPacked", "name": "_local", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" }
-    ],
-    "name": "configInfo",
+    "name": "DOMAIN_SEPARATOR",
     "outputs": [
       {
-        "components": [
-          { "internalType": "address", "name": "monitor", "type": "address" },
-          { "internalType": "bool", "name": "useOracle", "type": "bool" },
-          { "internalType": "bool", "name": "notify", "type": "bool" },
-          { "internalType": "uint256", "name": "gasprice", "type": "uint256" },
-          { "internalType": "uint256", "name": "gasmax", "type": "uint256" },
-          { "internalType": "bool", "name": "dead", "type": "bool" }
-        ],
-        "internalType": "struct GlobalUnpacked",
-        "name": "global",
-        "type": "tuple"
-      },
-      {
-        "components": [
-          { "internalType": "bool", "name": "active", "type": "bool" },
-          { "internalType": "uint256", "name": "fee", "type": "uint256" },
-          { "internalType": "uint256", "name": "density", "type": "uint256" },
-          {
-            "internalType": "uint256",
-            "name": "offer_gasbase",
-            "type": "uint256"
-          },
-          { "internalType": "bool", "name": "lock", "type": "bool" },
-          { "internalType": "uint256", "name": "best", "type": "uint256" },
-          { "internalType": "uint256", "name": "last", "type": "uint256" }
-        ],
-        "internalType": "struct LocalUnpacked",
-        "name": "local",
-        "type": "tuple"
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
       }
     ],
     "stateMutability": "view",
@@ -653,10 +681,799 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "outbound_tkn",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "inbound_tkn",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "spender",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      }
     ],
-    "name": "deactivate",
+    "name": "approve",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tickSpacing",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct OLKey",
+        "name": "olKey",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "offerId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "Tick",
+            "name": "tick",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "gasreq",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "takerWants",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct MgvLib.CleanTarget[]",
+        "name": "targets",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "address",
+        "name": "taker",
+        "type": "address"
+      }
+    ],
+    "name": "cleanByImpersonation",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "successes",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "bounty",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "outbound_tkn",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "inbound_tkn",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "tickSpacing",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct OLKey",
+            "name": "olKey",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint256",
+            "name": "offerId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "Offer",
+            "name": "offer",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "takerWants",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "takerGives",
+            "type": "uint256"
+          },
+          {
+            "internalType": "OfferDetail",
+            "name": "offerDetail",
+            "type": "uint256"
+          },
+          {
+            "internalType": "Global",
+            "name": "global",
+            "type": "uint256"
+          },
+          {
+            "internalType": "Local",
+            "name": "local",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct MgvLib.SingleOrder",
+        "name": "sor",
+        "type": "tuple"
+      },
+      {
+        "internalType": "address",
+        "name": "taker",
+        "type": "address"
+      }
+    ],
+    "name": "flashloan",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "gasused",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "makerData",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "maker",
+        "type": "address"
+      }
+    ],
+    "name": "fund",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "fund",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "governance",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tickSpacing",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct OLKey",
+        "name": "olKey",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint256",
+        "name": "offerId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "Tick",
+        "name": "tick",
+        "type": "int256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gasreq",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "takerWants",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "taker",
+        "type": "address"
+      }
+    ],
+    "name": "internalCleanByImpersonation",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "bounty",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tickSpacing",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct OLKey",
+        "name": "olKey",
+        "type": "tuple"
+      },
+      {
+        "internalType": "Tick",
+        "name": "maxTick",
+        "type": "int256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fillVolume",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "fillWants",
+        "type": "bool"
+      }
+    ],
+    "name": "marketOrderByTick",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "takerGot",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "takerGave",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "bounty",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "feePaid",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tickSpacing",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct OLKey",
+        "name": "olKey",
+        "type": "tuple"
+      },
+      {
+        "internalType": "Tick",
+        "name": "maxTick",
+        "type": "int256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fillVolume",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "fillWants",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxGasreqForFailingOffers",
+        "type": "uint256"
+      }
+    ],
+    "name": "marketOrderByTickCustom",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "takerGot",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "takerGave",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "bounty",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "feePaid",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tickSpacing",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct OLKey",
+        "name": "olKey",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint256",
+        "name": "takerWants",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "takerGives",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "fillWants",
+        "type": "bool"
+      }
+    ],
+    "name": "marketOrderByVolume",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "takerGot",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "takerGave",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "bounty",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "feePaid",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tickSpacing",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct OLKey",
+        "name": "olKey",
+        "type": "tuple"
+      },
+      {
+        "internalType": "Tick",
+        "name": "maxTick",
+        "type": "int256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fillVolume",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "fillWants",
+        "type": "bool"
+      },
+      {
+        "internalType": "address",
+        "name": "taker",
+        "type": "address"
+      }
+    ],
+    "name": "marketOrderForByTick",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "takerGot",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "takerGave",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "bounty",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "feePaid",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tickSpacing",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct OLKey",
+        "name": "olKey",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint256",
+        "name": "takerWants",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "takerGives",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "fillWants",
+        "type": "bool"
+      },
+      {
+        "internalType": "address",
+        "name": "taker",
+        "type": "address"
+      }
+    ],
+    "name": "marketOrderForByVolume",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "takerGot",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "takerGave",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "bounty",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "feePaid",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tickSpacing",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct OLKey",
+        "name": "olKey",
+        "type": "tuple"
+      },
+      {
+        "internalType": "Tick",
+        "name": "tick",
+        "type": "int256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gives",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gasreq",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gasprice",
+        "type": "uint256"
+      }
+    ],
+    "name": "newOfferByTick",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "offerId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tickSpacing",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct OLKey",
+        "name": "olKey",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint256",
+        "name": "wants",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gives",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gasreq",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gasprice",
+        "type": "uint256"
+      }
+    ],
+    "name": "newOfferByVolume",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "offerId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "outbound_tkn",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "inbound_tkn",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "spender",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint8",
+        "name": "v",
+        "type": "uint8"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "r",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "s",
+        "type": "bytes32"
+      }
+    ],
+    "name": "permit",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -675,405 +1492,169 @@
             "name": "inbound_tkn",
             "type": "address"
           },
-          { "internalType": "uint256", "name": "offerId", "type": "uint256" },
-          { "internalType": "OfferPacked", "name": "offer", "type": "uint256" },
-          { "internalType": "uint256", "name": "wants", "type": "uint256" },
-          { "internalType": "uint256", "name": "gives", "type": "uint256" },
-          {
-            "internalType": "OfferDetailPacked",
-            "name": "offerDetail",
-            "type": "uint256"
-          },
-          {
-            "internalType": "GlobalPacked",
-            "name": "global",
-            "type": "uint256"
-          },
-          { "internalType": "LocalPacked", "name": "local", "type": "uint256" }
-        ],
-        "internalType": "struct MgvLib.SingleOrder",
-        "name": "sor",
-        "type": "tuple"
-      },
-      { "internalType": "address", "name": "taker", "type": "address" }
-    ],
-    "name": "flashloan",
-    "outputs": [
-      { "internalType": "uint256", "name": "gasused", "type": "uint256" },
-      { "internalType": "bytes32", "name": "makerData", "type": "bytes32" }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "maker", "type": "address" }
-    ],
-    "name": "fund",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "fund",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "governance",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "OfferPacked", "name": "offer", "type": "uint256" }
-    ],
-    "name": "isLive",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "stateMutability": "pure",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "kill",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" }
-    ],
-    "name": "locked",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" },
-      { "internalType": "uint256", "name": "takerWants", "type": "uint256" },
-      { "internalType": "uint256", "name": "takerGives", "type": "uint256" },
-      { "internalType": "bool", "name": "fillWants", "type": "bool" }
-    ],
-    "name": "marketOrder",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" },
-      { "internalType": "uint256", "name": "takerWants", "type": "uint256" },
-      { "internalType": "uint256", "name": "takerGives", "type": "uint256" },
-      { "internalType": "bool", "name": "fillWants", "type": "bool" },
-      { "internalType": "address", "name": "taker", "type": "address" }
-    ],
-    "name": "marketOrderFor",
-    "outputs": [
-      { "internalType": "uint256", "name": "takerGot", "type": "uint256" },
-      { "internalType": "uint256", "name": "takerGave", "type": "uint256" },
-      { "internalType": "uint256", "name": "bounty", "type": "uint256" },
-      { "internalType": "uint256", "name": "feePaid", "type": "uint256" }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" },
-      { "internalType": "uint256", "name": "wants", "type": "uint256" },
-      { "internalType": "uint256", "name": "gives", "type": "uint256" },
-      { "internalType": "uint256", "name": "gasreq", "type": "uint256" },
-      { "internalType": "uint256", "name": "gasprice", "type": "uint256" },
-      { "internalType": "uint256", "name": "pivotId", "type": "uint256" }
-    ],
-    "name": "newOffer",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "name": "nonces",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "name": "offerDetails",
-    "outputs": [
-      { "internalType": "OfferDetailPacked", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" },
-      { "internalType": "uint256", "name": "offerId", "type": "uint256" }
-    ],
-    "name": "offerInfo",
-    "outputs": [
-      {
-        "components": [
-          { "internalType": "uint256", "name": "prev", "type": "uint256" },
-          { "internalType": "uint256", "name": "next", "type": "uint256" },
-          { "internalType": "uint256", "name": "wants", "type": "uint256" },
-          { "internalType": "uint256", "name": "gives", "type": "uint256" }
-        ],
-        "internalType": "struct OfferUnpacked",
-        "name": "offer",
-        "type": "tuple"
-      },
-      {
-        "components": [
-          { "internalType": "address", "name": "maker", "type": "address" },
-          { "internalType": "uint256", "name": "gasreq", "type": "uint256" },
           {
             "internalType": "uint256",
-            "name": "offer_gasbase",
+            "name": "tickSpacing",
             "type": "uint256"
-          },
-          { "internalType": "uint256", "name": "gasprice", "type": "uint256" }
+          }
         ],
-        "internalType": "struct OfferDetailUnpacked",
-        "name": "offerDetail",
+        "internalType": "struct OLKey",
+        "name": "olKey",
         "type": "tuple"
+      },
+      {
+        "internalType": "uint256",
+        "name": "offerId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "deprovision",
+        "type": "bool"
       }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "name": "offers",
-    "outputs": [
-      { "internalType": "OfferPacked", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "owner", "type": "address" },
-      { "internalType": "address", "name": "spender", "type": "address" },
-      { "internalType": "uint256", "name": "value", "type": "uint256" },
-      { "internalType": "uint256", "name": "deadline", "type": "uint256" },
-      { "internalType": "uint8", "name": "v", "type": "uint8" },
-      { "internalType": "bytes32", "name": "r", "type": "bytes32" },
-      { "internalType": "bytes32", "name": "s", "type": "bytes32" }
-    ],
-    "name": "permit",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" },
-      { "internalType": "uint256", "name": "offerId", "type": "uint256" },
-      { "internalType": "bool", "name": "deprovision", "type": "bool" }
     ],
     "name": "retractOffer",
     "outputs": [
-      { "internalType": "uint256", "name": "provision", "type": "uint256" }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" },
-      { "internalType": "uint256", "name": "density", "type": "uint256" }
-    ],
-    "name": "setDensity",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" },
-      { "internalType": "uint256", "name": "fee", "type": "uint256" }
-    ],
-    "name": "setFee",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" },
-      { "internalType": "uint256", "name": "offer_gasbase", "type": "uint256" }
-    ],
-    "name": "setGasbase",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint256", "name": "gasmax", "type": "uint256" }
-    ],
-    "name": "setGasmax",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint256", "name": "gasprice", "type": "uint256" }
-    ],
-    "name": "setGasprice",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
       {
-        "internalType": "address",
-        "name": "governanceAddress",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "provision",
+        "type": "uint256"
       }
     ],
-    "name": "setGovernance",
-    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "monitor", "type": "address" }
-    ],
-    "name": "setMonitor",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "bool", "name": "notify", "type": "bool" }],
-    "name": "setNotify",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "bool", "name": "useOracle", "type": "bool" }],
-    "name": "setUseOracle",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" },
       {
-        "internalType": "uint256[4][]",
-        "name": "targets",
-        "type": "uint256[4][]"
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tickSpacing",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct OLKey",
+        "name": "olKey",
+        "type": "tuple"
       },
-      { "internalType": "bool", "name": "fillWants", "type": "bool" }
-    ],
-    "name": "snipes",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" },
       {
-        "internalType": "uint256[4][]",
-        "name": "targets",
-        "type": "uint256[4][]"
+        "internalType": "Tick",
+        "name": "tick",
+        "type": "int256"
       },
-      { "internalType": "bool", "name": "fillWants", "type": "bool" },
-      { "internalType": "address", "name": "taker", "type": "address" }
+      {
+        "internalType": "uint256",
+        "name": "gives",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gasreq",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gasprice",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "offerId",
+        "type": "uint256"
+      }
     ],
-    "name": "snipesFor",
-    "outputs": [
-      { "internalType": "uint256", "name": "successes", "type": "uint256" },
-      { "internalType": "uint256", "name": "takerGot", "type": "uint256" },
-      { "internalType": "uint256", "name": "takerGave", "type": "uint256" },
-      { "internalType": "uint256", "name": "bounty", "type": "uint256" },
-      { "internalType": "uint256", "name": "feePaid", "type": "uint256" }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "outbound_tkn", "type": "address" },
-      { "internalType": "address", "name": "inbound_tkn", "type": "address" },
-      { "internalType": "uint256", "name": "wants", "type": "uint256" },
-      { "internalType": "uint256", "name": "gives", "type": "uint256" },
-      { "internalType": "uint256", "name": "gasreq", "type": "uint256" },
-      { "internalType": "uint256", "name": "gasprice", "type": "uint256" },
-      { "internalType": "uint256", "name": "pivotId", "type": "uint256" },
-      { "internalType": "uint256", "name": "offerId", "type": "uint256" }
-    ],
-    "name": "updateOffer",
+    "name": "updateOfferByTick",
     "outputs": [],
     "stateMutability": "payable",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "outbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "inbound_tkn",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tickSpacing",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct OLKey",
+        "name": "olKey",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint256",
+        "name": "wants",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gives",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gasreq",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gasprice",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "offerId",
+        "type": "uint256"
+      }
     ],
-    "name": "withdraw",
-    "outputs": [{ "internalType": "bool", "name": "noRevert", "type": "bool" }],
-    "stateMutability": "nonpayable",
+    "name": "updateOfferByVolume",
+    "outputs": [],
+    "stateMutability": "payable",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "tokenAddress", "type": "address" },
-      { "internalType": "uint256", "name": "value", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
     ],
-    "name": "withdrawERC20",
-    "outputs": [],
+    "name": "withdraw",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "noRevert",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
-  { "stateMutability": "payable", "type": "receive" }
+  {
+    "stateMutability": "payable",
+    "type": "receive"
+  }
 ]
