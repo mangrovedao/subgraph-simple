@@ -159,6 +159,7 @@ type Kandel @entity {
   offers: [Offer!]! @derivedFrom(field: "kandel")
   depositWithdraws: [KandelDepositWithdraw!]! @derivedFrom(field: "kandel")
   parameters: [KandelParameters!]! @derivedFrom(field: "kandel")
+  KandelPopulateRetract: [KandelPopulateRetract!]! @derivedFrom(field: "kandel")
 }
 
 type KandelPopulateRetract @entity {
