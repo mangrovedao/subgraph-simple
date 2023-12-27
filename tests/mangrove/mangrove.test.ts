@@ -13,12 +13,16 @@ import { createNewOffer, handleCleanComplete, handleCleanStart, handleOfferFail,
 import { createCleanCompleteEvent, createCleanOrderStartEvent as createCleanStartEvent, createOfferFailEvent, createOfferFailWithPosthookDataEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferSuccessWithPosthookDataEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent, createSetGasbaseEvent } from "./mangrove-utils";
 import { createMangroveOrderStartEvent } from "./mangrove-order-utils";
 import { handleMangroveOrderStart } from "../../src/mangrove-order";
+import { prepareERC20 } from "./helpers";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
 let token0 = Address.fromString("0x0000000000000000000000000000000000000000");
 let token1 = Address.fromString("0x0000000000000000000000000000000000000001");
+prepareERC20(token0, "token0", "tkn0", 18);
+prepareERC20(token1, "token1", "tkn1", 6);
+
 let maker = Address.fromString("0x0000000000000000000000000000000000000002")
 let taker = Address.fromString("0x0000000000000000000000000000000000000003")
 let owner = Address.fromString("0x0000000000000000000000000000000000000004")
@@ -34,11 +38,23 @@ describe("Describe entity assertions", () => {
     setActiveEvent = createSetActiveEvent( olKeyHash10, token1, token0, BigInt.fromI32(1), true);
     handleSetActive(setActiveEvent);
     assert.entityCount("Market", 2);
-  })
+  });
 
   afterEach(() => {
     clearStore()
-  })
+  });
+
+  test("Tokens are created", () => {   
+    assert.fieldEquals('Token', token0.toHexString(), 'address', token0.toHexString());
+    assert.fieldEquals('Token', token0.toHexString(), 'name', "token0");
+    assert.fieldEquals('Token', token0.toHexString(), 'symbol', 'tkn0');
+    assert.fieldEquals('Token', token0.toHexString(), 'decimals', '18');
+
+    assert.fieldEquals('Token', token1.toHexString(), 'address', token1.toHexString());
+    assert.fieldEquals('Token', token1.toHexString(), 'name', "token1");
+    assert.fieldEquals('Token', token1.toHexString(), 'symbol', 'tkn1');
+    assert.fieldEquals('Token', token1.toHexString(), 'decimals', '6');
+  });
 
   test("Offer, handleOfferFail", () => {
     const orderStart =  createOrderStartEvent(

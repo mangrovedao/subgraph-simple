@@ -5,9 +5,13 @@ import { handleNewAaveKandel, handleNewKandel } from "../../src/kandel-seeder";
 import { createNewAaveKandelEvent } from "./kandel-seeder-utils";
 import { createSetActiveEvent } from "../mangrove/mangrove-utils";
 import { handleSetActive } from "../../src/mangrove";
+import { prepareERC20 } from "../mangrove/helpers";
 
 const token0 = Address.fromString("0x0000000000000000000000000000000000000000");
 const token1 = Address.fromString("0x0000000000000000000000000000000000000001");
+prepareERC20(token0, "token0", "tkn0", 18);
+prepareERC20(token1, "token1", "tkn1", 6);
+
 const owner = Address.fromString("0x0000000000000000000000000000000000000002");
 const kandelAddress = Address.fromString("0x0000000000000000000000000000000000000004");
 const reservedId = Address.fromString("0x0000000000000000000000000000000000000005");

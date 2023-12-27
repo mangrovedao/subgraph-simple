@@ -6,6 +6,14 @@ type Account @entity {
   volumes: [AccountVolumeByPair!]! @derivedFrom(field: "account")
 }
 
+type Token @entity {
+  id: Bytes!
+  address: Bytes!
+  name: String!
+  symbol: String!
+  decimals: BigInt!
+}
+
 type AccountVolumeByPair @entity {
   id: String!
 

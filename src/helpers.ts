@@ -1,5 +1,5 @@
 import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
-import { Account, AccountVolumeByPair, KandelParameters, LimitOrder, Offer } from "../generated/schema";
+import { Account, AccountVolumeByPair, KandelParameters, LimitOrder, Offer, Token } from "../generated/schema";
 
 export const getKandelParamsId = (txHash: Bytes, kandel:Address): string => {
   return `${txHash}-${kandel.toHex()}`;
@@ -220,4 +220,74 @@ export const createDummyOffer = (
     BigInt.fromI32(0),
     BigInt.fromI32(0)
   )
+};
+
+/* minimal ERC20 interface */
+export class ERC20 extends ethereum.SmartContract {
+  static bind(address: Address): ERC20 {
+    return new ERC20("ERC20", address);
+  }
+
+  name(): string {
+    let result = super.call("name", "name():(string)", []);
+
+    return result[0].toString();
+  }
+
+  try_name(): ethereum.CallResult<string> {
+    let result = super.tryCall("name", "name():(string)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toString());
+  }
+
+  symbol(): string {
+    let result = super.call("symbol", "symbol():(string)", []);
+
+    return result[0].toString();
+  }
+
+  try_symbol(): ethereum.CallResult<string> {
+    let result = super.tryCall("symbol", "symbol():(string)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toString());
+  }
+
+  decimals(): i32 {
+    let result = super.call("decimals", "decimals():(uint8)", []);
+
+    return result[0].toI32();
+  }
+
+  try_decimals(): ethereum.CallResult<i32> {
+    let result = super.tryCall("decimals", "decimals():(uint8)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toI32());
+  }
+}
+
+export const getOrCreateToken = (address: Address): Token => {
+  let token = Token.load(address);
+
+  if (!token) {
+    const erc20 = ERC20.bind(address);
+
+    token = new Token(address);
+    token.address = address;
+    token.name = erc20.name();
+    token.symbol = erc20.symbol();
+    token.decimals = BigInt.fromI32(erc20.decimals());
+
+    token.save();
+  }
+
+  return token;
 };

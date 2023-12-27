@@ -29,7 +29,7 @@ import {
   SetUseOracle
 } from "../generated/Mangrove/Mangrove";
 import { CleanOrder, Kandel, LimitOrder, Market, Offer, Order } from "../generated/schema";
-import { getEventUniqueId, getOfferId, getOrCreateAccount, getOrCreateAccountVolumeByPair, increaseAccountVolume } from "./helpers";
+import { getEventUniqueId, getOfferId, getOrCreateAccount, getOrCreateAccountVolumeByPair, getOrCreateToken, increaseAccountVolume } from "./helpers";
 import {  addCleanOrderToStack, addOrderToStack, getLatestCleanOrderFromStack, getLatestLimitOrderFromStack, getLatestOrderFromStack, removeLatestCleanOrderFromStack, removeLatestOrderFromStack} from "./stack";
 import { limitOrderSetIsOpen } from "./mangrove-order";
 
@@ -291,6 +291,10 @@ export function handleSetActive(event: SetActive): void {
 
   if (!market) {
     market = new Market(marketId);
+    
+    getOrCreateToken(event.params.outbound_tkn);
+    getOrCreateToken(event.params.inbound_tkn);
+
     market.outbound_tkn = event.params.outbound_tkn;
     market.inbound_tkn = event.params.inbound_tkn;
     market.tickSpacing = event.params.tickSpacing;

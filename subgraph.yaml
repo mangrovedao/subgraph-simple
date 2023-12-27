@@ -119,7 +119,7 @@ dataSources:
           handler: handleApproval
         - event: CleanComplete()
           handler: handleCleanComplete
-        - event: CleanStart(indexed bytes32,indexed address,uint256)  
+        - event: CleanStart(indexed bytes32,indexed address,uint256)
           handler: handleCleanStart
         - event: Credit(indexed address,uint256)
           handler: handleCredit
@@ -129,15 +129,18 @@ dataSources:
           handler: handleKill
         - event: NewMgv()
           handler: handleNewMgv
-        - event: OfferFail(indexed bytes32,indexed address,indexed uint256,uint256,uint256,uint256,bytes32)
+        - event: OfferFail(indexed bytes32,indexed address,indexed
+            uint256,uint256,uint256,uint256,bytes32)
           handler: handleOfferFail
-        - event: OfferFailWithPosthookData(indexed bytes32,indexed address,indexed uint256,uint256,uint256,uint256,bytes32,bytes32)
+        - event: OfferFailWithPosthookData(indexed bytes32,indexed address,indexed
+            uint256,uint256,uint256,uint256,bytes32,bytes32)
           handler: handleOfferFailWithPosthookData
         - event: OfferRetract(indexed bytes32,indexed address,uint256,bool)
           handler: handleOfferRetract
         - event: OfferSuccess(indexed bytes32,indexed address,indexed uint256,uint256,uint256)
           handler: handleOfferSuccess
-        - event: OfferSuccessWithPosthookData(indexed bytes32,indexed address,indexed uint256,uint256,uint256,bytes32)
+        - event: OfferSuccessWithPosthookData(indexed bytes32,indexed address,indexed
+            uint256,uint256,uint256,bytes32)
           handler: handleOfferSuccessWithPosthookData
         - event: OfferWrite(indexed bytes32,indexed address,int256,uint256,uint256,uint256,uint256)
           handler: handleOfferWrite
@@ -236,7 +239,8 @@ dataSources:
       eventHandlers:
         - event: LogIncident(indexed bytes32,indexed uint256,bytes32,bytes32)
           handler: handleLogIncident
-        - event: MangroveOrderStart(indexed bytes32,indexed address,bool,int256,uint256,bool,bool,uint256)
+        - event: MangroveOrderStart(indexed bytes32,indexed
+            address,bool,int256,uint256,bool,bool,uint256)
           handler: handleMangroveOrderStart
         - event: MangroveOrderComplete()
           handler: handleMangroveOrderComplete

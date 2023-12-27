@@ -15,12 +15,16 @@ import { createDummyOffer, createOffer, getEventUniqueId, getOfferId } from "../
 import { Stack, LimitOrder, Order } from "../../generated/schema";
 import { createOfferRetractEvent } from "./mangrove-utils";
 import { getLatestLimitOrderFromStack } from "../../src/stack";
+import { prepareERC20 } from "./helpers";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
 const token0 = Address.fromString("0x0000000000000000000000000000000000000000");
 const token1 = Address.fromString("0x0000000000000000000000000000000000000001");
+prepareERC20(token0, "token0", "tkn0", 18);
+prepareERC20(token1, "token1", "tkn1", 6);
+
 const maker = Address.fromString("0x0000000000000000000000000000000000000002")
 const taker = Address.fromString("0x0000000000000000000000000000000000000003")
 const owner = Address.fromString("0x0000000000000000000000000000000000000004")
