@@ -13,12 +13,16 @@ import { getOfferIdsForKandel, handleCredit, handleDebit, handlePopulateEnd, han
 import { handleSetActive } from "../../src/mangrove";
 import { createSetActiveEvent } from "../mangrove/mangrove-utils";
 import { createCreditEvent, createDebitEvent, createPopulateEndEvent, createPopulateStartEvent, createRetractEndEvent, createRetractStartEvent, createSetAdminEvent, createSetBaseQuoteTickOffsetEvent, createSetGaspriceEvent, createSetGasreqEvent, createSetIndexMappingEvent, createSetLengthEvent, createSetReserveIdEvent, createSetRouterEvent, createSetStepSizeEvent } from "./kandel-utils";
+import { prepareERC20 } from "../mangrove/helpers";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
 const token0 = Address.fromString("0x0000000000000000000000000000000000000000");
 const token1 = Address.fromString("0x0000000000000000000000000000000000000001");
+prepareERC20(token0, "token0", "tkn0", 18);
+prepareERC20(token1, "token1", "tkn1", 6);
+
 const owner = Address.fromString("0x0000000000000000000000000000000000000002")
 const kandelAddress = Address.fromString("0x0000000000000000000000000000000000000004")
 const newOwner = Address.fromString("0x0000000000000000000000000000000000000005")
