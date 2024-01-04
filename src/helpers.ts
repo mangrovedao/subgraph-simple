@@ -1,5 +1,5 @@
 import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
-import { Account, AccountVolumeByPair, KandelParameters, LimitOrder, Offer, Token } from "../generated/schema";
+import { Account, AccountVolumeByPair, KandelParameters, MangroveOrder, Offer, Token } from "../generated/schema";
 
 export const getKandelParamsId = (txHash: Bytes, kandel:Address): string => {
   return `${txHash}-${kandel.toHex()}`;
@@ -18,6 +18,7 @@ export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnIn
     account.address = address;
     account.creationDate = currentDate;
     account.latestInteractionDate = currentDate;
+    account.proxyDeployed = false;
     account.save();
   }
 
@@ -114,27 +115,25 @@ export const getEventUniqueId = (event: ethereum.Event): string => {
   return `${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
 };
 
-export const createLimitOrder = (
+export const createMangroveOrder = (
   id: string,
   realTaker: Address,
-  fillOrKill: boolean,
-  restingOrder: boolean,
+  orderType: number,
   creationDate: BigInt,
   latestUpdateDate: BigInt,
   isOpen: boolean,
   offer: string
-): LimitOrder => {
-  let limitOrder = new LimitOrder(id);
-  limitOrder.realTaker = realTaker;
-  limitOrder.fillOrKill = fillOrKill;
-  limitOrder.restingOrder = restingOrder;
-  limitOrder.creationDate = creationDate;
-  limitOrder.latestUpdateDate = latestUpdateDate;
-  limitOrder.isOpen = isOpen;
-  limitOrder.offer = offer;
-  limitOrder.order = "";
-  limitOrder.save();
-  return limitOrder;
+): MangroveOrder => {
+  let mangroveOrder = new MangroveOrder(id);
+  mangroveOrder.realTaker = realTaker;
+  mangroveOrder.orderType = i32(orderType);
+  mangroveOrder.creationDate = creationDate;
+  mangroveOrder.latestUpdateDate = latestUpdateDate;
+  mangroveOrder.isOpen = isOpen;
+  mangroveOrder.offer = offer;
+  mangroveOrder.order = "";
+  mangroveOrder.save();
+  return mangroveOrder;
 }
 
 export const createOffer = (

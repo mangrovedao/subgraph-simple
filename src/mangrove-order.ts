@@ -3,31 +3,27 @@ import {
   LogIncident,
   MangroveOrderComplete,
   MangroveOrderStart,
-  Mgv,
   NewOwnedOffer,
   SetAdmin,
-  SetExpiry,
-  SetRouter
+  SetReneging,
 } from "../generated/MangroveOrder/MangroveOrder";
-import { LimitOrder, Offer } from "../generated/schema";
+import { MangroveOrder, Offer } from "../generated/schema";
 import { getEventUniqueId, getOfferId, getOrCreateAccount } from "./helpers";
-import { addLimitOrderToStack, getLatestLimitOrderFromStack, removeLatestLimitOrderFromStack } from "./stack";
+import { addMangroveOrderToStack, getLatestMangroveOrderFromStack, removeLatestMangroveOrderFromStack } from "./stack";
 
 export function handleLogIncident(event: LogIncident): void {}
 
-export function handleMgv(event: Mgv): void {}
-
-export const limitOrderSetIsOpen = (limitOrderId: string | null, value: boolean): void => {
-  if(limitOrderId === null){
+export const mangroveOrderSetIsOpen = (mangroveOrderId: string | null, value: boolean): void => {
+  if(mangroveOrderId === null){
     return;
   }
-  const limitOrder = LimitOrder.load(limitOrderId);
-  if (!limitOrder) {
+  const mangroveOrder = MangroveOrder.load(mangroveOrderId);
+  if (!mangroveOrder) {
     return;
   }
-  limitOrder.isOpen = value;
+  mangroveOrder.isOpen = value;
 
-  limitOrder.save();
+  mangroveOrder.save();
 }
 
 export function handleNewOwnedOffer(event: NewOwnedOffer): void {
@@ -43,53 +39,52 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
 
   const owner = getOrCreateAccount(event.params.owner, event.block.timestamp, true);
   offer.owner = owner.id;
-  const limitOrder = getLatestLimitOrderFromStack();
-  if( limitOrder !== null){
-    limitOrder.offer = offer.id;
-    limitOrder.isOpen = true;
-    offer.limitOrder = limitOrder.id;
-    limitOrder.save();
+  const mangroveOrder = getLatestMangroveOrderFromStack();
+  if( mangroveOrder !== null){
+    mangroveOrder.offer = offer.id;
+    mangroveOrder.isOpen = true;
+    offer.mangroveOrder = mangroveOrder.id;
+    mangroveOrder.save();
   } else {
-    throw new Error(`Missing limit order for offer id:${offer.offerId} - market: ${offer.market} - tx: ${event.transaction.hash.toHex()}`);
+    throw new Error(`Missing mangrove order for offer id:${offer.offerId} - market: ${offer.market} - tx: ${event.transaction.hash.toHex()}`);
   }
   offer.save();
-  
 }
 
 export function handleMangroveOrderStart(event: MangroveOrderStart): void {
-  let limitOrder = new LimitOrder(getEventUniqueId(event));
-  
+  let mangroveOrder = new MangroveOrder(getEventUniqueId(event));
+  mangroveOrder.realTaker = getOrCreateAccount(event.params.taker, event.block.timestamp, true).id;
+  mangroveOrder.orderType = i32(event.params.orderType);
+  mangroveOrder.creationDate = event.block.timestamp;
+  mangroveOrder.latestUpdateDate = event.block.timestamp;
+  mangroveOrder.isOpen = false;
+  mangroveOrder.order = "";
 
-  limitOrder.realTaker = getOrCreateAccount(event.params.taker, event.block.timestamp, true).id;
-  limitOrder.fillOrKill = event.params.fillOrKill;
-  limitOrder.restingOrder = event.params.restingOrder;
-  limitOrder.creationDate = event.block.timestamp;
-  limitOrder.latestUpdateDate = event.block.timestamp;
-  limitOrder.isOpen = false;
-  limitOrder.order = "";
-  limitOrder.save();
-  addLimitOrderToStack(limitOrder);
+  mangroveOrder.inboundRoute = event.params.takerWantsLogic;
+  mangroveOrder.outboundRoute = event.params.takerGivesLogic;
+
+  mangroveOrder.save();
+  addMangroveOrderToStack(mangroveOrder);
 }
 
 export function handleMangroveOrderComplete(event: MangroveOrderComplete): void {
-  removeLatestLimitOrderFromStack();
+  removeLatestMangroveOrderFromStack();
 }
 
 export function handleSetAdmin(event: SetAdmin): void {}
 
-export function handleSetExpiry(event: SetExpiry): void {
+export function handleSetReneging(event: SetReneging): void {
   const offerId = getOfferId(
     event.params.olKeyHash,
     event.params.offerId,
   );
-  const limitOrder = getLatestLimitOrderFromStack();
-  if (!limitOrder) {
-    log.debug("Missing limit order for offerId {}", [offerId]);
+  const mangroveOrder = getLatestMangroveOrderFromStack();
+  if (!mangroveOrder) {
+    log.debug("Missing mangrove order for offerId {}", [offerId]);
     return;
   }
-  limitOrder.expiryDate = event.params.date;
-  limitOrder.latestUpdateDate= event.block.timestamp;
-  limitOrder.save();
+  mangroveOrder.expiryDate = event.params.date;
+  mangroveOrder.maxVolume = event.params.volume;
+  mangroveOrder.latestUpdateDate= event.block.timestamp;
+  mangroveOrder.save();
 }
-
-export function handleSetRouter(event: SetRouter): void {}

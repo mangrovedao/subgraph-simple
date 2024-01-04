@@ -1,5 +1,5 @@
 import { Entity, store } from "@graphprotocol/graph-ts";
-import { CleanOrder, LimitOrder, Order, Stack } from "../generated/schema";
+import { CleanOrder, MangroveOrder, Order, Stack } from "../generated/schema";
 
 const getStack = (type: string): Stack => {
     let stack = Stack.load(type);
@@ -30,9 +30,9 @@ export function getLatestOrderFromStack(): Order {
     return changetype<Order>(order);
 };
 
-export function getLatestLimitOrderFromStack(): LimitOrder | null {
-    const order = getLatestFromStack("LimitOrder", false);
-    return changetype<LimitOrder | null>(order);
+export function getLatestMangroveOrderFromStack(): MangroveOrder | null {
+    const order = getLatestFromStack("MangroveOrder", false);
+    return changetype<MangroveOrder | null>(order);
 }
 
 export function getLatestCleanOrderFromStack(): CleanOrder | null {
@@ -45,8 +45,8 @@ function addToStack(type: string, entity: Entity ): void {
     if(type == "Order") {
         const order = changetype<Order>(entity);
         orderStack.ids = `${orderStack.ids}|${order.id}`;    
-    } else if(type == "LimitOrder") {
-        const order = changetype<LimitOrder>(entity);
+    } else if(type == "MangroveOrder") {
+        const order = changetype<MangroveOrder>(entity);
         orderStack.ids = `${orderStack.ids}|${order.id}`;    
     } else if(type == "CleanOrder") {
         const order = changetype<CleanOrder>(entity);
@@ -59,8 +59,8 @@ export function addOrderToStack(order: Order): void {
     addToStack("Order", order);
 }
 
-export function addLimitOrderToStack(order: LimitOrder): void {
-    addToStack("LimitOrder", order);
+export function addMangroveOrderToStack(order: MangroveOrder): void {
+    addToStack("MangroveOrder", order);
 }
 
 export function addCleanOrderToStack(order: CleanOrder): void {
@@ -84,8 +84,8 @@ export function removeLatestOrderFromStack(): void {
     removeLatestFromStack("Order");
 }
 
-export function removeLatestLimitOrderFromStack(): void {
-    removeLatestFromStack("LimitOrder");
+export function removeLatestMangroveOrderFromStack(): void {
+    removeLatestFromStack("MangroveOrder");
 }
 
 export function removeLatestCleanOrderFromStack(): void {
