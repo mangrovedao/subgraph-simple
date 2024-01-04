@@ -9,12 +9,12 @@ import {
 import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive } from "../../src/mangrove";
 import { createOfferFailEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils";
-import { createNewOwnedOfferEvent, createMangroveOrderStartEvent, createSetExpiryEvent, createMangroveOrderCompleteEvent } from "./mangrove-order-utils";
-import { handleNewOwnedOffer, handleMangroveOrderStart, handleSetExpiry, limitOrderSetIsOpen, handleMangroveOrderComplete } from "../../src/mangrove-order";
+import { createNewOwnedOfferEvent, createMangroveOrderStartEvent, createSetRenegingEvent, createMangroveOrderCompleteEvent } from "./mangrove-order-utils";
+import { handleNewOwnedOffer, handleMangroveOrderStart, handleSetReneging, mangroveOrderSetIsOpen, handleMangroveOrderComplete } from "../../src/mangrove-order";
 import { createDummyOffer, createOffer, getEventUniqueId, getOfferId } from "../../src/helpers";
-import { Stack, LimitOrder, Order } from "../../generated/schema";
+import { Stack, MangroveOrder, Order } from "../../generated/schema";
 import { createOfferRetractEvent } from "./mangrove-utils";
-import { getLatestLimitOrderFromStack } from "../../src/stack";
+import { getLatestMangroveOrderFromStack } from "../../src/stack";
 import { prepareERC20 } from "./helpers";
 
 // Tests structure (matchstick-as >=0.5.0)
@@ -44,27 +44,26 @@ describe("Describe entity assertions", () => {
     clearStore()
   });
 
-  test("LimitOrder, limitOrderSetIsOpen, id is null", () => {
-    limitOrderSetIsOpen(null, true); // should not throw
+  test("MangroveOrder, mangroveOrderSetIsOpen, id is null", () => {
+    mangroveOrderSetIsOpen(null, true); // should not throw
   })
 
-  test("LimitOrder, limitOrderSetIsOpen, id is not null, id does not exist", () => {
-    limitOrderSetIsOpen("limitOrder1", true); // should not throw
+  test("MangroveOrder, mangroveOrderSetIsOpen, id is not null, id does not exist", () => {
+    mangroveOrderSetIsOpen("MangroveOrder1", true); // should not throw
   })
 
-  test("LimitOrder, limitOrderSetIsOpen, id is not null, id exists", () => {
-    const limitOrder = new LimitOrder("limitOrder");
-    limitOrder.isOpen = false;
-    limitOrder.creationDate = BigInt.fromI32(0);
-    limitOrder.latestUpdateDate = BigInt.fromI32(0);
-    limitOrder.fillOrKill = false;
-    limitOrder.restingOrder = false;
-    limitOrder.order = "";
-    limitOrder.save();
+  test("MangroveOrder, mangroveOrderSetIsOpen, id is not null, id exists", () => {
+    const mangroveOrder = new MangroveOrder("mangroveOrder");
+    mangroveOrder.isOpen = false;
+    mangroveOrder.creationDate = BigInt.fromI32(0);
+    mangroveOrder.latestUpdateDate = BigInt.fromI32(0);
+    mangroveOrder.orderType = 0;
+    mangroveOrder.order = "";
+    mangroveOrder.save();
 
-    limitOrderSetIsOpen("limitOrder", true);
+    mangroveOrderSetIsOpen("mangroveOrder", true);
 
-    assert.fieldEquals('LimitOrder', "limitOrder", 'isOpen', 'true');
+    assert.fieldEquals('MangroveOrder', "mangroveOrder", 'isOpen', 'true');
   })
 
   test("Offer, handleNewOwnedOffer, offer exists", () => {
@@ -77,12 +76,13 @@ describe("Describe entity assertions", () => {
     const orderStartEvent = createMangroveOrderStartEvent(
       olKeyHash01,
       taker,
-      false,
       BigInt.fromI32(0),
       BigInt.fromI32(0),
-      false,
       false,
       id,
+      BigInt.fromI32(0),
+      Address.zero(),
+      Address.zero(),
     )
     handleMangroveOrderStart(orderStartEvent);
 
@@ -94,12 +94,12 @@ describe("Describe entity assertions", () => {
     handleNewOwnedOffer(newOwnerOffer);
 
     const offerId = getOfferId(olKeyHash01, id);
-    const limitOrderId = getEventUniqueId(orderStartEvent);
+    const mangroveOrderId = getEventUniqueId(orderStartEvent);
 
     assert.fieldEquals('Offer', offerId, 'owner', owner.toHex());
-    assert.fieldEquals('Offer', offerId, 'limitOrder', limitOrderId);
-    assert.fieldEquals('LimitOrder', limitOrderId, 'offer', offer.id);
-    assert.fieldEquals('LimitOrder', limitOrderId, 'isOpen', 'true');
+    assert.fieldEquals('Offer', offerId, 'mangroveOrder', mangroveOrderId);
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'offer', offer.id);
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'isOpen', 'true');
   });
 
   // test("Offer, handleNewOwnedOffer, limit order does exist", () => {
@@ -126,7 +126,7 @@ describe("Describe entity assertions", () => {
 
   //TODO: would like to test negative case, where the offer does not exist. And where limit order does not exists How?
 
-  test("LimitOrder, handleMangroveOrderStart, posting resting order", () => {
+  test("MangroveOrder, handleMangroveOrderStart, posting resting order", () => {
     let setActiveEvent = createSetActiveEvent(olKeyHash01, token0, token1, BigInt.fromI32(1), true);
     handleSetActive(setActiveEvent);
     assert.entityCount("Market", 1);
@@ -139,35 +139,36 @@ describe("Describe entity assertions", () => {
 
     const tick = BigInt.fromI32(1000);
     const fillVolume = BigInt.fromI32(2000);
-    const fillOrKill = false;
     const fillWants = false;
-    const restingOrder = true;
+    const orderType = BigInt.fromI32(0);
+    const takerGivesLogic = Address.zero();
+    const takerWantsLogic = Address.zero();
 
     const orderStartEvent = createMangroveOrderStartEvent(
       olKeyHash01,
       taker,
-      fillOrKill,
       tick,
       fillVolume,
       fillWants,
-      restingOrder,
       id,
+      orderType,
+      takerGivesLogic,
+      takerWantsLogic,
     );
     handleMangroveOrderStart(orderStartEvent);
 
-    const limitOrderId = getEventUniqueId(orderStartEvent);
+    const mangroveOrderId = getEventUniqueId(orderStartEvent);
 
-    assert.fieldEquals('LimitOrder', limitOrderId, 'isOpen', 'false');
-    assert.fieldEquals('LimitOrder', limitOrderId, 'realTaker', taker.toHex());
-    assert.fieldEquals('LimitOrder', limitOrderId, 'fillOrKill', 'false');
-    assert.fieldEquals('LimitOrder', limitOrderId, 'restingOrder', 'true');
-    assert.fieldEquals('LimitOrder', limitOrderId, 'creationDate', '1');
-    assert.fieldEquals('LimitOrder', limitOrderId, 'latestUpdateDate', '1');
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'isOpen', 'false');
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'realTaker', taker.toHex());
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'orderType', '0');
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'creationDate', '1');
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'latestUpdateDate', '1');
 
     assert.fieldEquals('Account', taker.toHex(), 'latestInteractionDate', orderStartEvent.block.timestamp.toI32().toString());
   });
 
-  test("LimitOrder, handleMangroveOrderComplete", () => {
+  test("MangroveOrder, handleMangroveOrderComplete", () => {
     let setActiveEvent = createSetActiveEvent(olKeyHash01, token0, token1, BigInt.fromI32(1), true);
     handleSetActive(setActiveEvent);
     assert.entityCount("Market", 1);
@@ -175,52 +176,55 @@ describe("Describe entity assertions", () => {
 
     const tick = BigInt.fromI32(1000);
     const fillVolume = BigInt.fromI32(2000);
-    const fillOrKill = false;
     const fillWants = false;
-    const restingOrder = true;
+    const orderType = BigInt.fromI32(0);
+    const takerGivesLogic = Address.zero();
+    const takerWantsLogic = Address.zero();
 
     const orderStartEvent = createMangroveOrderStartEvent(
       olKeyHash01,
       taker,
-      fillOrKill,
       tick,
       fillVolume,
       fillWants,
-      restingOrder,
       BigInt.fromI32(0),
+      orderType,
+      takerGivesLogic,
+      takerWantsLogic,
     );
     handleMangroveOrderStart(orderStartEvent);
 
-    const limitOrder = getLatestLimitOrderFromStack();
-    assert.assertTrue(limitOrder!.id == getEventUniqueId(orderStartEvent));
+    const mangroveOrder = getLatestMangroveOrderFromStack();
+    assert.assertTrue(mangroveOrder!.id == getEventUniqueId(orderStartEvent));
 
     const orderCompleteEvent = createMangroveOrderCompleteEvent()
     handleMangroveOrderComplete(orderCompleteEvent);
 
-    assert.assertNull(getLatestLimitOrderFromStack());
+    assert.assertNull(getLatestMangroveOrderFromStack());
   });
 
-  test("LimitOrder, handleSetExpiry, setting expiry date", () => {
+  test("MangroveOrder, handleSetExpiry, setting expiry date", () => {
     const mangroveOrderStartEvent = createMangroveOrderStartEvent(
       olKeyHash01,
       taker,
-      false,
       BigInt.fromI32(0),
       BigInt.fromI32(0),
-      false,
       false,
       BigInt.fromI32(1),
+      BigInt.fromI32(0),
+      Address.zero(),
+      Address.zero(),
     )
 
     handleMangroveOrderStart(mangroveOrderStartEvent);
 
-    const setExpiryEvent = createSetExpiryEvent(olKeyHash01, BigInt.fromI32(1), BigInt.fromI32(1000));
-    handleSetExpiry(setExpiryEvent);
+    const setExpiryEvent = createSetRenegingEvent(olKeyHash01, BigInt.fromI32(1), BigInt.fromI32(1000), BigInt.fromI32(0));
+    handleSetReneging(setExpiryEvent);
 
-    const limitOrderId = getEventUniqueId(mangroveOrderStartEvent);
-    assert.fieldEquals('LimitOrder', limitOrderId, 'expiryDate', '1000');
-    assert.fieldEquals('LimitOrder', limitOrderId, 'latestUpdateDate', '1');
+    const mangroveOrderId = getEventUniqueId(mangroveOrderStartEvent);
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'expiryDate', '1000');
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'latestUpdateDate', '1');
   })
 
-  //TODO: would like to test negative path, where the LimitOrder does not exist. How?
+  //TODO: would like to test negative path, where the MangroveOrder does not exist. How?
 });

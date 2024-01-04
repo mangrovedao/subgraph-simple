@@ -2,13 +2,11 @@ import { newMockEvent } from "matchstick-as"
 import { ethereum, Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
 import {
   LogIncident,
-  Mgv,
   NewOwnedOffer,
   MangroveOrderStart,
   SetAdmin,
-  SetExpiry,
-  SetRouter,
-  MangroveOrderComplete
+  MangroveOrderComplete,
+  SetReneging
 } from "../../generated/MangroveOrder/MangroveOrder"
 
 export function createLogIncidentEvent(
@@ -60,12 +58,13 @@ export function createMangroveOrderCompleteEvent(): MangroveOrderComplete {
 export function createMangroveOrderStartEvent(
   olKeyHash: Bytes,
   taker: Address,
-  fillOrKill: boolean,
   tick: BigInt,
   fillVolume: BigInt,
   fillWants: boolean,
-  resitingOrder: boolean,
   offerId: BigInt,
+  orderType: BigInt,
+  takerGivesLogic: Address,
+  takerWantsLogic: Address,
 ): MangroveOrderStart {
   let mangroveOrderStartEvent = changetype<MangroveOrderStart>(newMockEvent())
 
@@ -79,12 +78,6 @@ export function createMangroveOrderStartEvent(
   )
   mangroveOrderStartEvent.parameters.push(
     new ethereum.EventParam("taker", ethereum.Value.fromAddress(taker))
-  )
-  mangroveOrderStartEvent.parameters.push(
-    new ethereum.EventParam(
-      "fillOrKill",
-      ethereum.Value.fromBoolean(fillOrKill)
-    )
   )
   mangroveOrderStartEvent.parameters.push(
     new ethereum.EventParam("tick", ethereum.Value.fromUnsignedBigInt(tick))
@@ -103,31 +96,31 @@ export function createMangroveOrderStartEvent(
   )
   mangroveOrderStartEvent.parameters.push(
     new ethereum.EventParam(
-      "resitingOrder",
-      ethereum.Value.fromBoolean(resitingOrder)
+      "offerId",
+      ethereum.Value.fromUnsignedBigInt(offerId)
     )
   )
   mangroveOrderStartEvent.parameters.push(
     new ethereum.EventParam(
-      "offerId",
-      ethereum.Value.fromUnsignedBigInt(offerId)
+      "orderType",
+      ethereum.Value.fromUnsignedBigInt(orderType)
+    )
+  )
+  mangroveOrderStartEvent.parameters.push(
+    new ethereum.EventParam(
+      "takerGivesLogic",
+      ethereum.Value.fromAddress(takerGivesLogic)
+    )
+  )
+  mangroveOrderStartEvent.parameters.push(
+    new ethereum.EventParam(
+      "takerWantsLogic",
+      ethereum.Value.fromAddress(takerWantsLogic)
     )
   )
 
 
   return mangroveOrderStartEvent
-}
-
-export function createMgvEvent(mgv: Address): Mgv {
-  let mgvEvent = changetype<Mgv>(newMockEvent())
-
-  mgvEvent.parameters = new Array()
-
-  mgvEvent.parameters.push(
-    new ethereum.EventParam("mgv", ethereum.Value.fromAddress(mgv))
-  )
-
-  return mgvEvent
 }
 
 export function createNewOwnedOfferEvent(
@@ -170,12 +163,13 @@ export function createSetAdminEvent(admin: Address): SetAdmin {
   return setAdminEvent
 }
 
-export function createSetExpiryEvent(
+export function createSetRenegingEvent(
   olKeyHash: Bytes,
   offerId: BigInt,
-  date: BigInt
-): SetExpiry {
-  let setExpiryEvent = changetype<SetExpiry>(newMockEvent())
+  date: BigInt,
+  volume: BigInt
+): SetReneging {
+  let setExpiryEvent = changetype<SetReneging>(newMockEvent())
 
   setExpiryEvent.parameters = new Array()
 
@@ -194,18 +188,11 @@ export function createSetExpiryEvent(
   setExpiryEvent.parameters.push(
     new ethereum.EventParam("date", ethereum.Value.fromUnsignedBigInt(date))
   )
-
-  return setExpiryEvent
-}
-
-export function createSetRouterEvent(router: Address): SetRouter {
-  let setRouterEvent = changetype<SetRouter>(newMockEvent())
-
-  setRouterEvent.parameters = new Array()
-
-  setRouterEvent.parameters.push(
-    new ethereum.EventParam("router", ethereum.Value.fromAddress(router))
+  setExpiryEvent.parameters.push(
+    new ethereum.EventParam(
+      "volume",
+      ethereum.Value.fromUnsignedBigInt(volume)
+    )
   )
-
-  return setRouterEvent
+  return setExpiryEvent
 }

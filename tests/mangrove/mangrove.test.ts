@@ -7,8 +7,8 @@ import {
   describe,
   test
 } from "matchstick-as/assembly/index";
-import { CleanOrder, Kandel, LimitOrder, Market, Offer, Order } from "../../generated/schema";
-import { createDummyOffer, createLimitOrder, createOffer, getAccountVolumeByPairId, getEventUniqueId, getOfferId } from "../../src/helpers";
+import { CleanOrder, Kandel, MangroveOrder, Market, Offer, Order } from "../../generated/schema";
+import { createDummyOffer, createMangroveOrder, createOffer, getAccountVolumeByPairId, getEventUniqueId, getOfferId } from "../../src/helpers";
 import { createNewOffer, handleCleanComplete, handleCleanStart, handleOfferFail, handleOfferFailWithPosthookData, handleOfferRetract, handleOfferSuccess, handleOfferSuccessWithPosthookData, handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive, handleSetGasbase } from "../../src/mangrove";
 import { createCleanCompleteEvent, createCleanOrderStartEvent as createCleanStartEvent, createOfferFailEvent, createOfferFailWithPosthookDataEvent, createOfferRetractEvent, createOfferSuccessEvent, createOfferSuccessWithPosthookDataEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent, createSetGasbaseEvent } from "./mangrove-utils";
 import { createMangroveOrderStartEvent } from "./mangrove-order-utils";
@@ -385,11 +385,10 @@ describe("Describe entity assertions", () => {
       BigInt.fromI32(0),
     );
 
-    createLimitOrder(
-      "limitOrderId",
+    createMangroveOrder(
+      "mangroveOrderId",
       taker,
-      false,
-      true,
+      0,
       orderStart.block.timestamp,
       orderStart.block.timestamp,
       true,
@@ -397,7 +396,7 @@ describe("Describe entity assertions", () => {
     )
 
     const offer = Offer.load(offerId)!;
-    offer.limitOrder = "limitOrderId";
+    offer.mangroveOrder = "mangroveOrderId";
     offer.save();
 
     let offerSuccess = createOfferSuccessEvent(olKeyHash01, id, taker, BigInt.fromI32(10), BigInt.fromI32(20));
@@ -478,16 +477,17 @@ describe("Describe entity assertions", () => {
     order.feePaid = BigInt.fromI32(0);
     order.save();
 
-    const limitOrder = new LimitOrder(offerId)
-    limitOrder.realTaker = taker;
-    limitOrder.expiryDate = BigInt.fromI32(0);
-    limitOrder.fillOrKill = false;
-    limitOrder.restingOrder = true;
-    limitOrder.offer = offerId;
-    limitOrder.creationDate = BigInt.fromI32(100);
-    limitOrder.latestUpdateDate = BigInt.fromI32(1);
-    limitOrder.order = orderId;
-    limitOrder.save();
+    const mangroveOrder = new MangroveOrder(offerId)
+    mangroveOrder.realTaker = taker;
+    mangroveOrder.expiryDate = BigInt.fromI32(0);
+    mangroveOrder.orderType = 0;
+    mangroveOrder.offer = offerId;
+    mangroveOrder.creationDate = BigInt.fromI32(100);
+    mangroveOrder.latestUpdateDate = BigInt.fromI32(1);
+    mangroveOrder.order = orderId;
+    mangroveOrder.inboundRoute = Address.zero();
+    mangroveOrder.outboundRoute = Address.zero();
+    mangroveOrder.save();
 
     createOffer(
       id,
@@ -580,16 +580,17 @@ describe("Describe entity assertions", () => {
     order.feePaid = BigInt.fromI32(0);
     order.save();
 
-    const limitOrder = new LimitOrder(offerId)
-    limitOrder.realTaker = taker;
-    limitOrder.expiryDate = BigInt.fromI32(0);
-    limitOrder.fillOrKill = false;
-    limitOrder.restingOrder = true;
-    limitOrder.offer = offerId;
-    limitOrder.creationDate = BigInt.fromI32(100);
-    limitOrder.latestUpdateDate = BigInt.fromI32(1);
-    limitOrder.order = orderId;
-    limitOrder.save();
+    const mangroveOrder = new MangroveOrder(offerId)
+    mangroveOrder.realTaker = taker;
+    mangroveOrder.expiryDate = BigInt.fromI32(0);
+    mangroveOrder.orderType = 0;
+    mangroveOrder.offer = offerId;
+    mangroveOrder.creationDate = BigInt.fromI32(100);
+    mangroveOrder.latestUpdateDate = BigInt.fromI32(1);
+    mangroveOrder.order = orderId;
+    mangroveOrder.inboundRoute = Address.zero();
+    mangroveOrder.outboundRoute = Address.zero();
+    mangroveOrder.save();
 
     createOffer(
       id,
@@ -791,11 +792,10 @@ describe("Describe entity assertions", () => {
       BigInt.fromI32(40),
     );
 
-    createLimitOrder(
-      "limitOrderId",
+    createMangroveOrder(
+      "mangroveOrderId",
       taker,
-      false,
-      true,
+      0,
       gasbaseEvent.block.timestamp,
       gasbaseEvent.block.timestamp,
       false, // should not be open
@@ -803,7 +803,7 @@ describe("Describe entity assertions", () => {
     )
 
     const offer = Offer.load(offerId)!;
-    offer.limitOrder = "limitOrderId";
+    offer.mangroveOrder = "mangroveOrderId";
     offer.save();
 
     let offerWrite = createOfferWriteEvent(
@@ -919,12 +919,13 @@ describe("Describe entity assertions", () => {
     const mangroveOrderStart = createMangroveOrderStartEvent(
       olKeyHash01,
       taker,
-      true,
       BigInt.fromI32(1),
       BigInt.fromI32(1),
-      true, 
       true,
-      BigInt.fromI32(0)
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      Address.zero(),
+      Address.zero(),
     )
     handleMangroveOrderStart(mangroveOrderStart);
 
