@@ -1,4 +1,3 @@
-import { log } from "matchstick-as";
 import {
   InitBundle,
   EndBundle,
