@@ -54,6 +54,7 @@ import {
   removeLatestOrderFromStack,
 } from "./stack";
 import { mangroveOrderSetIsOpen } from "./mangrove-order";
+import { addOfferToCurrentBundle } from "./mangrove-amplifier";
 
 export function handleApproval(event: Approval): void {}
 
@@ -208,7 +209,7 @@ export const createNewOffer = (event: OfferWrite): Offer => {
   offer.latestTransactionHash = event.transaction.hash;
 
   const kandel = Kandel.load(event.params.maker);
-  if (kandel) {
+  if (kandel !== null) {
     offer.kandel = kandel.id;
   }
 
@@ -225,6 +226,8 @@ export function handleOfferWrite(event: OfferWrite): void {
     offer.totalGot = BigInt.fromI32(0);
     offer.totalGave = BigInt.fromI32(0);
     offer.totalPenalty = BigInt.fromI32(0);
+    // Adds to current bundle if creating one
+    addOfferToCurrentBundle(offer);
   }
 
   offer.latestUpdateDate = event.block.timestamp;
@@ -288,11 +291,11 @@ export function handleOrderStart(event: OrderStart): void {
     order.cleanOrder = cleanOrder.id;
   }
 
-  const limitOrder = getLatestMangroveOrderFromStack();
-  if (limitOrder !== null) {
-    order.mangroveOrder = limitOrder.id;
-    limitOrder.order = order.id;
-    limitOrder.save();
+  const mangroveOrder = getLatestMangroveOrderFromStack();
+  if (mangroveOrder !== null) {
+    order.mangroveOrder = mangroveOrder.id;
+    mangroveOrder.order = order.id;
+    mangroveOrder.save();
   }
 
   order.save();

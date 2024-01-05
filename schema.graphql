@@ -74,6 +74,7 @@ type Offer @entity {
   mangroveOrder: MangroveOrder
   kandel: Kandel
   kandelIndex: BigInt
+  amplifiedOffer: AmplifiedOffer
 }
 
 type CleanOrder @entity {
@@ -122,15 +123,22 @@ type MangroveOrder @entity {
   outboundRoute: Bytes!
 
   offer: Offer
+  order: Order
+  
   isOpen: Boolean
-
-  order: Order! 
 }
 
-type AmplifiedOrder @entity {
+type AmplifiedOfferElement @entity {
+  id: String!
+  inboundLogic: Bytes
+  offer: Offer!
+}
+
+type AmplifiedOffer @entity {
   id: String!
   creationDate: BigInt!
-  orders: [Order!]!
+  outboundLogic: Bytes
+  offers: [AmplifiedOfferElement!]!
 }
 
 type KandelDepositWithdraw @entity {

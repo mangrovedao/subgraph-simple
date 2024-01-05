@@ -58,7 +58,6 @@ export function handleMangroveOrderStart(event: MangroveOrderStart): void {
   mangroveOrder.creationDate = event.block.timestamp;
   mangroveOrder.latestUpdateDate = event.block.timestamp;
   mangroveOrder.isOpen = false;
-  mangroveOrder.order = "";
 
   mangroveOrder.inboundRoute = event.params.takerWantsLogic;
   mangroveOrder.outboundRoute = event.params.takerGivesLogic;
