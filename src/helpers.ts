@@ -229,9 +229,9 @@ export const getOrCreateToken = (address: Address): Token => {
     token = new Token(address);
     token.address = address;
 
-    token.name = ethereum.call(new ethereum.SmartContractCall("ERC20", address, "name", "name():(string)", new Array()))![0]!.toString();
-    token.symbol = ethereum.call(new ethereum.SmartContractCall("ERC20", address, "symbol", "symbol():(string)", new Array()))![0]!.toString();
-    token.decimals = ethereum.call(new ethereum.SmartContractCall("ERC20", address, "decimals", "decimals():(uint8)", new Array()))![0]!.toBigInt();
+    token.name = ethereum.call(new ethereum.SmartContractCall("ERC20", address, "name", "name():(string)", new Array()))![0].toString();
+    token.symbol = ethereum.call(new ethereum.SmartContractCall("ERC20", address, "symbol", "symbol():(string)", new Array()))![0].toString();
+    token.decimals = ethereum.call(new ethereum.SmartContractCall("ERC20", address, "decimals", "decimals():(uint8)", new Array()))![0].toBigInt();
 
     token.save();
   }
