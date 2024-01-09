@@ -8,7 +8,7 @@ import {
 } from "matchstick-as/assembly/index"
 import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { handleOfferFail, handleOfferRetract, handleOfferSuccess, handleOfferWrite, handleOrderComplete, handleOrderStart, handleSetActive } from "../../src/mangrove";
-import { createOfferFailEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent } from "./mangrove-utils";
+import { createOfferFailEvent, createOfferSuccessEvent, createOfferWriteEvent, createOrderCompleteEvent, createOrderStartEvent, createSetActiveEvent, createSetRouteLogicEvent } from "./mangrove-utils";
 import { createNewOwnedOfferEvent, createMangroveOrderStartEvent, createSetRenegingEvent, createMangroveOrderCompleteEvent } from "./mangrove-order-utils";
 import { handleNewOwnedOffer, handleMangroveOrderStart, handleSetReneging, mangroveOrderSetIsOpen, handleMangroveOrderComplete } from "../../src/mangrove-order";
 import { createDummyOffer, createOffer, getEventUniqueId, getOfferId } from "../../src/helpers";
@@ -16,6 +16,7 @@ import { Stack, MangroveOrder, Order } from "../../generated/schema";
 import { createOfferRetractEvent } from "./mangrove-utils";
 import { getLatestMangroveOrderFromStack } from "../../src/stack";
 import { prepareERC20 } from "./helpers";
+import { handleSetRouteLogic } from "../../src/smart-router-proxy";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -164,6 +165,11 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('MangroveOrder', mangroveOrderId, 'orderType', '0');
     assert.fieldEquals('MangroveOrder', mangroveOrderId, 'creationDate', '1');
     assert.fieldEquals('MangroveOrder', mangroveOrderId, 'latestUpdateDate', '1');
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'tick', '1000');
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'fillVolume', '2000');
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'fillWants', 'false');
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'takerGivesLogic', takerGivesLogic.toHex());
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'takerWantsLogic', takerWantsLogic.toHex());
 
     assert.fieldEquals('Account', taker.toHex(), 'latestInteractionDate', orderStartEvent.block.timestamp.toI32().toString());
   });
@@ -218,13 +224,47 @@ describe("Describe entity assertions", () => {
 
     handleMangroveOrderStart(mangroveOrderStartEvent);
 
-    const setExpiryEvent = createSetRenegingEvent(olKeyHash01, BigInt.fromI32(1), BigInt.fromI32(1000), BigInt.fromI32(0));
+    const setExpiryEvent = createSetRenegingEvent(olKeyHash01, BigInt.fromI32(1), BigInt.fromI32(1000), BigInt.fromI32(2000));
     handleSetReneging(setExpiryEvent);
 
     const mangroveOrderId = getEventUniqueId(mangroveOrderStartEvent);
     assert.fieldEquals('MangroveOrder', mangroveOrderId, 'expiryDate', '1000');
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'maxVolume', '2000');
     assert.fieldEquals('MangroveOrder', mangroveOrderId, 'latestUpdateDate', '1');
   })
+
+  test("MangroveOrder, handleSetRouteLogic, setting route logics", () => {
+    // random logic addresses
+    const logic1 = Address.fromString("0x0000000000000000000000000000000000000012");
+    const logic2 = Address.fromString("0x0000000000000000000000000000000000000234");
+
+    const offerId = BigInt.fromI32(1);
+    
+    const mangroveOrderStartEvent = createMangroveOrderStartEvent(
+      olKeyHash01,
+      taker,
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      false,
+      offerId,
+      BigInt.fromI32(0),
+      Address.zero(),
+      Address.zero(),
+    )
+
+    handleMangroveOrderStart(mangroveOrderStartEvent);
+
+    const setRouteLogicEvent1 = createSetRouteLogicEvent(olKeyHash01, token0, offerId, logic1);
+    handleSetRouteLogic(setRouteLogicEvent1);
+
+    const setRouteLogicEvent2 = createSetRouteLogicEvent(olKeyHash01, token1, offerId, logic2);
+    handleSetRouteLogic(setRouteLogicEvent2);
+
+    const mangroveOrderId = getEventUniqueId(mangroveOrderStartEvent);
+
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'inboundRoute', logic1.toHex());
+    assert.fieldEquals('MangroveOrder', mangroveOrderId, 'outboundRoute', logic2.toHex());
+  });
 
   //TODO: would like to test negative path, where the MangroveOrder does not exist. How?
 });
