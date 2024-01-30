@@ -1,5 +1,5 @@
 import { Entity, store } from "@graphprotocol/graph-ts";
-import { AmplifiedOffer, CleanOrder, LimitOrder, Order, Stack } from "../generated/schema";
+import { AmplifiedOfferBundle, CleanOrder, LimitOrder, Order, Stack } from "../generated/schema";
 
 const getStack = (type: string): Stack => {
     let stack = Stack.load(type);
@@ -40,9 +40,9 @@ export function getLatestCleanOrderFromStack(): CleanOrder | null {
     return changetype<CleanOrder | null>(order);
 }
 
-export function getLatestBundleFromStack(): AmplifiedOffer | null {
-    const order = getLatestFromStack("AmplifiedOffer", false);
-    return changetype<AmplifiedOffer | null>(order);
+export function getLatestBundleFromStack(): AmplifiedOfferBundle | null {
+    const order = getLatestFromStack("AmplifiedOfferBundle", false);
+    return changetype<AmplifiedOfferBundle | null>(order);
 }
 
 function addToStack(type: string, entity: Entity ): void {
@@ -72,8 +72,8 @@ export function addCleanOrderToStack(order: CleanOrder): void {
     addToStack("CleanOrder", order);
 }
 
-export function addBundleToStack(offer: AmplifiedOffer): void {
-    addToStack("AmplifiedOffer", offer);
+export function addBundleToStack(offer: AmplifiedOfferBundle): void {
+    addToStack("AmplifiedOfferBundle", offer);
 }
 
 function removeLatestFromStack(type: string ): void {
@@ -102,5 +102,5 @@ export function removeLatestCleanOrderFromStack(): void {
 }
 
 export function removeLatestBundleFromStack(): void {
-    removeLatestFromStack("AmplifiedOffer");
+    removeLatestFromStack("AmplifiedOfferBundle");
 }

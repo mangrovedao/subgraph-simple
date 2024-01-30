@@ -108,6 +108,20 @@ type Order @entity {
   cleanOrder: CleanOrder
 }
 
+type AmplifiedOffer @entity {
+  id: String!
+  
+  inboundRoute: Bytes
+  outboundRoute: Bytes
+
+  bundle: AmplifiedOfferBundle!
+}
+
+type AmplifiedOfferBundle @entity {
+  id: String!
+  creationDate: BigInt!
+}
+
 type LimitOrder @entity {
   id: String!
   creationDate: BigInt!
@@ -128,19 +142,6 @@ type LimitOrder @entity {
   order: Order
   
   isOpen: Boolean
-}
-
-type AmplifiedOfferElement @entity {
-  id: String!
-  inboundLogic: Bytes
-  offer: Offer!
-}
-
-type AmplifiedOffer @entity {
-  id: String!
-  creationDate: BigInt!
-  outboundLogic: Bytes
-  offers: [AmplifiedOfferElement!]!
 }
 
 type KandelDepositWithdraw @entity {
