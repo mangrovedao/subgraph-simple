@@ -676,20 +676,20 @@ export function createSetRouteLogicEvent(
   setRouteLogicEvent.parameters = new Array()
 
   setRouteLogicEvent.parameters.push(
+    new ethereum.EventParam("token", ethereum.Value.fromAddress(token))
+  );
+  setRouteLogicEvent.parameters.push(
     new ethereum.EventParam(
       "olKeyHash",
       ethereum.Value.fromBytes(olKeyHash)
     )
-  )
-  setRouteLogicEvent.parameters.push(
-    new ethereum.EventParam("token", ethereum.Value.fromAddress(token))
-  )
+  );
   setRouteLogicEvent.parameters.push(
     new ethereum.EventParam("offerId", ethereum.Value.fromUnsignedBigInt(offerId))
-  )
+  );
   setRouteLogicEvent.parameters.push(
     new ethereum.EventParam("logic", ethereum.Value.fromAddress(logic))
-  )
+  );
 
   return setRouteLogicEvent
 }

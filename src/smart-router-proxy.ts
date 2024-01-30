@@ -24,41 +24,40 @@ function setLogicOnLimitOrder(event: SetRouteLogic): void {
   if (_offerId.isZero()) {
     return;
   }
-  // const offerId = getOfferId(event.params.olKeyHash, event.params.offerId);
-  // const offer = Offer.load(offerId);
-  // if (!offer) {
-  //   log.error("Setting logic on mangrove order: missing offer with id: {}", [offerId]);
-  //   return;
-  // }
 
-  // const limitOrderId = offer.limitOrder;
-  //
-  // if (limitOrderId === null) {
-  //   return;
-  // }
-  //
-  // const limitOrder = LimitOrder.load(limitOrderId);
-  // if (!limitOrder) {
-  //   log.error("Setting logic on mangrove order: missing mangrove order with id: {}", [limitOrderId]);
-  //   return;
-  // }
-  //
-  // const market = Market.load(offer.market);
-  // if (!market) {
-  //   log.error("Setting logic on mangrove order: missing market with id: {}", [offer.market]);
-  //   return;
-  // }
-  //
-  // log.info("here {}", [event.params.logic.toHexString()]);
-  //
-  // if (event.params.token.equals(market.outbound_tkn)) {
-  //   limitOrder.outboundRoute = event.params.logic;
-  // } else if (event.params.token.equals(market.inbound_tkn)) {
-  //   limitOrder.inboundRoute = event.params.logic;
-  // } else {
-  //   return;
-  // }
-  // limitOrder.save();
+  const offerId = getOfferId(event.params.olKeyHash, event.params.offerId);
+  const offer = Offer.load(offerId);
+  if (!offer) {
+    log.error("Setting logic on mangrove order: missing offer with id: {}", [offerId]);
+    return;
+  }
+
+  const limitOrderId = offer.limitOrder;
+
+  if (limitOrderId === null) {
+    return;
+  }
+
+  const limitOrder = LimitOrder.load(limitOrderId);
+  if (!limitOrder) {
+    log.error("Setting logic on mangrove order: missing mangrove order with id: {}", [limitOrderId]);
+    return;
+  }
+
+  const market = Market.load(offer.market);
+  if (!market) {
+    log.error("Setting logic on mangrove order: missing market with id: {}", [offer.market]);
+    return;
+  }
+
+  if (event.params.token.equals(market.outbound_tkn)) {
+    limitOrder.outboundRoute = event.params.logic;
+  } else if (event.params.token.equals(market.inbound_tkn)) {
+    limitOrder.inboundRoute = event.params.logic;
+  } else {
+    return;
+  }
+  limitOrder.save();
 }
 
 function setLogicOnBundle(event: SetRouteLogic): void {

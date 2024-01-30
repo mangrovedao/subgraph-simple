@@ -7,12 +7,12 @@ import {
   afterEach
 } from "matchstick-as/assembly/index"
 import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
-import { handleSetActive } from "../../src/mangrove";
-import { createSetActiveEvent, createSetRouteLogicEvent } from "./mangrove-utils";
+import { handleOfferWrite, handleSetActive } from "../../src/mangrove";
+import { createOfferWriteEvent, createSetActiveEvent, createSetRouteLogicEvent } from "./mangrove-utils";
 import { createNewOwnedOfferEvent, createMangroveOrderStartEvent, createSetRenegingEvent, createMangroveOrderCompleteEvent } from "./mangrove-order-utils";
 import { handleNewOwnedOffer, handleMangroveOrderStart, handleSetReneging, limitOrderSetIsOpen, handleMangroveOrderComplete } from "../../src/mangrove-order";
 import { createDummyOffer, getEventUniqueId, getOfferId } from "../../src/helpers";
-import { LimitOrder } from "../../generated/schema";
+import { LimitOrder, Offer } from "../../generated/schema";
 import { getLatestLimitOrderFromStack } from "../../src/stack";
 import { prepareERC20 } from "./helpers";
 import { handleSetRouteLogic } from "../../src/smart-router-proxy";
@@ -29,8 +29,8 @@ const maker = Address.fromString("0x0000000000000000000000000000000000000002")
 const taker = Address.fromString("0x0000000000000000000000000000000000000003")
 const owner = Address.fromString("0x0000000000000000000000000000000000000004")
 const mgv = Address.fromString("0x0000000000000000000000000000000000000005");
-const olKeyHash01 = Bytes.fromHexString(token0.toHex() + token1.toHex());
-const olKeyHash10 = Bytes.fromHexString(token1.toHex() + token0.toHex());
+const olKeyHash01 = Bytes.fromHexString('0x' + token0.toHex().slice(2) + token1.toHex().slice(2));
+const olKeyHash10 = Bytes.fromHexString('0x' + token1.toHex().slice(2) + token0.toHex().slice(2));
 
 const inboundLogic = Address.fromString("0x0000000000000000000000000000000000000006")
 const outboundLogic = Address.fromString("0x0000000000000000000000000000000000000007");
@@ -248,6 +248,22 @@ describe("Describe entity assertions", () => {
     const logic2 = Address.fromString("0x0000000000000000000000000000000000000234");
 
     const offerId = BigInt.fromI32(1);
+
+    const offerWriteEvent = createOfferWriteEvent(
+      olKeyHash01,
+      maker,
+      BigInt.fromI32(0),
+      BigInt.fromI32(10),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      offerId,
+    );
+
+    handleOfferWrite(offerWriteEvent);
+
+    const offerIdString = getOfferId(olKeyHash01, offerId);
+
+    const offer = Offer.load(offerIdString)!;
     
     const limitOrderStartEvent = createMangroveOrderStartEvent(
       olKeyHash01,
@@ -259,20 +275,23 @@ describe("Describe entity assertions", () => {
       BigInt.fromI32(0),
       Address.zero(),
       Address.zero(),
-    )
+    );
 
     handleMangroveOrderStart(limitOrderStartEvent);
+
+    const limitOrderId = getEventUniqueId(limitOrderStartEvent);
+    offer.limitOrder = limitOrderId;
+    
+    offer.save();
 
     const setRouteLogicEvent1 = createSetRouteLogicEvent(olKeyHash01, token0, offerId, logic1);
     handleSetRouteLogic(setRouteLogicEvent1);
 
-    // const setRouteLogicEvent2 = createSetRouteLogicEvent(olKeyHash01, token1, offerId, logic2);
-    // handleSetRouteLogic(setRouteLogicEvent2);
-    //
-    // const limitOrderId = getEventUniqueId(limitOrderStartEvent);
-    //
-    // assert.fieldEquals('LimitOrder', limitOrderId, 'inboundRoute', logic1.toHex());
-    // assert.fieldEquals('LimitOrder', limitOrderId, 'outboundRoute', logic2.toHex());
+    const setRouteLogicEvent2 = createSetRouteLogicEvent(olKeyHash01, token1, offerId, logic2);
+    handleSetRouteLogic(setRouteLogicEvent2);
+
+    assert.fieldEquals('LimitOrder', limitOrderId, 'outboundRoute', logic1.toHex());
+    assert.fieldEquals('LimitOrder', limitOrderId, 'inboundRoute', logic2.toHex());
   });
 
   //TODO: would like to test negative path, where the LimitOrder does not exist. How?
