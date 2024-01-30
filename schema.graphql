@@ -3,6 +3,7 @@ type Account @entity {
   address: Bytes!
   creationDate: BigInt!
   latestInteractionDate: BigInt!
+  proxyDeployed: Boolean!
   volumes: [AccountVolumeByPair!]! @derivedFrom(field: "account")
 }
 
@@ -73,6 +74,7 @@ type Offer @entity {
   limitOrder: LimitOrder
   kandel: Kandel
   kandelIndex: BigInt
+  amplifiedOffer: AmplifiedOffer
 }
 
 type CleanOrder @entity {
@@ -111,13 +113,34 @@ type LimitOrder @entity {
   creationDate: BigInt!
   latestUpdateDate: BigInt!
   expiryDate: BigInt
-  fillOrKill: Boolean!
-  restingOrder: Boolean!
-  realTaker: Account 
-  offer: Offer
-  isOpen: Boolean
+  maxVolume: BigInt
+  orderType: Int!
+  tick: BigInt!
+  fillVolume: BigInt!
+  fillWants: Boolean!
 
-  order: Order! 
+  realTaker: Account!
+  
+  inboundRoute: Bytes!
+  outboundRoute: Bytes!
+
+  offer: Offer
+  order: Order
+  
+  isOpen: Boolean
+}
+
+type AmplifiedOfferElement @entity {
+  id: String!
+  inboundLogic: Bytes
+  offer: Offer!
+}
+
+type AmplifiedOffer @entity {
+  id: String!
+  creationDate: BigInt!
+  outboundLogic: Bytes
+  offers: [AmplifiedOfferElement!]!
 }
 
 type KandelDepositWithdraw @entity {

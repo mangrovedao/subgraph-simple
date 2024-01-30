@@ -71,6 +71,33 @@ templates:
         - event: SetStepSize(uint256)
           handler: handleSetStepSize
       file: ./src/kandel.ts
+  - kind: ethereum
+    name: SmartRouterProxy
+    network: matic
+    source:
+      abi: SmartRouter
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - SetRouteLogic
+        - MakerBind
+        - MakerUnbind
+        - SetAdmin
+      abis:
+        - name: SmartRouter
+          file: ./abis/SmartRouter.json
+      eventHandlers:
+        - event: SetRouteLogic(indexed address,indexed bytes32,uint256,address)
+          handler: handleSetRouteLogic
+        - event: MakerBind(indexed address)
+          handler: handleMakerBind
+        - event: MakerUnbind(indexed address)
+          handler: handleMakerUnbind
+        - event: SetAdmin(address)
+          handler: handleSetAdmin
+      file: ./src/smart-router-proxy.ts
 dataSources:
   - kind: ethereum
     name: Mangrove
@@ -230,11 +257,9 @@ dataSources:
         - LogIncident
         - MangroveOrderStart
         - MangroveOrderComplete
-        - Mgv
+        - SetReneging
         - NewOwnedOffer
         - SetAdmin
-        - SetExpiry
-        - SetRouter
       abis:
         - name: MangroveOrder
           file: ./abis/MangroveOrder.json
@@ -242,18 +267,57 @@ dataSources:
         - event: LogIncident(indexed bytes32,indexed uint256,bytes32,bytes32)
           handler: handleLogIncident
         - event: MangroveOrderStart(indexed bytes32,indexed
-            address,bool,int256,uint256,bool,bool,uint256)
+            address,int256,uint8,uint256,bool,uint256,address,address)
           handler: handleMangroveOrderStart
         - event: MangroveOrderComplete()
           handler: handleMangroveOrderComplete
-        - event: Mgv(address)
-          handler: handleMgv
+        - event: SetReneging(indexed bytes32,indexed uint256,uint256,uint256)
+          handler: handleSetReneging
         - event: NewOwnedOffer(indexed bytes32,indexed uint256,indexed address)
           handler: handleNewOwnedOffer
         - event: SetAdmin(address)
           handler: handleSetAdmin
-        - event: SetExpiry(indexed bytes32,indexed uint256,uint256)
-          handler: handleSetExpiry
-        - event: SetRouter(address)
-          handler: handleSetRouter
       file: ./src/mangrove-order.ts
+  - kind: ethereum
+    network: matic
+    name: RouterProxyFactory
+    source:
+      abi: RouterProxyFactory
+      address: "0x9a58de548212F65c5406e46563372Ee6DcC0aC43"
+      startBlock: 43091275
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - NewRouterProxy
+      abis:
+        - name: RouterProxyFactory
+          file: ./abis/RouterProxyFactory.json
+      eventHandlers:
+        - event: ProxyDeployed(address,indexed address,indexed address)
+          handler: handleNewRouterProxy
+      file: ./src/router-proxy-factory.ts
+  - kind: ethereum
+    network: matic
+    name: MangroveAmplifier
+    source:
+      abi: MangroveAmplifier
+      address: "0x9a58de548212F65c5406e46563372Ee6DcC0aC43"
+      startBlock: 43091275
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - InitBundle
+        - EndBundle
+      abis:
+        - name: MangroveAmplifier
+          file: ./abis/MangroveAmplifier.json
+      eventHandlers:
+        - event: InitBundle(indexed uint256)
+          handler: handleInitBundle
+        - event: EndBundle()
+          handler: handleEndBundle
+      file: ./src/mangrove-amplifier.ts

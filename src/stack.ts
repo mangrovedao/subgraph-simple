@@ -1,5 +1,5 @@
 import { Entity, store } from "@graphprotocol/graph-ts";
-import { CleanOrder, LimitOrder, Order, Stack } from "../generated/schema";
+import { AmplifiedOffer, CleanOrder, LimitOrder, Order, Stack } from "../generated/schema";
 
 const getStack = (type: string): Stack => {
     let stack = Stack.load(type);
@@ -40,6 +40,11 @@ export function getLatestCleanOrderFromStack(): CleanOrder | null {
     return changetype<CleanOrder | null>(order);
 }
 
+export function getLatestBundleFromStack(): AmplifiedOffer | null {
+    const order = getLatestFromStack("AmplifiedOffer", false);
+    return changetype<AmplifiedOffer | null>(order);
+}
+
 function addToStack(type: string, entity: Entity ): void {
     const orderStack = getStack(type);
     if(type == "Order") {
@@ -67,6 +72,10 @@ export function addCleanOrderToStack(order: CleanOrder): void {
     addToStack("CleanOrder", order);
 }
 
+export function addBundleToStack(offer: AmplifiedOffer): void {
+    addToStack("AmplifiedOffer", offer);
+}
+
 function removeLatestFromStack(type: string ): void {
     let stack = getStack(type);
     const ids = stack.ids;
@@ -90,4 +99,8 @@ export function removeLatestLimitOrderFromStack(): void {
 
 export function removeLatestCleanOrderFromStack(): void {
     removeLatestFromStack("CleanOrder");
+}
+
+export function removeLatestBundleFromStack(): void {
+    removeLatestFromStack("AmplifiedOffer");
 }
