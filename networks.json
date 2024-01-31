@@ -5,30 +5,22 @@
       "startBlock": 43711819
     },
     "KandelSeeder": {
-      "address": "0x68A1778E4D08D8f6De35323a9040791CE8E9EF4C",
+      "address": "0x878f8820cd99a96381074548a1B72d27A77fadA2",
       "startBlock": 43711838
     },
     "AaveKandelSeeder": {
-      "address": "0xC56CEc2A5912B49AAacEc0F391471Aeb4eb8D9D2",
-      "startBlock": 43711845
+      "address": "0x215A21620Ded0451F4867A5Ffa347351826233a4",
+      "startBlock": 45080305
     },
     "MangroveOrder": {
-      "address": "0x6469064C68B1Bd06861dabD20dF835Fa71Dff695",
-      "startBlock": 43711835	
+      "address": "0x092FC43fe474030387BBa4C657F0ceBc1dC218E7",
+      "startBlock": 44653500	
+    },
+    "RouterProxyFactory": {
+      "address": "0x2593BdD850EA25E87f3A1C83dcB8B49DAeddF0d1",
+      "startBlock": 44611263
     }
   },
   "matic": {
-    "Mangrove": {
-      "address": "0x9a58de548212F65c5406e46563372Ee6DcC0aC43",
-      "startBlock": 43091275
-    },
-    "KandelSeeder": {
-      "address": "0xA48B36E01919472fcdA56CAD574433BeCB7A87C5",
-      "startBlock": 43091477
-    },
-    "MangroveOrder": {
-      "address": "0xcf4ec117bc38d7D0fE8678B511Ff6a212c76d60B",
-      "startBlock": 43091361
-    }
   }
 }
