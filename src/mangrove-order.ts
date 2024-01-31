@@ -43,16 +43,17 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
 
   const owner = getOrCreateAccount(event.params.owner, event.block.timestamp, true);
   offer.owner = owner.id;
-  const limitOrder = getLatestLimitOrderFromStack();
-  if( limitOrder !== null){
+  const limitOrder = getLatestLimitOrderFromStack(true);
+  if (limitOrder !== null) {
     limitOrder.offer = offer.id;
     limitOrder.isOpen = true;
-    offer.limitOrder = limitOrder.id;
     limitOrder.save();
+
+    offer.limitOrder = limitOrder.id;
+    offer.save();
   } else {
     throw new Error(`Missing limit order for offer id:${offer.offerId} - market: ${offer.market} - tx: ${event.transaction.hash.toHex()}`);
   }
-  offer.save();
   
 }
 
@@ -82,7 +83,7 @@ export function handleSetExpiry(event: SetExpiry): void {
     event.params.olKeyHash,
     event.params.offerId,
   );
-  const limitOrder = getLatestLimitOrderFromStack();
+  const limitOrder = getLatestLimitOrderFromStack(true);
   if (!limitOrder) {
     log.debug("Missing limit order for offerId {}", [offerId]);
     return;

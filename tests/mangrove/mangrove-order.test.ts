@@ -191,13 +191,13 @@ describe("Describe entity assertions", () => {
     );
     handleMangroveOrderStart(orderStartEvent);
 
-    const limitOrder = getLatestLimitOrderFromStack();
+    const limitOrder = getLatestLimitOrderFromStack(true);
     assert.assertTrue(limitOrder!.id == getEventUniqueId(orderStartEvent));
 
     const orderCompleteEvent = createMangroveOrderCompleteEvent()
     handleMangroveOrderComplete(orderCompleteEvent);
 
-    assert.assertNull(getLatestLimitOrderFromStack());
+    assert.assertNull(getLatestLimitOrderFromStack(true));
   });
 
   test("LimitOrder, handleSetExpiry, setting expiry date", () => {

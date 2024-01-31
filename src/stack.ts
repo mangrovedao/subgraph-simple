@@ -30,8 +30,8 @@ export function getLatestOrderFromStack(): Order {
     return changetype<Order>(order);
 };
 
-export function getLatestLimitOrderFromStack(): LimitOrder | null {
-    const order = getLatestFromStack("LimitOrder", false);
+export function getLatestLimitOrderFromStack(shouldThrow: boolean): LimitOrder | null {
+    const order = getLatestFromStack("LimitOrder", shouldThrow);
     return changetype<LimitOrder | null>(order);
 }
 

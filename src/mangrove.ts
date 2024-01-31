@@ -218,6 +218,7 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.failedReason = null;
   offer.posthookFailReason = null;
   offer.latestPenalty = BigInt.fromI32(0);
+
   limitOrderSetIsOpen(offer.limitOrder, true);
 
   offer.save();
@@ -244,8 +245,8 @@ export function handleOrderStart(event: OrderStart): void {
     order.cleanOrder = cleanOrder.id;
   }
   
-  const limitOrder = getLatestLimitOrderFromStack();
-  if(limitOrder !== null){
+  const limitOrder = getLatestLimitOrderFromStack(false);
+  if (limitOrder !== null){
     order.limitOrder = limitOrder.id;
     limitOrder.order = order.id;
     limitOrder.save();
