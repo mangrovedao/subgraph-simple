@@ -5,7 +5,7 @@ import {
 import { Weight } from "../generated/schema"
 
 export const getWeightId = (event: WeigthsEvent): string => { 
-  return `${event.params.base}-${event.params.quote}-${event.params.fromBlock}`; 
+  return `${event.params.base.toHex()}-${event.params.quote.toHex()}-${event.params.fromBlock.toHex()}`; 
 } 
  
 export function handleWeigths(event: WeigthsEvent): void {
