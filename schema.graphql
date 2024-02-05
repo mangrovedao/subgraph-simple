@@ -201,7 +201,7 @@ type Stack @entity {
   ids: String!
 }
 
-type Weights @entity {
+type Weight @entity {
   id: String!
   base: Bytes! # address
   quote: Bytes! # address

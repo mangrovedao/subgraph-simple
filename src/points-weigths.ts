@@ -2,7 +2,7 @@ import { log } from "@graphprotocol/graph-ts";
 import {
   Weigths as WeigthsEvent
 } from "../generated/PointsWeights/PointsWeights"
-import { Weights } from "../generated/schema"
+import { Weight } from "../generated/schema"
 
 export const getWeightId = (event: WeigthsEvent): string => { 
   return `${event.params.base}-${event.params.quote}-${event.params.fromBlock}`; 
@@ -11,9 +11,9 @@ export const getWeightId = (event: WeigthsEvent): string => {
 export function handleWeigths(event: WeigthsEvent): void {
   const weigthsId = getWeightId(event); 
 
-  let weigths = Weights.load(weigthsId);
+  let weigths = Weight.load(weigthsId);
   if (!weigths) {
-    weigths = new Weights(weigthsId);
+    weigths = new Weight(weigthsId);
   }
   
   weigths.base = event.params.base;

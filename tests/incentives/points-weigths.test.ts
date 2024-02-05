@@ -42,15 +42,15 @@ describe("Verify points weigths indexing", () => {
     );
     handleWeigths(setWeigthsEvent);
 
-    assert.entityCount("Weights", 1);
+    assert.entityCount("Weight", 1);
 
     const weigthsId = getWeightId(setWeigthsEvent);
-    assert.fieldEquals("Weights", weigthsId, "base", token0.toHex());
-    assert.fieldEquals("Weights", weigthsId, "quote", token1.toHex());
-    assert.fieldEquals("Weights", weigthsId, "fromBlock", "0"); 
-    assert.fieldEquals("Weights", weigthsId, "toBlock", "10"); 
-    assert.fieldEquals("Weights", weigthsId, "takerPointsPerDollar", "1"); 
-    assert.fieldEquals("Weights", weigthsId, "makerPointsPerDollar", "2"); 
-    assert.fieldEquals("Weights", weigthsId, "reffererPointsPerDollar", "3");
+    assert.fieldEquals("Weight", weigthsId, "base", token0.toHex());
+    assert.fieldEquals("Weight", weigthsId, "quote", token1.toHex());
+    assert.fieldEquals("Weight", weigthsId, "fromBlock", "0"); 
+    assert.fieldEquals("Weight", weigthsId, "toBlock", "10"); 
+    assert.fieldEquals("Weight", weigthsId, "takerPointsPerDollar", "1"); 
+    assert.fieldEquals("Weight", weigthsId, "makerPointsPerDollar", "2"); 
+    assert.fieldEquals("Weight", weigthsId, "reffererPointsPerDollar", "3");
   });
 });
