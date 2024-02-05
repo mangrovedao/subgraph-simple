@@ -14,8 +14,13 @@
     },
     "MangroveOrder": {
       "address": "0x6469064C68B1Bd06861dabD20dF835Fa71Dff695",
-      "startBlock": 43711835	
+      "startBlock": 43711835
+    },
+    "PointsWeights": {
+      "address": "0xc8f191ee9d78eCFE37507bedE37F5B3D1fc15AE6",
+      "startBlock": 45574139
     }
+
   },
   "matic": {
     "Mangrove": {
