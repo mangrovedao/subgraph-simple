@@ -87,7 +87,7 @@ export function handleMgv(event: Mgv): void {
 }
 
 export function handleOfferListKey(event: OfferListKey): void {
-    // nothing to do we already have this information inside NewKandle
+    // nothing to do we already have this information inside NewKandel
 }
 
 export function handlePopulateEnd(event: PopulateEnd): void {

@@ -1,6 +1,6 @@
 # Mangrove Indexer
 
-This repo contains the indexer code for Mangrove, MangroveOrder and Kandel. It is writtin using [the graph](https://thegraph.com/docs/en/).
+This repo contains the indexer code for Mangrove, MangroveOrder and Kandel. It is written using [the graph](https://thegraph.com/docs/en/).
 
 The contracts that is being indexed can be found in these 2 repos. [mangrove-core](https://github.com/mangrovedao/mangrove-core) and [mangrove-strats](https://github.com/mangrovedao/mangrove-strats)
 
@@ -22,7 +22,7 @@ $ yarn install
 
 ## Codegen
 
-The codegen script will generate the event types and the entities from the schema.grapql file.
+The codegen script will generate the event types and the entities from the schema.graphql file.
 
 ```shell
 $ yarn codegen

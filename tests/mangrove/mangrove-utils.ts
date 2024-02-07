@@ -66,7 +66,7 @@ export function createApprovalEvent(
   return approvalEvent
 }
 
-export function reditEvent(maker: Address, amount: BigInt): Credit {
+export function creditEvent(maker: Address, amount: BigInt): Credit {
   let creditEvent = changetype<Credit>(newMockEvent())
 
   creditEvent.parameters = new Array()
