@@ -1,0 +1,14 @@
+// cSpell Settings
+{
+  // Version of the setting file.  Always 0.2
+  "version": "0.2",
+  // language - current active spelling language
+  "language": "en",
+  // words - list of words to be always considered correct
+  "words": ["Kandel", "graphprotocol", "gasreq", "IERC", "codegen", "changetype", "posthook", "assemblyscript", "gasmax", "gasbase", "chainstack", "galxe", "strats", "ipfs"],
+  "useGitignore": true,
+  // flagWords - list of words to be always considered incorrect
+  // This is useful for offensive words and common spelling errors.
+  "flagWords": [],
+  "ignorePaths": ["node_modules/**", "abis/*.json", "*.wasm"]
+}

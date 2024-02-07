@@ -33,8 +33,8 @@ export function handleNewAaveKandel(event: NewAaveKandel): void {
   const ownerAccount = getOrCreateAccount(event.params.owner, event.block.timestamp, true);
   kandel.deployer = ownerAccount.address;
 
-  const adminAcount = getOrCreateAccount(event.params.owner, event.block.timestamp, true);
-  kandel.admin = adminAcount.address;
+  const adminAccount = getOrCreateAccount(event.params.owner, event.block.timestamp, true);
+  kandel.admin = adminAccount.address;
 
   kandel.offerIndexes = [];
 
@@ -63,8 +63,8 @@ export function handleNewKandel(event: NewKandel): void {
   const ownerAccount = getOrCreateAccount(event.params.owner, event.block.timestamp, true);
   kandel.deployer = ownerAccount.address;
 
-  const adminAcount = getOrCreateAccount(event.params.owner, event.block.timestamp, false);
-  kandel.admin = adminAcount.address;
+  const adminAccount = getOrCreateAccount(event.params.owner, event.block.timestamp, false);
+  kandel.admin = adminAccount.address;
 
   kandel.offerIndexes = [];
 
