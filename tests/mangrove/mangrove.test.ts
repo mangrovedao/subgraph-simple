@@ -388,8 +388,7 @@ describe("Describe entity assertions", () => {
     createLimitOrder(
       "limitOrderId",
       taker,
-      false,
-      true,
+      0,
       orderStart.block.timestamp,
       orderStart.block.timestamp,
       true,
@@ -452,7 +451,7 @@ describe("Describe entity assertions", () => {
 
   });
 
-  test("Offer, handleOfferSuccess, fully fill", () => {
+  test("cffer, handleOfferSuccess, fully fill", () => {
     const orderStart =  createOrderStartEvent(
       olKeyHash01,
       taker,
@@ -481,12 +480,16 @@ describe("Describe entity assertions", () => {
     const limitOrder = new LimitOrder(offerId)
     limitOrder.realTaker = taker;
     limitOrder.expiryDate = BigInt.fromI32(0);
-    limitOrder.fillOrKill = false;
-    limitOrder.restingOrder = true;
+    limitOrder.orderType = 0;
     limitOrder.offer = offerId;
+    limitOrder.tick = BigInt.fromI32(0);
+    limitOrder.fillVolume = BigInt.fromI32(0);
+    limitOrder.fillWants = false;
     limitOrder.creationDate = BigInt.fromI32(100);
     limitOrder.latestUpdateDate = BigInt.fromI32(1);
     limitOrder.order = orderId;
+    limitOrder.inboundRoute = Address.zero();
+    limitOrder.outboundRoute = Address.zero();
     limitOrder.save();
 
     createOffer(
@@ -583,12 +586,16 @@ describe("Describe entity assertions", () => {
     const limitOrder = new LimitOrder(offerId)
     limitOrder.realTaker = taker;
     limitOrder.expiryDate = BigInt.fromI32(0);
-    limitOrder.fillOrKill = false;
-    limitOrder.restingOrder = true;
+    limitOrder.orderType = 0;
     limitOrder.offer = offerId;
     limitOrder.creationDate = BigInt.fromI32(100);
     limitOrder.latestUpdateDate = BigInt.fromI32(1);
+    limitOrder.fillWants = false;
+    limitOrder.fillVolume = BigInt.fromI32(0);
+    limitOrder.tick = BigInt.fromI32(0);
     limitOrder.order = orderId;
+    limitOrder.inboundRoute = Address.zero();
+    limitOrder.outboundRoute = Address.zero();
     limitOrder.save();
 
     createOffer(
@@ -794,8 +801,7 @@ describe("Describe entity assertions", () => {
     createLimitOrder(
       "limitOrderId",
       taker,
-      false,
-      true,
+      0,
       gasbaseEvent.block.timestamp,
       gasbaseEvent.block.timestamp,
       false, // should not be open
@@ -916,17 +922,18 @@ describe("Describe entity assertions", () => {
   });
 
   test('Order, handleOrderStart, is limit order', () => {
-    const mangroveOrderStart = createMangroveOrderStartEvent(
+    const limitOrderStart = createMangroveOrderStartEvent(
       olKeyHash01,
       taker,
-      true,
       BigInt.fromI32(1),
       BigInt.fromI32(1),
-      true, 
       true,
-      BigInt.fromI32(0)
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      Address.zero(),
+      Address.zero(),
     )
-    handleMangroveOrderStart(mangroveOrderStart);
+    handleMangroveOrderStart(limitOrderStart);
 
     const orderStart =  createOrderStartEvent(
       olKeyHash01,
@@ -950,9 +957,9 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals('Order', orderId, 'fillVolume', '1');
     assert.fieldEquals('Order', orderId, 'fillWants', 'false');
     assert.fieldEquals('Order', orderId, 'maxTick', '40');
-    assert.fieldEquals('Order', orderId, 'limitOrder', getEventUniqueId(mangroveOrderStart));
+    assert.fieldEquals('Order', orderId, 'limitOrder', getEventUniqueId(limitOrderStart));
 
-    assert.fieldEquals('LimitOrder', getEventUniqueId(mangroveOrderStart), 'order', orderId);
+    assert.fieldEquals('LimitOrder', getEventUniqueId(limitOrderStart), 'order', orderId);
 
     assert.fieldEquals('Stack', 'Order', 'ids',  `|${orderId}`);
   });

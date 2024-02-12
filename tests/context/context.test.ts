@@ -8,7 +8,7 @@ import {
 } from "matchstick-as/assembly/index"
 import { BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { Order } from "../../generated/schema";
-import { addOrderToStack, getLatestLimitOrderFromStack, getLatestOrderFromStack, removeLatestOrderFromStack } from "../../src/stack";
+import { addOrderToStack, getLatestOrderFromStack, removeLatestOrderFromStack } from "../../src/stack";
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 

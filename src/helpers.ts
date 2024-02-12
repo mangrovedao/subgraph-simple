@@ -7,7 +7,7 @@ export const getKandelParamsId = (txHash: Bytes, kandel:Address): string => {
 
 
 export const getOfferId = (olKeyHash: Bytes, id: BigInt): string => {
-  return `${olKeyHash.toHexString()}-${id.toString()}`;
+  return `${olKeyHash.toHex()}-${id.toString()}`;
 };
 
 export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnInteraction: boolean): Account => {
@@ -18,6 +18,7 @@ export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnIn
     account.address = address;
     account.creationDate = currentDate;
     account.latestInteractionDate = currentDate;
+    account.proxyDeployed = false;
     account.save();
   }
 
@@ -117,8 +118,7 @@ export const getEventUniqueId = (event: ethereum.Event): string => {
 export const createLimitOrder = (
   id: string,
   realTaker: Address,
-  fillOrKill: boolean,
-  restingOrder: boolean,
+  orderType: number,
   creationDate: BigInt,
   latestUpdateDate: BigInt,
   isOpen: boolean,
@@ -126,13 +126,17 @@ export const createLimitOrder = (
 ): LimitOrder => {
   let limitOrder = new LimitOrder(id);
   limitOrder.realTaker = realTaker;
-  limitOrder.fillOrKill = fillOrKill;
-  limitOrder.restingOrder = restingOrder;
+  limitOrder.orderType = i32(orderType);
   limitOrder.creationDate = creationDate;
   limitOrder.latestUpdateDate = latestUpdateDate;
   limitOrder.isOpen = isOpen;
   limitOrder.offer = offer;
   limitOrder.order = "";
+  limitOrder.fillVolume = BigInt.fromI32(0);
+  limitOrder.fillWants = false;
+  limitOrder.tick = BigInt.fromI32(0);
+  limitOrder.inboundRoute = Address.zero();
+  limitOrder.outboundRoute = Address.zero();
   limitOrder.save();
   return limitOrder;
 }
@@ -230,9 +234,9 @@ export const getOrCreateToken = (address: Address): Token => {
     token = new Token(address);
     token.address = address;
 
-    token.name = ethereum.call(new ethereum.SmartContractCall("ERC20", address, "name", "name():(string)", new Array()))![0]!.toString();
-    token.symbol = ethereum.call(new ethereum.SmartContractCall("ERC20", address, "symbol", "symbol():(string)", new Array()))![0]!.toString();
-    token.decimals = ethereum.call(new ethereum.SmartContractCall("ERC20", address, "decimals", "decimals():(uint8)", new Array()))![0]!.toBigInt();
+    token.name = ethereum.call(new ethereum.SmartContractCall("ERC20", address, "name", "name():(string)", new Array()))![0].toString();
+    token.symbol = ethereum.call(new ethereum.SmartContractCall("ERC20", address, "symbol", "symbol():(string)", new Array()))![0].toString();
+    token.decimals = ethereum.call(new ethereum.SmartContractCall("ERC20", address, "decimals", "decimals():(uint8)", new Array()))![0].toBigInt();
 
     token.save();
   }

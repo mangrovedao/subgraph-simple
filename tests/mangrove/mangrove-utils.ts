@@ -29,6 +29,7 @@ import {
   SetNotify,
   SetUseOracle
 } from "../../generated/Mangrove/Mangrove"
+import { SetRouteLogic } from "../../generated/templates/SmartRouterProxy/SmartRouter"
 
 export function createApprovalEvent(
   outbound_tkn: Address,
@@ -449,8 +450,6 @@ export function createCleanCompleteEvent(): CleanComplete {
   return changetype<CleanComplete>(newMockEvent())
 }
 
-
-
 export function createSetActiveEvent(
   olKeyHash: Bytes,
   outbound_tkn: Address,
@@ -664,4 +663,33 @@ export function createSetUseOracleEvent(value: boolean): SetUseOracle {
   )
 
   return setUseOracleEvent
+}
+
+export function createSetRouteLogicEvent(
+  olKeyHash: Bytes,
+  token: Address,
+  offerId: BigInt,
+  logic: Address
+): SetRouteLogic {
+  let setRouteLogicEvent = changetype<SetRouteLogic>(newMockEvent())
+
+  setRouteLogicEvent.parameters = new Array()
+
+  setRouteLogicEvent.parameters.push(
+    new ethereum.EventParam("token", ethereum.Value.fromAddress(token))
+  );
+  setRouteLogicEvent.parameters.push(
+    new ethereum.EventParam(
+      "olKeyHash",
+      ethereum.Value.fromBytes(olKeyHash)
+    )
+  );
+  setRouteLogicEvent.parameters.push(
+    new ethereum.EventParam("offerId", ethereum.Value.fromUnsignedBigInt(offerId))
+  );
+  setRouteLogicEvent.parameters.push(
+    new ethereum.EventParam("logic", ethereum.Value.fromAddress(logic))
+  );
+
+  return setRouteLogicEvent
 }
