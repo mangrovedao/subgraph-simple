@@ -19,6 +19,10 @@
     "RouterProxyFactory": {
       "address": "0x2593BdD850EA25E87f3A1C83dcB8B49DAeddF0d1",
       "startBlock": 44611263
+    },
+    "PointsWeights": {
+      "address": "0xc8f191ee9d78eCFE37507bedE37F5B3D1fc15AE6",
+      "startBlock": 45574139
     }
   },
   "matic": {
