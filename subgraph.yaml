@@ -257,3 +257,22 @@ dataSources:
         - event: SetRouter(address)
           handler: handleSetRouter
       file: ./src/mangrove-order.ts
+  - kind: ethereum
+    name: PointsWeights
+    network: matic
+    source:
+      address: "0xc8f191ee9d78eCFE37507bedE37F5B3D1fc15AE6"
+      abi: PointsWeights
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Weigths
+      abis:
+        - name: PointsWeights
+          file: ./abis/PointsWeights.json
+      eventHandlers:
+        - event: Weigths(indexed address,indexed address,uint256,uint256,uint256,uint256,uint256)
+          handler: handleWeigths
+      file: ./src/points-weigths.ts
