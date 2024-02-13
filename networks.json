@@ -14,7 +14,7 @@
     },
     "MangroveOrder": {
       "address": "0x092FC43fe474030387BBa4C657F0ceBc1dC218E7",
-      "startBlock": 44653500	
+      "startBlock": 44653500
     },
     "RouterProxyFactory": {
       "address": "0x2593BdD850EA25E87f3A1C83dcB8B49DAeddF0d1",
@@ -22,5 +22,8 @@
     }
   },
   "matic": {
+    "MangroveAmplifier": {
+      "address": "0x9a58de548212F65c5406e46563372Ee6DcC0aC43"
+    }
   }
 }
