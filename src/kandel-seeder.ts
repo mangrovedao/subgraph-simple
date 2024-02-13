@@ -1,10 +1,6 @@
-import {
-  NewKandel
-} from "../generated/KandelSeeder/KandelSeeder"
-import {
-    NewAaveKandel
-  } from "../generated/AaveKandelSeeder/AaveKandelSeeder"
-import { Kandel } from "../generated/templates"
+import { NewKandel } from "../generated/KandelSeeder/KandelSeeder";
+import { NewAaveKandel } from "../generated/AaveKandelSeeder/AaveKandelSeeder";
+import { Kandel } from "../generated/templates";
 import { Kandel as KandelEntity, Market } from "../generated/schema";
 import { BigInt } from "@graphprotocol/graph-ts";
 import { getOrCreateAccount } from "./helpers";
@@ -19,7 +15,7 @@ export function handleNewAaveKandel(event: NewAaveKandel): void {
   kandel.seeder = event.address;
   kandel.address = event.params.aaveKandel;
   kandel.type = "KandelAAVE";
-  const market = Market.load(event.params.quoteBaseOlKeyHash.toHexString())!
+  const market = Market.load(event.params.quoteBaseOlKeyHash.toHexString())!;
   kandel.base = market.inbound_tkn;
   kandel.quote = market.outbound_tkn;
   kandel.baseQuoteOlKeyHash = event.params.baseQuoteOlKeyHash;
@@ -51,7 +47,7 @@ export function handleNewKandel(event: NewKandel): void {
   kandel.seeder = event.address;
   kandel.address = event.params.kandel;
   kandel.type = "Kandel";
-  const market = Market.load(event.params.quoteBaseOlKeyHash.toHexString())!
+  const market = Market.load(event.params.quoteBaseOlKeyHash.toHexString())!;
   kandel.base = market.inbound_tkn;
   kandel.quote = market.outbound_tkn;
   kandel.baseQuoteOlKeyHash = event.params.baseQuoteOlKeyHash;

@@ -18,15 +18,13 @@ const reservedId = Address.fromString("0x000000000000000000000000000000000000000
 const olKeyHash01 = Bytes.fromHexString(token0.toHex() + token1.toHex());
 const olKeyHash10 = Bytes.fromHexString(token1.toHex() + token0.toHex());
 
-
 describe("KandelSeeder", () => {
-
-    beforeEach(() => {
-        const activate01 = createSetActiveEvent(olKeyHash01, token0, token1, BigInt.fromI32(1), true);
-        handleSetActive(activate01);
-        const activate10 = createSetActiveEvent(olKeyHash10, token1, token0, BigInt.fromI32(1), true);
-        handleSetActive(activate10);
-    })
+  beforeEach(() => {
+    const activate01 = createSetActiveEvent(olKeyHash01, token0, token1, BigInt.fromI32(1), true);
+    handleSetActive(activate01);
+    const activate10 = createSetActiveEvent(olKeyHash10, token1, token0, BigInt.fromI32(1), true);
+    handleSetActive(activate10);
+  });
 
   test("NewKandel", () => {
     const kandel = createNewKandelEvent(owner, olKeyHash01, olKeyHash10, kandelAddress);
@@ -62,5 +60,4 @@ describe("KandelSeeder", () => {
     assert.fieldEquals("Kandel", kandelAddress.toHex(), "reserveId", reservedId.toHex());
     assert.fieldEquals("Kandel", kandelAddress.toHex(), "offerIndexes", "[]");
   });
-
 });

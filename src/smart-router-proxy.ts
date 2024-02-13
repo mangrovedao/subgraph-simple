@@ -1,9 +1,4 @@
-import {
-  MakerBind,
-  MakerUnbind,
-  SetAdmin,
-  SetRouteLogic,
-} from "../generated/templates/SmartRouterProxy/SmartRouter";
+import { MakerBind, MakerUnbind, SetAdmin, SetRouteLogic } from "../generated/templates/SmartRouterProxy/SmartRouter";
 import { getOfferId } from "./helpers";
 import { AmplifiedOffer, LimitOrder, Market, Offer } from "../generated/schema";
 import { log } from "matchstick-as";
