@@ -340,5 +340,27 @@ dataSources:
         - event: Weigths(indexed address,indexed address,uint256,uint256,uint256,uint256,uint256)
           handler: handleWeigths
       file: ./src/points-weigths.ts
-
-
+  - kind: ethereum
+    name: MgvReferral
+    network: matic
+    source:
+      address: "0x5e852CA313995f7C5382061e9119a96b74Ccc928"
+      abi: MgvReferral
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - EIP712DomainChanged
+        - OwnershipTransferred
+        - ReferStarted
+        - ReferralRecorded
+      abis:
+        - name: MgvReferral
+          file: ./abis/MgvReferral.json
+      eventHandlers:
+        - event: ReferStarted(indexed address)
+          handler: handleReferStarted
+        - event: ReferralRecorded(indexed address,indexed address)
+          handler: handleReferralRecorded
+      file: ./src/mgv-referral.ts
