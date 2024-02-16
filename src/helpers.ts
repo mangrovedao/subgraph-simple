@@ -18,6 +18,7 @@ export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnIn
     account.creationDate = currentDate;
     account.latestInteractionDate = currentDate;
     account.proxyDeployed = false;
+    account.isReferrer = false;
     account.save();
   }
 

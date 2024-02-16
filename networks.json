@@ -23,6 +23,10 @@
     "PointsWeights": {
       "address": "0xa472bD0CFA442b19a3e896C3F33Ab7336F7e1D7b",
       "startBlock": 45832115
+    },
+    "MgvReferral": {
+      "address": "0x5e852CA313995f7C5382061e9119a96b74Ccc928",
+      "startBlock": 45942861
     }
   },
   "matic": {

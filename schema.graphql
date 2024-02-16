@@ -5,6 +5,11 @@ type Account @entity {
   latestInteractionDate: BigInt!
   proxyDeployed: Boolean!
   volumes: [AccountVolumeByPair!]! @derivedFrom(field: "account")
+
+  isReferrer: Boolean!
+
+  referrer: Account
+  referrals: [Account!]! @derivedFrom(field: "referrer")
 }
 
 type Token @entity {
