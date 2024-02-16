@@ -45,8 +45,8 @@ export function createApprovalEvent(outbound_tkn: Address, inbound_tkn: Address,
   return approvalEvent;
 }
 
-export function reditEvent(maker: Address, amount: BigInt): Credit {
-  let creditEvent = changetype<Credit>(newMockEvent());
+export function creditEvent(maker: Address, amount: BigInt): Credit {
+  let creditEvent = changetype<Credit>(newMockEvent())
 
   creditEvent.parameters = new Array();
 

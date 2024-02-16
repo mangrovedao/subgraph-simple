@@ -227,7 +227,7 @@ describe("Describe entity assertions", () => {
     assert.assertTrue(updatedOffer.owner === null);
   });
 
-  test("Offer, handleOfferRetract, with deporivison", () => {
+  test("Offer, handleOfferRetract, with deprovision", () => {
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(olKeyHash01, id);
 
@@ -290,7 +290,7 @@ describe("Describe entity assertions", () => {
     assert.entityCount("Offer", 1);
   });
 
-  test("Offer, handleOfferRetract, no deporivison", () => {
+  test("Offer, handleOfferRetract, no deprovision", () => {
     const id = BigInt.fromI32(1);
     let offerId = getOfferId(olKeyHash01, id);
 
@@ -724,7 +724,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Account", maker.toHex(), "latestInteractionDate", offerWrite.block.timestamp.toI32().toString());
   });
 
-  test("Offer, handleOfferWrite, Update exsiting offer", () => {
+  test("Offer, handleOfferWrite, Update existing offer", () => {
     // Open market
     let setActiveEvent = createSetActiveEvent(olKeyHash01, token0, token1, BigInt.fromI32(1), true);
     handleSetActive(setActiveEvent);
