@@ -55,6 +55,9 @@ function addToStack(type: string, entity: Entity): void {
   } else if (type == "CleanOrder") {
     const order = changetype<CleanOrder>(entity);
     orderStack.ids = `${orderStack.ids}|${order.id}`;
+  } else if (type == "AmplifiedOfferBundle") {
+    const order = changetype<AmplifiedOfferBundle>(entity);
+    orderStack.ids = `${orderStack.ids}|${order.id}`;
   }
   orderStack.save();
 }

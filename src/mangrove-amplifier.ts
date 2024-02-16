@@ -20,7 +20,7 @@ export function addOfferToCurrentBundle(offer: Offer): void {
   bundle.save();
 
   offer.amplifiedOffer = amplifiedOffer.id;
-  offer.save();
+  // offer.save();
 }
 
 export function handleInitBundle(event: InitBundleEvent): void {
