@@ -14,7 +14,7 @@
     },
     "MangroveOrder": {
       "address": "0x092FC43fe474030387BBa4C657F0ceBc1dC218E7",
-      "startBlock": 44653500	
+      "startBlock": 44653500
     },
     "RouterProxyFactory": {
       "address": "0x2593BdD850EA25E87f3A1C83dcB8B49DAeddF0d1",
@@ -23,6 +23,10 @@
     "PointsWeights": {
       "address": "0xa472bD0CFA442b19a3e896C3F33Ab7336F7e1D7b",
       "startBlock": 45832115
+    },
+    "MgvReferral": {
+      "address": "0x5e852CA313995f7C5382061e9119a96b74Ccc928",
+      "startBlock": 45942861
     }
   },
   "matic": {
