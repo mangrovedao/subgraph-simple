@@ -1,33 +1,36 @@
-import {
-  InitBundle,
-  EndBundle,
-} from "../generated/MangroveAmplifier/MangroveAmplifier";
-
-import { AmplifiedOffer, AmplifiedOfferBundle, Offer } from "../generated/schema";
+import { log } from "matchstick-as";
+import { EndBundle as EndBundleEvent, InitBundle as InitBundleEvent } from "../generated/MangroveAmplifier/MangroveAmplifier";
+import { Offer, AmplifiedOffer, AmplifiedOfferBundle } from "../generated/schema";
+import { getEventUniqueId } from "./helpers";
 import { addBundleToStack, getLatestBundleFromStack, removeLatestBundleFromStack } from "./stack";
 
-export function addOfferToCurrentBundle(
-  offer: Offer,
-): void {
+export function addOfferToCurrentBundle(offer: Offer): void {
   const bundle = getLatestBundleFromStack();
   if (bundle === null) {
     return;
   }
+
+  log.error("Adding offer to bundle: {}", [bundle.id]);
+
   const amplifiedOffer = new AmplifiedOffer(offer.id);
-  amplifiedOffer.bundle = bundle.id 
+  amplifiedOffer.bundle = bundle.id;
   amplifiedOffer.save();
+
+  bundle.offers = bundle.offers.concat([amplifiedOffer.id]);
+  bundle.save();
 
   offer.amplifiedOffer = amplifiedOffer.id;
   offer.save();
 }
 
-export function handleInitBundle(event: InitBundle): void {
-  const bundle = new AmplifiedOfferBundle(event.params.bundleId.toHex());
-  bundle.creationDate = event.block.timestamp;
-  bundle.save();
-  addBundleToStack(bundle);
+export function handleInitBundle(event: InitBundleEvent): void {
+  const entity = new AmplifiedOfferBundle(getEventUniqueId(event));
+  entity.creationDate = event.block.timestamp;
+  entity.offers = new Array<string>();
+  entity.save();
+  addBundleToStack(entity);
 }
 
-export function handleEndBundle(event: EndBundle): void {
+export function handleEndBundle(event: EndBundleEvent): void {
   removeLatestBundleFromStack();
 }

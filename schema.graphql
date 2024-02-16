@@ -120,6 +120,8 @@ type AmplifiedOffer @entity {
 type AmplifiedOfferBundle @entity {
   id: String!
   creationDate: BigInt!
+
+  offers: [AmplifiedOffer!]!
 }
 
 type LimitOrder @entity {
@@ -223,20 +225,4 @@ type KandelParameters @entity {
 type Stack @entity {
   id: String!
   ids: String!
-}
-
-type EndBundle @entity(immutable: true) {
-  id: String!
-
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type InitBundle @entity(immutable: true) {
-  id: String!
-  bundleId: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
 }
