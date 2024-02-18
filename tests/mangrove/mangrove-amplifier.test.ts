@@ -44,7 +44,7 @@ describe("Describe entity assertions", () => {
   });
 
   test("EndBundle removes bundle from stack", () => {
-    const createBundleEvent = createInitBundleEvent(bundleId);
+    const createBundleEvent = createInitBundleEvent(bundleId, token0);
     handleInitBundle(createBundleEvent);
 
     const endBundleEvent = createEndBundleEvent();
@@ -56,7 +56,7 @@ describe("Describe entity assertions", () => {
   });
 
   test("InitBundle created and stored", () => {
-    const createBundleEvent = createInitBundleEvent(bundleId);
+    const createBundleEvent = createInitBundleEvent(bundleId, token0);
 
     handleInitBundle(createBundleEvent);
 
@@ -72,7 +72,7 @@ describe("Describe entity assertions", () => {
   });
 
   test("Offers are added to the current bundle", () => {
-    const createBundleEvent = createInitBundleEvent(bundleId);
+    const createBundleEvent = createInitBundleEvent(bundleId, token0);
     handleInitBundle(createBundleEvent);
 
     const offerId = BigInt.fromI32(1);

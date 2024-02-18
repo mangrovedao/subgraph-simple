@@ -20,9 +20,7 @@
     "type": "function",
     "name": "MGV",
     "inputs": [],
-    "outputs": [
-      { "name": "", "type": "address", "internalType": "contract IMangrove" }
-    ],
+    "outputs": [{ "name": "", "type": "address", "internalType": "contract IMangrove" }],
     "stateMutability": "view"
   },
   {
@@ -68,9 +66,7 @@
     "type": "function",
     "name": "admin",
     "inputs": [],
-    "outputs": [
-      { "name": "current", "type": "address", "internalType": "address" }
-    ],
+    "outputs": [{ "name": "current", "type": "address", "internalType": "address" }],
     "stateMutability": "view"
   },
   {
@@ -141,9 +137,7 @@
         ]
       }
     ],
-    "outputs": [
-      { "name": "ret", "type": "bytes32", "internalType": "bytes32" }
-    ],
+    "outputs": [{ "name": "ret", "type": "bytes32", "internalType": "bytes32" }],
     "stateMutability": "nonpayable"
   },
   {
@@ -288,9 +282,7 @@
   {
     "type": "function",
     "name": "offersOf",
-    "inputs": [
-      { "name": "bundleId", "type": "uint256", "internalType": "uint256" }
-    ],
+    "inputs": [{ "name": "bundleId", "type": "uint256", "internalType": "uint256" }],
     "outputs": [
       {
         "name": "",
@@ -334,9 +326,7 @@
       { "name": "olKeyHash", "type": "bytes32", "internalType": "bytes32" },
       { "name": "offerId", "type": "uint256", "internalType": "uint256" }
     ],
-    "outputs": [
-      { "name": "owner", "type": "address", "internalType": "address" }
-    ],
+    "outputs": [{ "name": "owner", "type": "address", "internalType": "address" }],
     "stateMutability": "view"
   },
   {
@@ -367,9 +357,7 @@
       },
       { "name": "offerId", "type": "uint256", "internalType": "uint256" }
     ],
-    "outputs": [
-      { "name": "provision", "type": "uint256", "internalType": "uint256" }
-    ],
+    "outputs": [{ "name": "provision", "type": "uint256", "internalType": "uint256" }],
     "stateMutability": "view"
   },
   {
@@ -403,9 +391,7 @@
         "internalType": "contract IERC20"
       }
     ],
-    "outputs": [
-      { "name": "freeWei", "type": "uint256", "internalType": "uint256" }
-    ],
+    "outputs": [{ "name": "freeWei", "type": "uint256", "internalType": "uint256" }],
     "stateMutability": "nonpayable"
   },
   {
@@ -437,17 +423,13 @@
       { "name": "offerId", "type": "uint256", "internalType": "uint256" },
       { "name": "deprovision", "type": "bool", "internalType": "bool" }
     ],
-    "outputs": [
-      { "name": "freeWei", "type": "uint256", "internalType": "uint256" }
-    ],
+    "outputs": [{ "name": "freeWei", "type": "uint256", "internalType": "uint256" }],
     "stateMutability": "nonpayable"
   },
   {
     "type": "function",
     "name": "router",
-    "inputs": [
-      { "name": "fundOwner", "type": "address", "internalType": "address" }
-    ],
+    "inputs": [{ "name": "fundOwner", "type": "address", "internalType": "address" }],
     "outputs": [
       {
         "name": "",
@@ -460,9 +442,7 @@
   {
     "type": "function",
     "name": "setAdmin",
-    "inputs": [
-      { "name": "admin_", "type": "address", "internalType": "address" }
-    ],
+    "inputs": [{ "name": "admin_", "type": "address", "internalType": "address" }],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
@@ -557,6 +537,12 @@
         "type": "uint256",
         "indexed": true,
         "internalType": "uint256"
+      },
+      {
+        "name": "outbound_tkn",
+        "type": "address",
+        "indexed": true,
+        "internalType": "contract IERC20"
       }
     ],
     "anonymous": false

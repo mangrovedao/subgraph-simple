@@ -318,7 +318,7 @@ dataSources:
       eventHandlers:
         - event: EndBundle()
           handler: handleEndBundle
-        - event: InitBundle(indexed uint256)
+        - event: InitBundle(indexed uint256,indexed address)
           handler: handleInitBundle
       file: ./src/mangrove-amplifier.ts
   - kind: ethereum

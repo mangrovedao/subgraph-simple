@@ -10,12 +10,13 @@ export function createEndBundleEvent(): EndBundle {
   return endBundleEvent;
 }
 
-export function createInitBundleEvent(bundleId: BigInt): InitBundle {
+export function createInitBundleEvent(bundleId: BigInt, outboundToken: Address): InitBundle {
   let initBundleEvent = changetype<InitBundle>(newMockEvent());
 
   initBundleEvent.parameters = new Array();
 
   initBundleEvent.parameters.push(new ethereum.EventParam("bundleId", ethereum.Value.fromUnsignedBigInt(bundleId)));
+  initBundleEvent.parameters.push(new ethereum.EventParam("outboundToken", ethereum.Value.fromAddress(outboundToken)));
 
   return initBundleEvent;
 }
