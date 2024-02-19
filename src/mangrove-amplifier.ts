@@ -10,8 +10,6 @@ export function addOfferToCurrentBundle(offer: Offer): void {
     return;
   }
 
-  log.error("Adding offer to bundle: {}", [bundle.id]);
-
   const amplifiedOffer = new AmplifiedOffer(offer.id);
   amplifiedOffer.bundle = bundle.id;
   amplifiedOffer.save();
