@@ -337,7 +337,7 @@ dataSources:
         - name: PointsWeights
           file: ./abis/PointsWeights.json
       eventHandlers:
-        - event: Weigths(indexed address,indexed address,uint256,uint256,uint256,uint256,uint256)
+        - event: Weigths(indexed address,indexed address,uint256,uint256,uint256,uint256,uint256,uint256)
           handler: handleWeigths
       file: ./src/points-weigths.ts
   - kind: ethereum
