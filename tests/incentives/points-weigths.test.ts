@@ -28,8 +28,9 @@ describe("Verify points weigths indexing", () => {
     const toBlock = BigInt.fromI32(10);
 
     const takerPointsPerDollar1 = BigInt.fromI32(1);
-    const makerPointsPerDollar1 = BigInt.fromI32(2);
-    const reffererPointsPerDollar1 = BigInt.fromI32(3);
+    const makerToTakerRatio = BigInt.fromI32(2);
+    const ncMakerToCMakerRatio = BigInt.fromI32(3);
+    const reffererPointsPerDollar1 = BigInt.fromI32(4);
 
     const setWeigthsEvent = createWeigthsEvent(
       token0,
@@ -37,7 +38,8 @@ describe("Verify points weigths indexing", () => {
       fromBlock,
       toBlock,
       takerPointsPerDollar1,
-      makerPointsPerDollar1,
+      makerToTakerRatio,
+      ncMakerToCMakerRatio,
       reffererPointsPerDollar1,
     );
     handleWeigths(setWeigthsEvent);
@@ -50,7 +52,8 @@ describe("Verify points weigths indexing", () => {
     assert.fieldEquals("Weight", weigthsId, "fromBlock", "0"); 
     assert.fieldEquals("Weight", weigthsId, "toBlock", "10"); 
     assert.fieldEquals("Weight", weigthsId, "takerPointsPerDollar", "1"); 
-    assert.fieldEquals("Weight", weigthsId, "makerPointsPerDollar", "2"); 
-    assert.fieldEquals("Weight", weigthsId, "reffererPointsPerDollar", "3");
+    assert.fieldEquals("Weight", weigthsId, "makerToTakerRatio", "2"); 
+    assert.fieldEquals("Weight", weigthsId, "ncMakerToCMakerRatio", "3"); 
+    assert.fieldEquals("Weight", weigthsId, "reffererPointsPerDollar", "4");
   });
 });

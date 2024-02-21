@@ -10,7 +10,8 @@ export function createWeigthsEvent(
   fromBlock: BigInt,
   toBlock: BigInt,
   takerPointsPerDollar: BigInt,
-  makerPointsPerDollar: BigInt,
+  makerToTakerRatio: BigInt,
+  ncMakerToCMakerRatio: BigInt,
   reffererPointsPerDollar: BigInt
 ): Weigths {
   let weigthsEvent = changetype<Weigths>(newMockEvent())
@@ -43,8 +44,14 @@ export function createWeigthsEvent(
   )
   weigthsEvent.parameters.push(
     new ethereum.EventParam(
-      "makerPointsPerDollar",
-      ethereum.Value.fromUnsignedBigInt(makerPointsPerDollar)
+      "makerToTakerRatio",
+      ethereum.Value.fromUnsignedBigInt(makerToTakerRatio)
+    )
+  )
+  weigthsEvent.parameters.push(
+    new ethereum.EventParam(
+      "ncMakerToCMakerRatio",
+      ethereum.Value.fromUnsignedBigInt(ncMakerToCMakerRatio)
     )
   )
   weigthsEvent.parameters.push(

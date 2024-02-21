@@ -21,8 +21,9 @@ export function handleWeigths(event: WeigthsEvent): void {
   weigths.fromBlock = event.params.fromBlock;
   weigths.toBlock = event.params.toBlock;
   weigths.takerPointsPerDollar = event.params.takerPointsPerDollar;
-  weigths.makerPointsPerDollar = event.params.makerPointsPerDollar;
+  weigths.makerToTakerRatio = event.params.makerToTakerRatio;
+  weigths.ncMakerToCMakerRatio = event.params.ncMakerToCMakerRatio;
   weigths.reffererPointsPerDollar = event.params.reffererPointsPerDollar;
 
-  weigths.save()
+  weigths.save();
 }
