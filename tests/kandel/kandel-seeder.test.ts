@@ -2,7 +2,7 @@ import { Address, Bytes, BigInt } from "@graphprotocol/graph-ts";
 import { assert, beforeEach, describe, test } from "matchstick-as";
 import { createNewKandelEvent } from "./kandel-seeder-utils";
 import { /*handleNewAaveKandel,*/ handleNewKandel } from "../../src/kandel-seeder";
-import { createNewAaveKandelEvent } from "./kandel-seeder-utils";
+// import { createNewAaveKandelEvent } from "./kandel-seeder-utils";
 import { createSetActiveEvent } from "../mangrove/mangrove-utils";
 import { handleSetActive } from "../../src/mangrove";
 import { prepareERC20 } from "../mangrove/helpers";
