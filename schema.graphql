@@ -234,11 +234,12 @@ type Stack @entity {
 
 type Weight @entity {
   id: String!
-  base: Bytes! # address
-  quote: Bytes! # address
-  fromBlock: BigInt! # uint256
-  toBlock: BigInt! # uint256
-  takerPointsPerDollar: BigInt! # uint256
-  makerPointsPerDollar: BigInt! # uint256
-  reffererPointsPerDollar: BigInt! # uint256
+  base: Bytes! 
+  quote: Bytes! 
+  fromBlock: BigInt!
+  toBlock: BigInt!
+  takerPointsPerDollar: BigInt! 
+  makerToTakerRatio: BigInt!
+  ncMakerToCMakerRatio: BigInt!,
+  reffererPointsPerDollar: BigInt!
 }
