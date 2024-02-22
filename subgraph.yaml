@@ -222,26 +222,26 @@ dataSources:
         - event: NewKandel(indexed address,indexed bytes32,indexed bytes32,address)
           handler: handleNewKandel
       file: ./src/kandel-seeder.ts
-  - kind: ethereum
-    name: AaveKandelSeeder
-    network: matic
-    source:
-      abi: AaveKandelSeeder
-      address: "0xA48B36E01919472fcdA56CAD574433BeCB7A87C5"
-      startBlock: 43091477
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - NewAaveKandel
-      abis:
-        - name: AaveKandelSeeder
-          file: ./abis/AaveKandelSeeder.json
-      eventHandlers:
-        - event: NewAaveKandel(indexed address,indexed bytes32,indexed bytes32,address,address)
-          handler: handleNewAaveKandel
-      file: ./src/kandel-seeder.ts
+  # - kind: ethereum
+  #   name: AaveKandelSeeder
+  #   network: matic
+  #   source:
+  #     abi: AaveKandelSeeder
+  #     address: "0xA48B36E01919472fcdA56CAD574433BeCB7A87C5"
+  #     startBlock: 43091477
+  #   mapping:
+  #     kind: ethereum/events
+  #     apiVersion: 0.0.7
+  #     language: wasm/assemblyscript
+  #     entities:
+  #       - NewAaveKandel
+  #     abis:
+  #       - name: AaveKandelSeeder
+  #         file: ./abis/AaveKandelSeeder.json
+  #     eventHandlers:
+  #       - event: NewAaveKandel(indexed address,indexed bytes32,indexed bytes32,address,address)
+  #         handler: handleNewAaveKandel
+  #     file: ./src/kandel-seeder.ts
   - kind: ethereum
     name: MangroveOrder
     network: matic
@@ -299,27 +299,27 @@ dataSources:
           handler: handleNewRouterProxy
       file: ./src/router-proxy-factory.ts
   - kind: ethereum
-    network: matic
     name: MangroveAmplifier
+    network: matic
     source:
-      abi: MangroveAmplifier
       address: "0x9a58de548212F65c5406e46563372Ee6DcC0aC43"
+      abi: MangroveAmplifier
       startBlock: 43091275
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - InitBundle
         - EndBundle
+        - InitBundle
       abis:
         - name: MangroveAmplifier
           file: ./abis/MangroveAmplifier.json
       eventHandlers:
-        - event: InitBundle(indexed uint256)
-          handler: handleInitBundle
         - event: EndBundle()
           handler: handleEndBundle
+        - event: InitBundle(indexed uint256,indexed address)
+          handler: handleInitBundle
       file: ./src/mangrove-amplifier.ts
   - kind: ethereum
     name: PointsWeights

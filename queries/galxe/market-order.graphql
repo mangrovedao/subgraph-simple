@@ -1,11 +1,5 @@
-query(
-	$address: Bytes,
-) {
-	orders(
-		where: {
-			taker: $address
-		}
-	) {
-		taker
-	}
+query($address: Bytes) {
+  orders(where: { taker: $address }) {
+    taker
+  }
 }

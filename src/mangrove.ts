@@ -26,23 +26,10 @@ import {
   SetMaxRecursionDepth,
   SetMonitor,
   SetNotify,
-  SetUseOracle,
+  SetUseOracle
 } from "../generated/Mangrove/Mangrove";
-import {
-  CleanOrder,
-  Kandel,
-  Market,
-  Offer,
-  Order,
-} from "../generated/schema";
-import {
-  getEventUniqueId,
-  getOfferId,
-  getOrCreateAccount,
-  getOrCreateAccountVolumeByPair,
-  getOrCreateToken,
-  increaseAccountVolume,
-} from "./helpers";
+import { CleanOrder, Kandel, Market, Offer, Order } from "../generated/schema";
+import { getEventUniqueId, getOfferId, getOrCreateAccount, getOrCreateAccountVolumeByPair, getOrCreateToken, increaseAccountVolume } from "./helpers";
 import {
   addCleanOrderToStack,
   addOrderToStack,
@@ -50,7 +37,7 @@ import {
   getLatestLimitOrderFromStack,
   getLatestOrderFromStack,
   removeLatestCleanOrderFromStack,
-  removeLatestOrderFromStack,
+  removeLatestOrderFromStack
 } from "./stack";
 import { limitOrderSetIsOpen } from "./mangrove-order";
 import { addOfferToCurrentBundle } from "./mangrove-amplifier";
@@ -65,9 +52,7 @@ export function handleKill(event: Kill): void {}
 
 export function handleNewMgv(event: NewMgv): void {}
 
-export function handleOfferFailWithPosthookData(
-  event: OfferFailWithPosthookData
-): void {
+export function handleOfferFailWithPosthookData(event: OfferFailWithPosthookData): void {
   handleOfferFailEvent(changetype<OfferFail>(event), event.params.posthookData);
 }
 
@@ -75,10 +60,7 @@ export function handleOfferFail(event: OfferFail): void {
   handleOfferFailEvent(event);
 }
 
-export function handleOfferFailEvent(
-  event: OfferFail,
-  posthookData: Bytes | null = null
-): void {
+export function handleOfferFailEvent(event: OfferFail, posthookData: Bytes | null = null): void {
   const offerId = getOfferId(event.params.olKeyHash, event.params.id);
   const offer = Offer.load(offerId)!;
 
@@ -100,10 +82,7 @@ export function handleOfferFailEvent(
   offer.save();
 
   const order = getLatestOrderFromStack();
-  order.penalty =
-    order.penalty !== null
-      ? order.penalty.plus(event.params.penalty)
-      : event.params.penalty;
+  order.penalty = order.penalty !== null ? order.penalty.plus(event.params.penalty) : event.params.penalty;
   order.save();
 }
 
@@ -132,23 +111,15 @@ export function handleOfferRetract(event: OfferRetract): void {
   offer.save();
 }
 
-export function handleOfferSuccessWithPosthookData(
-  event: OfferSuccessWithPosthookData
-): void {
-  handleOfferSuccessEvent(
-    changetype<OfferSuccess>(event),
-    event.params.posthookData
-  );
+export function handleOfferSuccessWithPosthookData(event: OfferSuccessWithPosthookData): void {
+  handleOfferSuccessEvent(changetype<OfferSuccess>(event), event.params.posthookData);
 }
 
 export function handleOfferSuccess(event: OfferSuccess): void {
   handleOfferSuccessEvent(event);
 }
 
-export function handleOfferSuccessEvent(
-  event: OfferSuccess,
-  posthookData: Bytes | null = null
-): void {
+export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes | null = null): void {
   const offerId = getOfferId(event.params.olKeyHash, event.params.id);
   const offer = Offer.load(offerId)!;
 
@@ -181,21 +152,11 @@ export function handleOfferSuccessEvent(
     event.block.timestamp,
     true
   );
-  increaseAccountVolume(
-    volume,
-    market.inbound_tkn,
-    event.params.takerGives,
-    event.params.takerWants,
-    true
-  );
+  increaseAccountVolume(volume, market.inbound_tkn, event.params.takerGives, event.params.takerWants, true);
 
   let order = getLatestOrderFromStack();
-  order.takerGot = order.takerGot
-    ? order.takerGot.plus(event.params.takerWants)
-    : event.params.takerWants;
-  order.takerGave = order.takerGave
-    ? order.takerGave.plus(event.params.takerGives)
-    : event.params.takerGives;
+  order.takerGot = order.takerGot ? order.takerGot.plus(event.params.takerWants) : event.params.takerWants;
+  order.takerGave = order.takerGave ? order.takerGave.plus(event.params.takerGives) : event.params.takerGives;
   order.save();
 
   offer.save();
@@ -233,11 +194,7 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.latestLogIndex = event.logIndex;
   offer.latestTransactionHash = event.transaction.hash;
 
-  const owner = getOrCreateAccount(
-    event.params.maker,
-    event.block.timestamp,
-    true
-  );
+  const owner = getOrCreateAccount(event.params.maker, event.block.timestamp, true);
   offer.maker = owner.id;
 
   const marketId = event.params.olKeyHash.toHex();
@@ -272,11 +229,7 @@ export function handleOrderStart(event: OrderStart): void {
   order.fillVolume = event.params.fillVolume;
   order.maxTick = event.params.maxTick;
   order.fillWants = event.params.fillWants;
-  order.taker = getOrCreateAccount(
-    event.params.taker,
-    event.block.timestamp,
-    true
-  ).id;
+  order.taker = getOrCreateAccount(event.params.taker, event.block.timestamp, true).id;
   order.market = event.params.olKeyHash.toHex();
 
   // 0 offers could be matched and therefore have to initialize the 4 fields
@@ -307,20 +260,8 @@ export function handleOrderComplete(event: OrderComplete): void {
   order.save();
 
   let market = Market.load(event.params.olKeyHash.toHex())!;
-  const volume = getOrCreateAccountVolumeByPair(
-    event.params.taker,
-    market.outbound_tkn,
-    market.inbound_tkn,
-    event.block.timestamp,
-    false
-  );
-  increaseAccountVolume(
-    volume,
-    market.outbound_tkn,
-    order.takerGot,
-    order.takerGave,
-    true
-  );
+  const volume = getOrCreateAccountVolumeByPair(event.params.taker, market.outbound_tkn, market.inbound_tkn, event.block.timestamp, false);
+  increaseAccountVolume(volume, market.outbound_tkn, order.takerGot, order.takerGave, true);
 
   removeLatestOrderFromStack();
 }
@@ -330,11 +271,7 @@ export function handleCleanStart(event: CleanStart): void {
   order.transactionHash = event.transaction.hash;
   order.creationDate = event.block.timestamp;
   order.offersToBeCleaned = event.params.offersToBeCleaned;
-  order.taker = getOrCreateAccount(
-    event.params.taker,
-    event.block.timestamp,
-    true
-  ).id;
+  order.taker = getOrCreateAccount(event.params.taker, event.block.timestamp, true).id;
   order.market = event.params.olKeyHash.toHex();
   order.save();
 
@@ -394,8 +331,6 @@ export function handleSetNotify(event: SetNotify): void {}
 
 export function handleSetUseOracle(event: SetUseOracle): void {}
 
-export function handleSetMaxGasreqForFailingOffers(
-  event: SetMaxGasreqForFailingOffers
-): void {}
+export function handleSetMaxGasreqForFailingOffers(event: SetMaxGasreqForFailingOffers): void {}
 
 export function handleSetMaxRecursionDepth(event: SetMaxRecursionDepth): void {}

@@ -27,6 +27,10 @@
     "MgvReferral": {
       "address": "0x5e852CA313995f7C5382061e9119a96b74Ccc928",
       "startBlock": 45942861
+    },
+    "MangroveAmplifier": {
+      "address": "0x5936A0CA18C72074852Ec81147B8D3FA714c423C",
+      "startBlock": 46141094
     }
   },
   "matic": {

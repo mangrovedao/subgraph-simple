@@ -89,7 +89,7 @@ type CleanOrder @entity {
 
   taker: Account!
   offersToBeCleaned: BigInt!
-  orders: [Order!]!  @derivedFrom(field: "cleanOrder")
+  orders: [Order!]! @derivedFrom(field: "cleanOrder")
 
   market: Market
 }
@@ -109,13 +109,13 @@ type Order @entity {
   feePaid: BigInt!
 
   market: Market
-  limitOrder: LimitOrder 
+  limitOrder: LimitOrder
   cleanOrder: CleanOrder
 }
 
 type AmplifiedOffer @entity {
   id: String!
-  
+
   inboundRoute: Bytes
   outboundRoute: Bytes
 
@@ -125,6 +125,8 @@ type AmplifiedOffer @entity {
 type AmplifiedOfferBundle @entity {
   id: String!
   creationDate: BigInt!
+
+  offers: [AmplifiedOffer!]!
 }
 
 type LimitOrder @entity {
@@ -139,13 +141,13 @@ type LimitOrder @entity {
   fillWants: Boolean!
 
   realTaker: Account!
-  
+
   inboundRoute: Bytes!
   outboundRoute: Bytes!
 
   offer: Offer
   order: Order
-  
+
   isOpen: Boolean
 }
 
@@ -168,7 +170,7 @@ type Kandel @entity {
   seeder: Bytes!
   address: Bytes!
 
-  base: Bytes! 
+  base: Bytes!
   quote: Bytes!
   baseQuoteOlKeyHash: Bytes!
   quoteBaseOlKeyHash: Bytes!
@@ -207,7 +209,7 @@ type KandelPopulateRetract @entity {
 
   isRetract: Boolean!
   offerGives: [String!]!
-  
+
   kandel: Kandel!
 }
 
