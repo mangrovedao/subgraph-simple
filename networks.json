@@ -44,6 +44,10 @@
       "address": "0x710cE7BB7eC4c4e76C716A9c0F8Ba8Fe55445460",
       "startBlock": 1848609
     },
+    "MangroveAmplifier": {
+      "address": "0xCbB118083D78f424b73602E05c141313215b732d",
+      "startBlock": 1848773
+    },
     "RouterProxyFactory": {
       "address": "0x77CD6977011658019B8aF1b77C6b1310dFA35508",
       "startBlock": 1848367 
