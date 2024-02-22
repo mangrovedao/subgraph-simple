@@ -30,5 +30,35 @@
     }
   },
   "matic": {
+  },
+  "mangrove-private-blast-sepolia": {
+    "Mangrove": {
+      "address": "0x579ba1708e8E15c9D41143a3da4B8382831E0897",
+      "startBlock": 1842865
+    },
+    "KandelSeeder": {
+      "address": "0x1A839030107167452D69d8f1a673004B2a1b8A3A",
+      "startBlock": 1911217
+    },
+    "MangroveOrder": {
+      "address": "0x710cE7BB7eC4c4e76C716A9c0F8Ba8Fe55445460",
+      "startBlock": 1848609
+    },
+    "MangroveAmplifier": {
+      "address": "0xCbB118083D78f424b73602E05c141313215b732d",
+      "startBlock": 1848773
+    },
+    "RouterProxyFactory": {
+      "address": "0x77CD6977011658019B8aF1b77C6b1310dFA35508",
+      "startBlock": 1848367 
+    },
+    "PointsWeights": {
+      "address": "0x27FF6d775F32E02044ea41B0a6CC9D7305C79224",
+      "startBlock": 1911778
+    },
+    "MgvReferral": {
+      "address": "0xCb62cD0Ea7aD46d5B630C1068C7bED2cBd2b7E23",
+      "startBlock": 1911920
+    }
   }
 }
