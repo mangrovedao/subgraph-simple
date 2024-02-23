@@ -1,6 +1,6 @@
 import { MakerBind, MakerUnbind, SetAdmin, SetRouteLogic } from "../generated/templates/SmartRouterProxy/SmartRouter";
 import { getOfferId } from "./helpers";
-import { AmplifiedOffer, LimitOrder, Market, Offer } from "../generated/schema";
+import { AmplifiedOffer, Kandel, LimitOrder, Market, Offer } from "../generated/schema";
 import { log } from "matchstick-as";
 
 export function handleMakerBind(event: MakerBind): void {}
@@ -25,6 +25,8 @@ export function handleSetRouteLogic(event: SetRouteLogic): void {
     setLogicOnLimitOrder(offer, event);
   } else if (offer.amplifiedOffer) {
     setLogicOnAmplifiedOffer(offer, event);
+  } else if (offer.kandel) {
+    setLogicOnKandel(offer, event);
   }
 }
 
@@ -44,7 +46,6 @@ function setLogicOnLimitOrder(offer: Offer, event: SetRouteLogic): void {
   } else if (event.params.token.equals(market.inbound_tkn)) {
     limitOrder.inboundRoute = event.params.logic;
   } else {
-    return;
   }
   limitOrder.save();
 }
@@ -54,7 +55,7 @@ function setLogicOnAmplifiedOffer(offer: Offer, event: SetRouteLogic): void {
 
   const amplifiedOffer = AmplifiedOffer.load(amplifiedOfferId);
   if (!amplifiedOffer) {
-    log.error("Setting logic on mangrove order: missing mangrove order with id: {}", [amplifiedOfferId]);
+    log.error("Setting logic on amplified order: missing mangrove order with id: {}", [amplifiedOfferId]);
     return;
   }
 
@@ -68,4 +69,23 @@ function setLogicOnAmplifiedOffer(offer: Offer, event: SetRouteLogic): void {
     return;
   }
   amplifiedOffer.save();
+}
+
+function setLogicOnKandel(offer: Offer, event: SetRouteLogic): void {
+  const kandel = Kandel.load(offer.kandel!);
+  if (!kandel) {
+    log.error("Setting logic on kandel order: missing mangrove order with id: {}", [offer.kandel!.toHex()]);
+    return;
+  }
+
+  const market = Market.load(offer.market)!;
+
+  if (event.params.token.equals(market.outbound_tkn)) {
+    kandel.outboundRoute = event.params.logic;
+  } else if (event.params.token.equals(market.inbound_tkn)) {
+    kandel.inboundRoute = event.params.logic;
+  } else {
+    return;
+  }
+  kandel.save();
 }
