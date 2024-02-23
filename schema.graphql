@@ -178,6 +178,9 @@ type Kandel @entity {
   deployer: Account!
   admin: Account!
 
+  inboundRoute: Bytes
+  outboundRoute: Bytes
+
   type: String!
 
   # Only for kandel AAVE

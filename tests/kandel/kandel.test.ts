@@ -21,7 +21,7 @@ import {
   handleSetStepSize
 } from "../../src/kandel";
 import { handleSetActive } from "../../src/mangrove";
-import { createSetActiveEvent } from "../mangrove/mangrove-utils";
+import { createSetActiveEvent, createSetRouteLogicEvent } from "../mangrove/mangrove-utils";
 import {
   createCreditEvent,
   createDebitEvent,
@@ -40,6 +40,7 @@ import {
   createSetStepSizeEvent
 } from "./kandel-utils";
 import { prepareERC20 } from "../mangrove/helpers";
+import { handleSetRouteLogic } from "../../src/smart-router-proxy";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -57,6 +58,9 @@ const reserveId = Address.fromString("0x0000000000000000000000000000000000000007
 const taker = Address.fromString("0x0000000000000000000000000000000000000008");
 const olKeyHash01 = Bytes.fromHexString(token0.toHex() + token1.toHex());
 const olKeyHash10 = Bytes.fromHexString(token1.toHex() + token0.toHex());
+
+const inboundLogic = Address.fromString("0x0000000000000000000000000000000000000009");
+const outboundLogic = Address.fromString("0x0000000000000000000000000000000000000011");
 
 describe("Describe entity assertions", () => {
   beforeEach(() => {
@@ -321,6 +325,28 @@ describe("Describe entity assertions", () => {
     handleSetAdmin(setAdmin);
 
     assert.fieldEquals("Kandel", kandelAddress.toHexString(), "admin", newOwner.toHexString());
+  });
+
+  test("Kandel smart router", () => {
+    const kandel = Kandel.load(kandelAddress)!;
+    kandel.save();
+
+    const offer1 = createDummyOffer(BigInt.fromI32(1), olKeyHash01);
+    offer1.gives = BigInt.fromI32(10);
+    offer1.totalGave = BigInt.fromI32(10);
+    offer1.totalGot = BigInt.fromI32(100);
+    offer1.latestLogIndex = BigInt.fromI32(4);
+    offer1.kandel = kandel.id;
+    offer1.save();
+
+    const setRouteLogicEvent1 = createSetRouteLogicEvent(olKeyHash01, token0, BigInt.fromI32(1), outboundLogic);
+    handleSetRouteLogic(setRouteLogicEvent1);
+
+    const setRouteLogicEvent2 = createSetRouteLogicEvent(olKeyHash01, token1, BigInt.fromI32(1), inboundLogic);
+    handleSetRouteLogic(setRouteLogicEvent2);
+
+    assert.fieldEquals("Kandel", kandel.id.toHex(), "outboundRoute", outboundLogic.toHexString());
+    assert.fieldEquals("Kandel", kandel.id.toHex(), "inboundRoute", inboundLogic.toHexString());
   });
 
   test("KandelParameters, handleSetBaseQuoteTickOffset", () => {
