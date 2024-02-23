@@ -178,8 +178,8 @@ type Kandel @entity {
   deployer: Account!
   admin: Account!
 
-  inboundRoute: Bytes!
-  outboundRoute: Bytes!
+  inboundRoute: Bytes
+  outboundRoute: Bytes
 
   type: String!
 
