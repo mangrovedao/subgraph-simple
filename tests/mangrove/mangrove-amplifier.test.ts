@@ -1,8 +1,7 @@
 import { assert, describe, test, clearStore, beforeAll, afterAll, beforeEach, afterEach } from "matchstick-as/assembly/index";
 import { BigInt, Bytes, Address, ethereum } from "@graphprotocol/graph-ts";
-import { EndBundle as EndBundleEvent } from "../../generated/MangroveAmplifier/MangroveAmplifier";
-import { handleEndBundle, handleInitBundle } from "../../src/mangrove-amplifier";
-import { createEndBundleEvent, createInitBundleEvent } from "../mangrove/mangrove-amplifier-utils";
+import { handleEndBundle, handleInitBundle, handleNewOwnedOffer } from "../../src/mangrove-amplifier";
+import { createEndBundleEvent, createInitBundleEvent, createNewOwnedOfferEvent } from "../mangrove/mangrove-amplifier-utils";
 import { createOfferWriteEvent, createSetActiveEvent } from "./mangrove-utils";
 import { handleOfferWrite, handleSetActive } from "../../src/mangrove";
 import { prepareERC20 } from "./helpers";
@@ -93,5 +92,28 @@ describe("Describe entity assertions", () => {
       assert.equals(ethereum.Value.fromString(offerOut), ethereum.Value.fromString(offerIdString));
       // assert.fieldEquals("AmplifiedOffer", offerOut, "id", offerId.toString());
     }
+  });
+
+  test("NewOwnedOffer updates owner of bundle and offers", () => {
+    const createBundleEvent = createInitBundleEvent(bundleId, token0);
+    handleInitBundle(createBundleEvent);
+
+    const offerId = BigInt.fromI32(1);
+
+    let offerWrite = createOfferWriteEvent(olKeyHash01, maker, BigInt.fromI32(1000), BigInt.fromI32(2000), BigInt.fromI32(0), BigInt.fromI32(0), offerId);
+    handleOfferWrite(offerWrite);
+
+    const offerIdString = getOfferId(olKeyHash01, offerId);
+
+    const newOwnedOfferEvent = createNewOwnedOfferEvent(olKeyHash01, offerId, owner);
+    handleNewOwnedOffer(newOwnedOfferEvent);
+
+    const bundle = getLatestBundleFromStack();
+    assert.assertNotNull(bundle);
+    if (bundle !== null) {
+      assert.fieldEquals("AmplifiedOfferBundle", bundle.id, "owner", owner.toHex());
+    }
+
+    assert.fieldEquals("AmplifiedOffer", offerIdString, "owner", owner.toHex());
   });
 });

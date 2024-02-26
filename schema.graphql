@@ -121,6 +121,7 @@ type AmplifiedOffer @entity {
   outboundRoute: Bytes
 
   bundle: AmplifiedOfferBundle!
+  owner: Account
 }
 
 type AmplifiedOfferBundle @entity {
@@ -128,6 +129,7 @@ type AmplifiedOfferBundle @entity {
   creationDate: BigInt!
 
   offers: [AmplifiedOffer!]!
+  owner: Account
 }
 
 type LimitOrder @entity {
