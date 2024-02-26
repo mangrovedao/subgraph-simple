@@ -122,6 +122,7 @@ type AmplifiedOffer @entity {
 
   bundle: AmplifiedOfferBundle!
   owner: Account
+  offer: Offer!
 }
 
 type AmplifiedOfferBundle @entity {

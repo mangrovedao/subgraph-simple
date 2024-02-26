@@ -12,6 +12,7 @@ export function addOfferToCurrentBundle(offer: Offer): void {
 
   const amplifiedOffer = new AmplifiedOffer(offer.id);
   amplifiedOffer.bundle = bundle.id;
+  amplifiedOffer.offer = offer.id;
   amplifiedOffer.save();
 
   bundle.offers = bundle.offers.concat([amplifiedOffer.id]);
