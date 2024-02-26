@@ -30,7 +30,6 @@ export function handleInitBundle(event: InitBundleEvent): void {
 }
 
 export function handleNewOwnedOffer(event: NewOwnedOffer): void {
-  log.error("NewOwnedOffer: {}", [event.params.owner.toHexString()]);
   const amplifiedBundle = getLatestBundleFromStack();
   const owner = getOrCreateAccount(event.params.owner, event.block.timestamp, false);
   if (amplifiedBundle !== null) {

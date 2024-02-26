@@ -312,6 +312,7 @@ dataSources:
       entities:
         - EndBundle
         - InitBundle
+        - NewOwnedOffer
       abis:
         - name: MangroveAmplifier
           file: ./abis/MangroveAmplifier.json
@@ -320,6 +321,8 @@ dataSources:
           handler: handleEndBundle
         - event: InitBundle(indexed uint256,indexed address)
           handler: handleInitBundle
+        - event: NewOwnedOffer(indexed bytes32,indexed uint256,indexed address)
+          handler: handleNewOwnedOffer
       file: ./src/mangrove-amplifier.ts
   - kind: ethereum
     name: PointsWeights
