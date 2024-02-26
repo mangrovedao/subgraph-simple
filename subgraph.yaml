@@ -312,6 +312,7 @@ dataSources:
       entities:
         - EndBundle
         - InitBundle
+        - NewOwnedOffer
       abis:
         - name: MangroveAmplifier
           file: ./abis/MangroveAmplifier.json
