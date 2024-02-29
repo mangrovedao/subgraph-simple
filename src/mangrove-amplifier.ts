@@ -24,6 +24,7 @@ export function addOfferToCurrentBundle(offer: Offer): void {
 export function handleInitBundle(event: InitBundleEvent): void {
   const entity = new AmplifiedOfferBundle(getEventUniqueId(event));
   entity.creationDate = event.block.timestamp;
+  entity.bundleId = event.params.bundleId;
   entity.offers = new Array<string>();
   entity.save();
   addBundleToStack(entity);

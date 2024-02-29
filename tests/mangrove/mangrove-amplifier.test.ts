@@ -67,6 +67,7 @@ describe("Describe entity assertions", () => {
 
     assert.entityCount("AmplifiedOfferBundle", 1);
     assert.fieldEquals("AmplifiedOfferBundle", initId, "id", initId);
+    assert.fieldEquals("AmplifiedOfferBundle", initId, "bundleId", bundleId.toString());
     assert.fieldEquals("AmplifiedOfferBundle", initId, "creationDate", createBundleEvent.block.timestamp.toString());
   });
 
