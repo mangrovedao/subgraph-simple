@@ -69,6 +69,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("AmplifiedOfferBundle", initId, "id", initId);
     assert.fieldEquals("AmplifiedOfferBundle", initId, "bundleId", bundleId.toString());
     assert.fieldEquals("AmplifiedOfferBundle", initId, "creationDate", createBundleEvent.block.timestamp.toString());
+
+    assert.fieldEquals("AmplifiedOfferBundle", initId, "expiryDate", "0");
   });
 
   test("Offers are added to the current bundle", () => {
