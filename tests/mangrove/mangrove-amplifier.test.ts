@@ -81,7 +81,6 @@ describe("Describe entity assertions", () => {
     handleOfferWrite(offerWrite);
 
     const offerIdString = getOfferId(olKeyHash01, offerId);
-    const offer = Offer.load(offerIdString)!;
 
     const bundle = getLatestBundleFromStack();
     assert.assertNotNull(bundle);
@@ -90,6 +89,8 @@ describe("Describe entity assertions", () => {
       assert.equals(ethereum.Value.fromI32(bundle.offers.length), ethereum.Value.fromI32(1));
       const offerOut = bundle.offers[0];
       assert.assertNotNull(offerOut);
+      assert.fieldEquals("Offer", offerOut, "maker", maker.toHexString());
+
       assert.equals(ethereum.Value.fromString(offerOut), ethereum.Value.fromString(offerIdString));
       // assert.fieldEquals("AmplifiedOffer", offerOut, "id", offerId.toString());
     }
