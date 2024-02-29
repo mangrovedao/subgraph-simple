@@ -127,6 +127,7 @@ type AmplifiedOffer @entity {
 type AmplifiedOfferBundle @entity {
   id: String!
   creationDate: BigInt!
+  bundleId: BigInt!
 
   offers: [AmplifiedOffer!]!
   owner: Account
