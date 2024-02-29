@@ -1,5 +1,12 @@
 import { log } from "matchstick-as";
-import { EndBundle as EndBundleEvent, InitBundle as InitBundleEvent, NewOwnedOffer } from "../generated/MangroveAmplifier/MangroveAmplifier";
+import {
+  EndBundle as EndBundleEvent,
+  InitBundle as InitBundleEvent,
+  NewOwnedOffer,
+  SetReneging as SetRenegingEvent
+} from "../generated/MangroveAmplifier/MangroveAmplifier";
+import { BigInt } from "@graphprotocol/graph-ts";
+
 import { Offer, AmplifiedOffer, AmplifiedOfferBundle } from "../generated/schema";
 import { getEventUniqueId, getOrCreateAccount } from "./helpers";
 import { addBundleToStack, getLatestBundleFromStack, removeLatestBundleFromStack } from "./stack";
@@ -27,6 +34,7 @@ export function handleInitBundle(event: InitBundleEvent): void {
   entity.creationDate = event.block.timestamp;
   entity.bundleId = event.params.bundleId;
   entity.offers = new Array<string>();
+  entity.expiryDate = BigInt.fromI32(0);
   entity.save();
   addBundleToStack(entity);
 }
@@ -51,4 +59,14 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
 
 export function handleEndBundle(event: EndBundleEvent): void {
   removeLatestBundleFromStack();
+}
+
+export function handleSetReneging(event: SetRenegingEvent): void {
+  const bundle = getLatestBundleFromStack();
+  if (bundle === null) {
+    return;
+  }
+
+  bundle.expiryDate = event.params.date;
+  bundle.save();
 }
