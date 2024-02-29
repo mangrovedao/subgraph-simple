@@ -45,11 +45,11 @@
       "startBlock": 133207
     },
     "MangroveOrder": {
-      "address": "0x9204743121466F9de67eb058c9764b5A6608E418",
+      "address": "0x50793D97A0c905Ea51c1C93f37FC73aBE6D2ffCc",
       "startBlock": 133207
     },
     "MangroveAmplifier": {
-      "address": "0x55b196D0d51840b99C7973D1b8D6d036B69eD24C",
+      "address": "0xAe9ABaD5DDC4eE2e8FAc8Bb5575212722a56D251",
       "startBlock": 133207
     },
     "RouterProxyFactory": {
