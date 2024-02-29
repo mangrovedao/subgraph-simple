@@ -35,6 +35,37 @@
   },
   "matic": {
   },
+  "mangrove-private-blast": {
+    "Mangrove": {
+      "address": "0xb1a49C54192Ea59B233200eA38aB56650Dfb448C",
+      "startBlock": 133207
+    },
+    "KandelSeeder": {
+      "address": "0x4BB7567303C8BDE27a4b490B3e5f1593c891B03d",
+      "startBlock": 133207
+    },
+    "MangroveOrder": {
+      "address": "0x9204743121466F9de67eb058c9764b5A6608E418",
+      "startBlock": 133207
+    },
+    "MangroveAmplifier": {
+      "address": "0x55b196D0d51840b99C7973D1b8D6d036B69eD24C",
+      "startBlock": 133207
+    },
+    "RouterProxyFactory": {
+      "address": "0xcf4ec117bc38d7D0fE8678B511Ff6a212c76d60B",
+      "startBlock": 133207
+    },
+    "PointsWeights": {
+      "address": "0xa52ba5E5199bE4fD363B163bDe567606589eD2E2",
+      "startBlock": 133207
+    },
+    "MgvReferral": {
+      "address": "0x07e5a2DCf82D7b5b8ab684d9b40842E174e49908",
+      "startBlock": 133207
+    }
+
+  },
   "mangrove-private-blast-sepolia": {
     "Mangrove": {
       "address": "0x579ba1708e8E15c9D41143a3da4B8382831E0897",
