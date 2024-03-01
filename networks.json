@@ -45,15 +45,15 @@
       "startBlock": 133207
     },
     "MangroveOrder": {
-      "address": "0x50793D97A0c905Ea51c1C93f37FC73aBE6D2ffCc",
+      "address": "0x83251E7F36a51c5238C9aa0c6Bb7cc209b32d80e",
       "startBlock": 133207
     },
     "MangroveAmplifier": {
-      "address": "0xAe9ABaD5DDC4eE2e8FAc8Bb5575212722a56D251",
+      "address": "0x8d1B8aa759A40EF0B5121d1F1b6F9A2694996612",
       "startBlock": 133207
     },
     "RouterProxyFactory": {
-      "address": "0xcf4ec117bc38d7D0fE8678B511Ff6a212c76d60B",
+      "address": "0x79C3F23F210e30F6AA9072F0ddFd2D180C8B7131",
       "startBlock": 133207
     },
     "PointsWeights": {
