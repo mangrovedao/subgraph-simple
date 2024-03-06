@@ -429,17 +429,6 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Order", orderId, "takerGot", "10");
     assert.fieldEquals("Order", orderId, "takerGave", "20");
 
-    const accountVolumeByPairId = getAccountVolumeByPairId(maker, token0, token1, true);
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "account", maker.toHexString());
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "token0", token0.toHexString());
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "token1", token1.toHexString());
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "token0Sent", "10");
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "token1Sent", "0");
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "token0Received", "0");
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "token1Received", "20");
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "updatedDate", orderStart.block.timestamp.toString());
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "asMaker", "true");
-
     assert.fieldEquals("LimitOrder", "limitOrderId", "isOpen", "false");
   });
 
@@ -922,14 +911,12 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Account", taker.toHex(), "creationDate", orderComplete.block.timestamp.toI32().toString());
     assert.fieldEquals("Account", taker.toHex(), "latestInteractionDate", orderComplete.block.timestamp.toI32().toString());
 
-    const accountVolumeByPairId = getAccountVolumeByPairId(taker, token0, token1, false);
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "account", taker.toHexString());
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "token0", token0.toHexString());
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "token1", token1.toHexString());
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "token0Sent", "0");
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "token1Sent", "40");
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "token0Received", "20");
-    assert.fieldEquals("AccountVolumeByPair", accountVolumeByPairId, "token1Received", "0");
+    const offerSuccessEventId = getEventUniqueId(offerSuccessEvent);
+    assert.fieldEquals("OfferFilled", offerSuccessEventId, "creationDate", offerSuccessEvent.block.timestamp.toString());
+    assert.fieldEquals("OfferFilled", offerSuccessEventId, "transactionHash", offerSuccessEvent.transaction.hash.toHexString());
+    assert.fieldEquals("OfferFilled", offerSuccessEventId, "makerGot", "40");
+    assert.fieldEquals("OfferFilled", offerSuccessEventId, "makerGave", "20");
+    assert.fieldEquals("OfferFilled", offerSuccessEventId, "offer", getOfferId(olKeyHash01, BigInt.fromI32(1)));
   });
 
   test("Order, handleCleanStart", () => {
