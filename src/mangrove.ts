@@ -81,9 +81,13 @@ export function handleOfferFailEvent(event: OfferFail, posthookData: Bytes | nul
   limitOrderSetIsOpen(offer.limitOrder, false);
   offer.save();
 
-  const order = getLatestOrderFromStack();
-  order.penalty = order.penalty !== null ? order.penalty.plus(event.params.penalty) : event.params.penalty;
-  order.save();
+  const normalOrder = getLatestOrderFromStack(false);
+  if (normalOrder) {
+    normalOrder.penalty = normalOrder.penalty !== null ? normalOrder.penalty.plus(event.params.penalty) : event.params.penalty;
+    normalOrder.save();
+  } else {
+    // TODO: add proper handling of clean order
+  }
 }
 
 export function handleOfferRetract(event: OfferRetract): void {
@@ -154,7 +158,7 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
   offerFilled.offer = offer.id;
   offerFilled.save();
 
-  let order = getLatestOrderFromStack();
+  let order = getLatestOrderFromStack(true);
   order.takerGot = order.takerGot ? order.takerGot.plus(event.params.takerWants) : event.params.takerWants;
   order.takerGave = order.takerGave ? order.takerGave.plus(event.params.takerGives) : event.params.takerGives;
   order.save();
@@ -255,11 +259,9 @@ export function handleOrderStart(event: OrderStart): void {
 }
 
 export function handleOrderComplete(event: OrderComplete): void {
-  const order = getLatestOrderFromStack();
+  const order = getLatestOrderFromStack(true);
   order.feePaid = event.params.fee;
   order.save();
-
-  let market = Market.load(event.params.olKeyHash.toHex())!;
 
   removeLatestOrderFromStack();
 }
