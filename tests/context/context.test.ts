@@ -39,23 +39,23 @@ describe("Describe entity assertions", () => {
     order2.save();
 
     addOrderToStack(order1);
-    let currentOrder = getLatestOrderFromStack();
+    let currentOrder = getLatestOrderFromStack(true);
 
     assert.assertTrue(order1.id.toString() == currentOrder.id.toString());
 
     addOrderToStack(order2);
-    currentOrder = getLatestOrderFromStack();
+    currentOrder = getLatestOrderFromStack(true);
 
     assert.assertTrue(currentOrder.id.toString() == order2.id.toString());
 
-    currentOrder = getLatestOrderFromStack();
+    currentOrder = getLatestOrderFromStack(true);
     removeLatestOrderFromStack();
 
-    currentOrder = getLatestOrderFromStack();
+    currentOrder = getLatestOrderFromStack(true);
     assert.assertTrue(currentOrder.id.toString() == order1.id.toString());
     removeLatestOrderFromStack;
 
-    const lastOrder = getLatestOrderFromStack();
+    const lastOrder = getLatestOrderFromStack(true);
     assert.assertTrue(lastOrder.id.toString() == order1.id.toString());
   });
 });

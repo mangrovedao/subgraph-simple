@@ -917,6 +917,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("OfferFilled", offerSuccessEventId, "makerGot", "40");
     assert.fieldEquals("OfferFilled", offerSuccessEventId, "makerGave", "20");
     assert.fieldEquals("OfferFilled", offerSuccessEventId, "offer", getOfferId(olKeyHash01, BigInt.fromI32(1)));
+    assert.fieldEquals("OfferFilled", offerSuccessEventId, "market", olKeyHash01.toHex());
   });
 
   test("Order, handleCleanStart", () => {

@@ -156,6 +156,7 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
   offerFilled.makerGot = event.params.takerGives;
   offerFilled.makerGave = event.params.takerWants;
   offerFilled.offer = offer.id;
+  offerFilled.market = offer.market;
   offerFilled.save();
 
   let order = getLatestOrderFromStack(true);

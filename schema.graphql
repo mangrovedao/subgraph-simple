@@ -71,6 +71,7 @@ type OfferFilled @entity {
   transactionHash: Bytes!
 
   account: Account!
+  market: Market!
 
   makerGot: BigInt!
   makerGave: BigInt!
