@@ -1,65 +1,37 @@
-import { newMockEvent } from "matchstick-as"
-import { ethereum, Address } from "@graphprotocol/graph-ts"
-import {
-  NewAaveKandel,
-  NewKandel
-} from "../../generated/KandelSeeder/KandelSeeder"
+import { newMockEvent } from "matchstick-as";
+import { ethereum, Address, Bytes } from "@graphprotocol/graph-ts";
+import { NewKandel } from "../../generated/KandelSeeder/KandelSeeder";
+// import { NewAaveKandel } from "../../generated/AaveKandelSeeder/AaveKandelSeeder";
 
-export function createNewAaveKandelEvent(
-  owner: Address,
-  base: Address,
-  quote: Address,
-  aaveKandel: Address,
-  reserveId: Address
-): NewAaveKandel {
-  let newAaveKandelEvent = changetype<NewAaveKandel>(newMockEvent())
+// export function createNewAaveKandelEvent(
+//   owner: Address,
+//   baseQuoteOlKeyHash: Bytes,
+//   quoteBaseOlKeyHash: Bytes,
+//   aaveKandel: Address,
+//   reserveId: Address
+// ): NewAaveKandel {
+//   let newAaveKandelEvent = changetype<NewAaveKandel>(newMockEvent());
+//
+//   newAaveKandelEvent.parameters = new Array();
+//
+//   newAaveKandelEvent.parameters.push(new ethereum.EventParam("owner", ethereum.Value.fromAddress(owner)));
+//   newAaveKandelEvent.parameters.push(new ethereum.EventParam("baseQuoteOlKeyHash", ethereum.Value.fromBytes(baseQuoteOlKeyHash)));
+//   newAaveKandelEvent.parameters.push(new ethereum.EventParam("quoteBaseOlKeyHash", ethereum.Value.fromBytes(quoteBaseOlKeyHash)));
+//   newAaveKandelEvent.parameters.push(new ethereum.EventParam("aaveKandel", ethereum.Value.fromAddress(aaveKandel)));
+//   newAaveKandelEvent.parameters.push(new ethereum.EventParam("reserveId", ethereum.Value.fromAddress(reserveId)));
+//
+//   return newAaveKandelEvent;
+// }
 
-  newAaveKandelEvent.parameters = new Array()
+export function createNewKandelEvent(owner: Address, baseQuoteOlKeyHash: Bytes, quoteBaseOlKeyHash: Bytes, kandel: Address): NewKandel {
+  let newKandelEvent = changetype<NewKandel>(newMockEvent());
 
-  newAaveKandelEvent.parameters.push(
-    new ethereum.EventParam("owner", ethereum.Value.fromAddress(owner))
-  )
-  newAaveKandelEvent.parameters.push(
-    new ethereum.EventParam("base", ethereum.Value.fromAddress(base))
-  )
-  newAaveKandelEvent.parameters.push(
-    new ethereum.EventParam("quote", ethereum.Value.fromAddress(quote))
-  )
-  newAaveKandelEvent.parameters.push(
-    new ethereum.EventParam(
-      "aaveKandel",
-      ethereum.Value.fromAddress(aaveKandel)
-    )
-  )
-  newAaveKandelEvent.parameters.push(
-    new ethereum.EventParam("reserveId", ethereum.Value.fromAddress(reserveId))
-  )
+  newKandelEvent.parameters = new Array();
 
-  return newAaveKandelEvent
-}
+  newKandelEvent.parameters.push(new ethereum.EventParam("owner", ethereum.Value.fromAddress(owner)));
+  newKandelEvent.parameters.push(new ethereum.EventParam("baseQuoteOlKeyHash", ethereum.Value.fromBytes(baseQuoteOlKeyHash)));
+  newKandelEvent.parameters.push(new ethereum.EventParam("quoteBaseOlKeyHash", ethereum.Value.fromBytes(quoteBaseOlKeyHash)));
+  newKandelEvent.parameters.push(new ethereum.EventParam("kandel", ethereum.Value.fromAddress(kandel)));
 
-export function createNewKandelEvent(
-  owner: Address,
-  base: Address,
-  quote: Address,
-  kandel: Address
-): NewKandel {
-  let newKandelEvent = changetype<NewKandel>(newMockEvent())
-
-  newKandelEvent.parameters = new Array()
-
-  newKandelEvent.parameters.push(
-    new ethereum.EventParam("owner", ethereum.Value.fromAddress(owner))
-  )
-  newKandelEvent.parameters.push(
-    new ethereum.EventParam("base", ethereum.Value.fromAddress(base))
-  )
-  newKandelEvent.parameters.push(
-    new ethereum.EventParam("quote", ethereum.Value.fromAddress(quote))
-  )
-  newKandelEvent.parameters.push(
-    new ethereum.EventParam("kandel", ethereum.Value.fromAddress(kandel))
-  )
-
-  return newKandelEvent
+  return newKandelEvent;
 }

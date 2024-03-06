@@ -1,54 +1,45 @@
-import { newMockEvent } from "matchstick-as"
-import { ethereum, Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { newMockEvent } from "matchstick-as";
+import { ethereum, Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {
   Credit,
   Debit,
   LogIncident,
   Mgv,
-  Pair,
   PopulateEnd,
   PopulateStart,
   RetractEnd,
   RetractStart,
   SetAdmin,
-  SetCompoundRates,
+  SetBaseQuoteTickOffset,
   SetGasprice,
   SetGasreq,
-  SetGeometricParams,
   SetIndexMapping,
   SetLength,
   SetReserveId,
-  SetRouter
-} from "../../generated/templates/Kandel/Kandel"
+  SetRouter,
+  SetStepSize
+} from "../../generated/templates/Kandel/Kandel";
 
 export function createCreditEvent(token: Address, amount: BigInt): Credit {
-  let creditEvent = changetype<Credit>(newMockEvent())
+  let creditEvent = changetype<Credit>(newMockEvent());
 
-  creditEvent.parameters = new Array()
+  creditEvent.parameters = new Array();
 
-  creditEvent.parameters.push(
-    new ethereum.EventParam("token", ethereum.Value.fromAddress(token))
-  )
-  creditEvent.parameters.push(
-    new ethereum.EventParam("amount", ethereum.Value.fromUnsignedBigInt(amount))
-  )
+  creditEvent.parameters.push(new ethereum.EventParam("token", ethereum.Value.fromAddress(token)));
+  creditEvent.parameters.push(new ethereum.EventParam("amount", ethereum.Value.fromUnsignedBigInt(amount)));
 
-  return creditEvent
+  return creditEvent;
 }
 
 export function createDebitEvent(token: Address, amount: BigInt): Debit {
-  let debitEvent = changetype<Debit>(newMockEvent())
+  let debitEvent = changetype<Debit>(newMockEvent());
 
-  debitEvent.parameters = new Array()
+  debitEvent.parameters = new Array();
 
-  debitEvent.parameters.push(
-    new ethereum.EventParam("token", ethereum.Value.fromAddress(token))
-  )
-  debitEvent.parameters.push(
-    new ethereum.EventParam("amount", ethereum.Value.fromUnsignedBigInt(amount))
-  )
+  debitEvent.parameters.push(new ethereum.EventParam("token", ethereum.Value.fromAddress(token)));
+  debitEvent.parameters.push(new ethereum.EventParam("amount", ethereum.Value.fromUnsignedBigInt(amount)));
 
-  return debitEvent
+  return debitEvent;
 }
 
 export function createLogIncidentEvent(
@@ -59,241 +50,161 @@ export function createLogIncidentEvent(
   makerData: Bytes,
   mgvData: Bytes
 ): LogIncident {
-  let logIncidentEvent = changetype<LogIncident>(newMockEvent())
+  let logIncidentEvent = changetype<LogIncident>(newMockEvent());
 
-  logIncidentEvent.parameters = new Array()
+  logIncidentEvent.parameters = new Array();
 
-  logIncidentEvent.parameters.push(
-    new ethereum.EventParam("mangrove", ethereum.Value.fromAddress(mangrove))
-  )
-  logIncidentEvent.parameters.push(
-    new ethereum.EventParam(
-      "outbound_tkn",
-      ethereum.Value.fromAddress(outbound_tkn)
-    )
-  )
-  logIncidentEvent.parameters.push(
-    new ethereum.EventParam(
-      "inbound_tkn",
-      ethereum.Value.fromAddress(inbound_tkn)
-    )
-  )
-  logIncidentEvent.parameters.push(
-    new ethereum.EventParam(
-      "offerId",
-      ethereum.Value.fromUnsignedBigInt(offerId)
-    )
-  )
-  logIncidentEvent.parameters.push(
-    new ethereum.EventParam(
-      "makerData",
-      ethereum.Value.fromFixedBytes(makerData)
-    )
-  )
-  logIncidentEvent.parameters.push(
-    new ethereum.EventParam("mgvData", ethereum.Value.fromFixedBytes(mgvData))
-  )
+  logIncidentEvent.parameters.push(new ethereum.EventParam("mangrove", ethereum.Value.fromAddress(mangrove)));
+  logIncidentEvent.parameters.push(new ethereum.EventParam("outbound_tkn", ethereum.Value.fromAddress(outbound_tkn)));
+  logIncidentEvent.parameters.push(new ethereum.EventParam("inbound_tkn", ethereum.Value.fromAddress(inbound_tkn)));
+  logIncidentEvent.parameters.push(new ethereum.EventParam("offerId", ethereum.Value.fromUnsignedBigInt(offerId)));
+  logIncidentEvent.parameters.push(new ethereum.EventParam("makerData", ethereum.Value.fromFixedBytes(makerData)));
+  logIncidentEvent.parameters.push(new ethereum.EventParam("mgvData", ethereum.Value.fromFixedBytes(mgvData)));
 
-  return logIncidentEvent
+  return logIncidentEvent;
 }
 
 export function createMgvEvent(mgv: Address): Mgv {
-  let mgvEvent = changetype<Mgv>(newMockEvent())
+  let mgvEvent = changetype<Mgv>(newMockEvent());
 
-  mgvEvent.parameters = new Array()
+  mgvEvent.parameters = new Array();
 
-  mgvEvent.parameters.push(
-    new ethereum.EventParam("mgv", ethereum.Value.fromAddress(mgv))
-  )
+  mgvEvent.parameters.push(new ethereum.EventParam("mgv", ethereum.Value.fromAddress(mgv)));
 
-  return mgvEvent
+  return mgvEvent;
 }
 
-export function createPairEvent(base: Address, quote: Address): Pair {
-  let pairEvent = changetype<Pair>(newMockEvent())
+export function createOfferListKeyEvent(olKeyHash: Bytes): Pair {
+  let pairEvent = changetype<Pair>(newMockEvent());
 
-  pairEvent.parameters = new Array()
+  pairEvent.parameters = new Array();
 
-  pairEvent.parameters.push(
-    new ethereum.EventParam("base", ethereum.Value.fromAddress(base))
-  )
-  pairEvent.parameters.push(
-    new ethereum.EventParam("quote", ethereum.Value.fromAddress(quote))
-  )
+  pairEvent.parameters.push(new ethereum.EventParam("olKeyHash", ethereum.Value.fromBytes(olKeyHash)));
 
-  return pairEvent
+  return pairEvent;
 }
 
 export function createPopulateEndEvent(): PopulateEnd {
-  let populateEndEvent = changetype<PopulateEnd>(newMockEvent())
+  let populateEndEvent = changetype<PopulateEnd>(newMockEvent());
 
-  populateEndEvent.parameters = new Array()
+  populateEndEvent.parameters = new Array();
 
-  return populateEndEvent
+  return populateEndEvent;
 }
 
 export function createPopulateStartEvent(): PopulateStart {
-  let populateStartEvent = changetype<PopulateStart>(newMockEvent())
+  let populateStartEvent = changetype<PopulateStart>(newMockEvent());
 
-  populateStartEvent.parameters = new Array()
+  populateStartEvent.parameters = new Array();
 
-  return populateStartEvent
+  return populateStartEvent;
 }
 
 export function createRetractEndEvent(): RetractEnd {
-  let retractEndEvent = changetype<RetractEnd>(newMockEvent())
+  let retractEndEvent = changetype<RetractEnd>(newMockEvent());
 
-  retractEndEvent.parameters = new Array()
+  retractEndEvent.parameters = new Array();
 
-  return retractEndEvent
+  return retractEndEvent;
 }
 
 export function createRetractStartEvent(): RetractStart {
-  let retractStartEvent = changetype<RetractStart>(newMockEvent())
+  let retractStartEvent = changetype<RetractStart>(newMockEvent());
 
-  retractStartEvent.parameters = new Array()
+  retractStartEvent.parameters = new Array();
 
-  return retractStartEvent
+  return retractStartEvent;
 }
 
 export function createSetAdminEvent(admin: Address): SetAdmin {
-  let setAdminEvent = changetype<SetAdmin>(newMockEvent())
+  let setAdminEvent = changetype<SetAdmin>(newMockEvent());
 
-  setAdminEvent.parameters = new Array()
+  setAdminEvent.parameters = new Array();
 
-  setAdminEvent.parameters.push(
-    new ethereum.EventParam("admin", ethereum.Value.fromAddress(admin))
-  )
+  setAdminEvent.parameters.push(new ethereum.EventParam("admin", ethereum.Value.fromAddress(admin)));
 
-  return setAdminEvent
+  return setAdminEvent;
 }
 
-export function createSetCompoundRatesEvent(
-  compoundRateBase: BigInt,
-  compoundRateQuote: BigInt
-): SetCompoundRates {
-  let setCompoundRatesEvent = changetype<SetCompoundRates>(newMockEvent())
+export function createSetBaseQuoteTickOffsetEvent(baseQuoteTickOffset: BigInt): SetBaseQuoteTickOffset {
+  let setCompoundRatesEvent = changetype<SetBaseQuoteTickOffset>(newMockEvent());
 
-  setCompoundRatesEvent.parameters = new Array()
+  setCompoundRatesEvent.parameters = new Array();
 
-  setCompoundRatesEvent.parameters.push(
-    new ethereum.EventParam(
-      "compoundRateBase",
-      ethereum.Value.fromUnsignedBigInt(compoundRateBase)
-    )
-  )
-  setCompoundRatesEvent.parameters.push(
-    new ethereum.EventParam(
-      "compoundRateQuote",
-      ethereum.Value.fromUnsignedBigInt(compoundRateQuote)
-    )
-  )
+  setCompoundRatesEvent.parameters.push(new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(baseQuoteTickOffset)));
 
-  return setCompoundRatesEvent
+  return setCompoundRatesEvent;
 }
 
 export function createSetGaspriceEvent(value: BigInt): SetGasprice {
-  let setGaspriceEvent = changetype<SetGasprice>(newMockEvent())
+  let setGaspriceEvent = changetype<SetGasprice>(newMockEvent());
 
-  setGaspriceEvent.parameters = new Array()
+  setGaspriceEvent.parameters = new Array();
 
-  setGaspriceEvent.parameters.push(
-    new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(value))
-  )
+  setGaspriceEvent.parameters.push(new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(value)));
 
-  return setGaspriceEvent
+  return setGaspriceEvent;
 }
 
 export function createSetGasreqEvent(value: BigInt): SetGasreq {
-  let setGasreqEvent = changetype<SetGasreq>(newMockEvent())
+  let setGasreqEvent = changetype<SetGasreq>(newMockEvent());
 
-  setGasreqEvent.parameters = new Array()
+  setGasreqEvent.parameters = new Array();
 
-  setGasreqEvent.parameters.push(
-    new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(value))
-  )
+  setGasreqEvent.parameters.push(new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(value)));
 
-  return setGasreqEvent
+  return setGasreqEvent;
 }
 
-export function createSetGeometricParamsEvent(
-  spread: BigInt,
-  ratio: BigInt
-): SetGeometricParams {
-  let setGeometricParamsEvent = changetype<SetGeometricParams>(newMockEvent())
+export function createSetIndexMappingEvent(ba: i32, index: BigInt, offerId: BigInt): SetIndexMapping {
+  let setIndexMappingEvent = changetype<SetIndexMapping>(newMockEvent());
 
-  setGeometricParamsEvent.parameters = new Array()
+  setIndexMappingEvent.parameters = new Array();
 
-  setGeometricParamsEvent.parameters.push(
-    new ethereum.EventParam("spread", ethereum.Value.fromUnsignedBigInt(spread))
-  )
-  setGeometricParamsEvent.parameters.push(
-    new ethereum.EventParam("ratio", ethereum.Value.fromUnsignedBigInt(ratio))
-  )
+  setIndexMappingEvent.parameters.push(new ethereum.EventParam("ba", ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(ba))));
+  setIndexMappingEvent.parameters.push(new ethereum.EventParam("index", ethereum.Value.fromUnsignedBigInt(index)));
+  setIndexMappingEvent.parameters.push(new ethereum.EventParam("offerId", ethereum.Value.fromUnsignedBigInt(offerId)));
 
-  return setGeometricParamsEvent
-}
-
-export function createSetIndexMappingEvent(
-  ba: i32,
-  index: BigInt,
-  offerId: BigInt
-): SetIndexMapping {
-  let setIndexMappingEvent = changetype<SetIndexMapping>(newMockEvent())
-
-  setIndexMappingEvent.parameters = new Array()
-
-  setIndexMappingEvent.parameters.push(
-    new ethereum.EventParam(
-      "ba",
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(ba))
-    )
-  )
-  setIndexMappingEvent.parameters.push(
-    new ethereum.EventParam("index", ethereum.Value.fromUnsignedBigInt(index))
-  )
-  setIndexMappingEvent.parameters.push(
-    new ethereum.EventParam(
-      "offerId",
-      ethereum.Value.fromUnsignedBigInt(offerId)
-    )
-  )
-
-  return setIndexMappingEvent
+  return setIndexMappingEvent;
 }
 
 export function createSetLengthEvent(value: BigInt): SetLength {
-  let setLengthEvent = changetype<SetLength>(newMockEvent())
+  let setLengthEvent = changetype<SetLength>(newMockEvent());
 
-  setLengthEvent.parameters = new Array()
+  setLengthEvent.parameters = new Array();
 
-  setLengthEvent.parameters.push(
-    new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(value))
-  )
+  setLengthEvent.parameters.push(new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(value)));
 
-  return setLengthEvent
+  return setLengthEvent;
 }
 
 export function createSetReserveIdEvent(reserveId: Address): SetReserveId {
-  let setReserveIdEvent = changetype<SetReserveId>(newMockEvent())
+  let setReserveIdEvent = changetype<SetReserveId>(newMockEvent());
 
-  setReserveIdEvent.parameters = new Array()
+  setReserveIdEvent.parameters = new Array();
 
-  setReserveIdEvent.parameters.push(
-    new ethereum.EventParam("reserveId", ethereum.Value.fromAddress(reserveId))
-  )
+  setReserveIdEvent.parameters.push(new ethereum.EventParam("reserveId", ethereum.Value.fromAddress(reserveId)));
 
-  return setReserveIdEvent
+  return setReserveIdEvent;
 }
 
 export function createSetRouterEvent(router: Address): SetRouter {
-  let setRouterEvent = changetype<SetRouter>(newMockEvent())
+  let setRouterEvent = changetype<SetRouter>(newMockEvent());
 
-  setRouterEvent.parameters = new Array()
+  setRouterEvent.parameters = new Array();
 
-  setRouterEvent.parameters.push(
-    new ethereum.EventParam("router", ethereum.Value.fromAddress(router))
-  )
+  setRouterEvent.parameters.push(new ethereum.EventParam("router", ethereum.Value.fromAddress(router)));
 
-  return setRouterEvent
+  return setRouterEvent;
+}
+
+// setStepSize
+export function createSetStepSizeEvent(value: BigInt): SetStepSize {
+  let setStepSizeEvent = changetype<SetStepSize>(newMockEvent());
+
+  setStepSizeEvent.parameters = new Array();
+
+  setStepSizeEvent.parameters.push(new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(value)));
+
+  return setStepSizeEvent;
 }

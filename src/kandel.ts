@@ -1,33 +1,33 @@
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { Address, BigInt } from "@graphprotocol/graph-ts";
 import {
-  Kandel,
   Credit,
   Debit,
   LogIncident,
   Mgv,
-  Pair,
+  OfferListKey,
   PopulateEnd,
   PopulateStart,
   RetractEnd,
   RetractStart,
   SetAdmin,
-  SetCompoundRates,
+  SetBaseQuoteTickOffset,
   SetGasprice,
   SetGasreq,
-  SetGeometricParams,
   SetIndexMapping,
   SetLength,
   SetReserveId,
-  SetRouter
-} from "../generated/templates/Kandel/Kandel"
+  SetRouter,
+  SetStepSize
+} from "../generated/templates/Kandel/Kandel";
 import { KandelDepositWithdraw, Kandel as KandelEntity, KandelPopulateRetract, Offer } from "../generated/schema";
-import { getEventUniqueId, getMarketId, getOfferId, getOrCreateKandelParameters } from "./helpers";
-import { log } from "matchstick-as";
+import { getEventUniqueId, getOfferId, getOrCreateAccount, getOrCreateKandelParameters } from "./helpers";
 
 export function handleCredit(event: Credit): void {
-  const deposit = new KandelDepositWithdraw(
-    getEventUniqueId(event),
-  );
+  if (event.params.amount.equals(BigInt.fromI32(0))) {
+    return;
+  }
+
+  const deposit = new KandelDepositWithdraw(getEventUniqueId(event));
 
   deposit.transactionHash = event.transaction.hash;
   deposit.date = event.block.timestamp;
@@ -37,7 +37,7 @@ export function handleCredit(event: Credit): void {
 
   deposit.kandel = event.address;
 
-  const kandel = KandelEntity.load(event.address)!;  // TODO: use load in block
+  const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
 
   if (Address.fromBytes(kandel.base).equals(event.params.token)) {
     kandel.depositedBase = kandel.depositedBase.plus(event.params.amount);
@@ -45,14 +45,16 @@ export function handleCredit(event: Credit): void {
     kandel.depositedQuote = kandel.depositedQuote.plus(event.params.amount);
   }
 
-  kandel.save()
+  kandel.save();
   deposit.save();
 }
 
 export function handleDebit(event: Debit): void {
-  const withdraw = new KandelDepositWithdraw(
-    getEventUniqueId(event),
-  );
+  if (event.params.amount.equals(BigInt.fromI32(0))) {
+    return;
+  }
+
+  const withdraw = new KandelDepositWithdraw(getEventUniqueId(event));
 
   withdraw.transactionHash = event.transaction.hash;
   withdraw.date = event.block.timestamp;
@@ -74,14 +76,14 @@ export function handleDebit(event: Debit): void {
   withdraw.save();
 }
 
-export function handleLogIncident(event: LogIncident): void { }
+export function handleLogIncident(event: LogIncident): void {}
 
 export function handleMgv(event: Mgv): void {
   // nothing to do here as we have one subgraph by mangrove
 }
 
-export function handlePair(event: Pair): void {
-  // nothing to do we already have this information inside NewKandle
+export function handleOfferListKey(event: OfferListKey): void {
+  // nothing to do we already have this information inside NewKandel
 }
 
 export function handlePopulateEnd(event: PopulateEnd): void {
@@ -94,22 +96,26 @@ export function handlePopulateEnd(event: PopulateEnd): void {
     if (offer.latestTransactionHash == event.transaction.hash && offer.latestLogIndex.gt(kandelPopulateRetract.startLogIndex)) {
       const totalGave = offer.totalGave === null ? BigInt.fromI32(0) : offer.totalGave;
       const totalGot = offer.totalGot === null ? BigInt.fromI32(0) : offer.totalGot;
-      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([`${offerIds[i]}-${offer.gives}-${totalGave.toString()}-${totalGot.toString()}`]);
+      kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([
+        `${offerIds[i]}-${offer.gives}-${totalGave.toString()}-${totalGot.toString()}`
+      ]);
     }
   }
   kandelPopulateRetract.save();
 }
 
 export function getOfferIdsForKandel(kandel: KandelEntity): string[] {
-  let offerIds = new Array<string>()
+  let offerIds = new Array<string>();
   for (let i = 0; i < kandel.offerIndexes.length; i++) {
-    const info = kandel.offerIndexes[i].toString().split('-');
+    const info = kandel.offerIndexes[i].toString().split("-");
     const offerNumber = info[1];
     const ba = info[2];
-    if (ba == '1') { // Ask
-      offerIds.push(getOfferId(Address.fromBytes(kandel.base), Address.fromBytes(kandel.quote), BigInt.fromString(offerNumber)));
-    } else if (ba == '0') { // Bid
-      offerIds.push(getOfferId(Address.fromBytes(kandel.quote), Address.fromBytes(kandel.base), BigInt.fromString(offerNumber)));
+    if (ba == "1") {
+      // Ask
+      offerIds.push(getOfferId(kandel.baseQuoteOlKeyHash, BigInt.fromString(offerNumber)));
+    } else if (ba == "0") {
+      // Bid
+      offerIds.push(getOfferId(kandel.quoteBaseOlKeyHash, BigInt.fromString(offerNumber)));
     }
   }
   return offerIds;
@@ -156,56 +162,72 @@ export function handleRetractStart(event: RetractStart): void {
 export function handleSetAdmin(event: SetAdmin): void {
   const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
 
-  kandel.admin = event.params.admin;
-
+  const adminAccount = getOrCreateAccount(event.params.admin, event.block.timestamp, false);
+  kandel.admin = adminAccount.address;
   kandel.save();
 }
 
-export function handleSetCompoundRates(event: SetCompoundRates): void {
-  const kandel = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
-  kandel.compoundRateBase = event.params.compoundRateBase;
-  kandel.compoundRateQuote = event.params.compoundRateQuote;
-
+export function handleSetBaseQuoteTickOffset(event: SetBaseQuoteTickOffset): void {
+  const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
+  kandel.baseQuoteTickOffset = event.params.value;
   kandel.save();
+
+  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  kandelParams.baseQuoteTickOffset = event.params.value;
+
+  kandelParams.save();
 }
 
 export function handleSetGasprice(event: SetGasprice): void {
-  const kandel = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
-  kandel.creationDate = event.block.timestamp;
+  const kandel = KandelEntity.load(event.address)!;
   kandel.gasprice = event.params.value;
-
   kandel.save();
+
+  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  kandelParams.gasprice = event.params.value;
+
+  kandelParams.save();
 }
 
 export function handleSetGasreq(event: SetGasreq): void {
-  const kandel = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
-  kandel.creationDate = event.block.timestamp;
+  const kandel = KandelEntity.load(event.address)!;
   kandel.gasreq = event.params.value;
-
   kandel.save();
-}
 
-export function handleSetGeometricParams(event: SetGeometricParams): void {
-  const kandel = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
-  kandel.creationDate = event.block.timestamp;
-  kandel.spread = event.params.spread;
-  kandel.ratio = event.params.ratio;
+  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  kandelParams.gasreq = event.params.value;
 
-  kandel.save();
+  kandelParams.save();
 }
 
 export function handleSetIndexMapping(event: SetIndexMapping): void {
   const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
+  if (event.params.ba === 0) {
+    // bid
+
+    const offer = Offer.load(getOfferId(kandel.quoteBaseOlKeyHash, event.params.offerId))!;
+    offer.kandelIndex = event.params.index;
+    offer.save();
+  } else {
+    // ask
+    const offer = Offer.load(getOfferId(kandel.baseQuoteOlKeyHash, event.params.offerId))!;
+    offer.kandelIndex = event.params.index;
+    offer.save();
+  }
+
   kandel.offerIndexes = kandel.offerIndexes.concat([`${event.params.index}-${event.params.offerId}-${event.params.ba}`]);
   kandel.save();
 }
 
 export function handleSetLength(event: SetLength): void {
-  const kandel = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
-  kandel.creationDate = event.block.timestamp;
+  const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
   kandel.length = event.params.value;
-
   kandel.save();
+
+  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  kandelParams.length = event.params.value;
+
+  kandelParams.save();
 }
 
 export function handleSetReserveId(event: SetReserveId): void {
@@ -220,4 +242,15 @@ export function handleSetRouter(event: SetRouter): void {
   kandel.router = event.params.router;
 
   kandel.save();
+}
+
+export function handleSetStepSize(event: SetStepSize): void {
+  const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
+  kandel.stepSize = event.params.value;
+  kandel.save();
+
+  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  kandelParams.stepSize = event.params.value;
+
+  kandelParams.save();
 }

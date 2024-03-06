@@ -1,8 +1,99 @@
 {
   "mumbai": {
     "Mangrove": {
-      "address": "0xd1805f6Fe12aFF69D4264aE3e49ef320895e2D8b",
-      "startBlock": 35666000
+      "address": "0x80cd6Ef14c23dD3957FD5629141a9d7028557c39",
+      "startBlock": 43711819
+    },
+    "KandelSeeder": {
+      "address": "0x878f8820cd99a96381074548a1B72d27A77fadA2",
+      "startBlock": 43711838
+    },
+    "AaveKandelSeeder": {
+      "address": "0x215A21620Ded0451F4867A5Ffa347351826233a4",
+      "startBlock": 45080305
+    },
+    "MangroveOrder": {
+      "address": "0x092FC43fe474030387BBa4C657F0ceBc1dC218E7",
+      "startBlock": 44653500
+    },
+    "RouterProxyFactory": {
+      "address": "0x2593BdD850EA25E87f3A1C83dcB8B49DAeddF0d1",
+      "startBlock": 44611263
+    },
+    "PointsWeights": {
+      "address": "0x787612FA81529FECF44882Dae128254329727dCE",
+      "startBlock": 46140257
+    },
+    "MgvReferral": {
+      "address": "0x5e852CA313995f7C5382061e9119a96b74Ccc928",
+      "startBlock": 45942861
+    },
+    "MangroveAmplifier": {
+      "address": "0x5936A0CA18C72074852Ec81147B8D3FA714c423C",
+      "startBlock": 46141094
+    }
+  },
+  "matic": {
+  },
+  "mangrove-private-blast": {
+    "Mangrove": {
+      "address": "0xb1a49C54192Ea59B233200eA38aB56650Dfb448C",
+      "startBlock": 133207
+    },
+    "KandelSeeder": {
+      "address": "0x4BB7567303C8BDE27a4b490B3e5f1593c891B03d",
+      "startBlock": 133207
+    },
+    "MangroveOrder": {
+      "address": "0x83251E7F36a51c5238C9aa0c6Bb7cc209b32d80e",
+      "startBlock": 133207
+    },
+    "MangroveAmplifier": {
+      "address": "0x8d1B8aa759A40EF0B5121d1F1b6F9A2694996612",
+      "startBlock": 133207
+    },
+    "RouterProxyFactory": {
+      "address": "0x79C3F23F210e30F6AA9072F0ddFd2D180C8B7131",
+      "startBlock": 133207
+    },
+    "PointsWeights": {
+      "address": "0xa52ba5E5199bE4fD363B163bDe567606589eD2E2",
+      "startBlock": 133207
+    },
+    "MgvReferral": {
+      "address": "0x07e5a2DCf82D7b5b8ab684d9b40842E174e49908",
+      "startBlock": 133207
+    }
+
+  },
+  "mangrove-private-blast-sepolia": {
+    "Mangrove": {
+      "address": "0x579ba1708e8E15c9D41143a3da4B8382831E0897",
+      "startBlock": 1842865
+    },
+    "KandelSeeder": {
+      "address": "0x1A839030107167452D69d8f1a673004B2a1b8A3A",
+      "startBlock": 1911217
+    },
+    "MangroveOrder": {
+      "address": "0x710cE7BB7eC4c4e76C716A9c0F8Ba8Fe55445460",
+      "startBlock": 1848609
+    },
+    "MangroveAmplifier": {
+      "address": "0xCbB118083D78f424b73602E05c141313215b732d",
+      "startBlock": 1848773
+    },
+    "RouterProxyFactory": {
+      "address": "0x77CD6977011658019B8aF1b77C6b1310dFA35508",
+      "startBlock": 1848367 
+    },
+    "PointsWeights": {
+      "address": "0x27FF6d775F32E02044ea41B0a6CC9D7305C79224",
+      "startBlock": 1911778
+    },
+    "MgvReferral": {
+      "address": "0xCb62cD0Ea7aD46d5B630C1068C7bED2cBd2b7E23",
+      "startBlock": 1911920
     }
   }
 }

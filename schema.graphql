@@ -1,12 +1,30 @@
-type Account @entity(immutable: true) {
+type Account @entity {
   id: Bytes!
   address: Bytes!
+  creationDate: BigInt!
+  latestInteractionDate: BigInt!
+  proxyDeployed: Boolean!
+  proxy: Bytes
+
+  isReferrer: Boolean!
+
+  referrer: Account
+  referrals: [Account!]! @derivedFrom(field: "referrer")
+}
+
+type Token @entity {
+  id: Bytes!
+  address: Bytes!
+  name: String!
+  symbol: String!
+  decimals: BigInt!
 }
 
 type Market @entity {
   id: String!
   outbound_tkn: Bytes! # address
   inbound_tkn: Bytes! # address
+  tickSpacing: BigInt!
   active: Boolean!
   gasbase: BigInt!
 }
@@ -18,12 +36,11 @@ type Offer @entity {
   creationDate: BigInt!
   latestUpdateDate: BigInt!
   offerId: BigInt!
-  wants: BigInt!
+  tick: BigInt!
   gives: BigInt!
   gasprice: BigInt!
   gasreq: BigInt!
   gasBase: BigInt!
-  prev: BigInt!
   isOpen: Boolean!
   isFailed: Boolean!
   isFilled: Boolean!
@@ -31,15 +48,46 @@ type Offer @entity {
   failedReason: Bytes
   posthookFailReason: Bytes
   deprovisioned: Boolean!
+  latestPenalty: BigInt!
+  totalPenalty: BigInt!
   totalGot: BigInt!
   totalGave: BigInt!
   prevGives: BigInt
-  prevWants: BigInt
+  prevTick: BigInt
 
   market: Market!
   maker: Account!
   owner: Account
+  limitOrder: LimitOrder
   kandel: Kandel
+  kandelIndex: BigInt
+  amplifiedOffer: AmplifiedOffer
+}
+
+type OfferFilled @entity {
+  id: String!
+
+  creationDate: BigInt
+  transactionHash: Bytes!
+
+  account: Account!
+
+  makerGot: BigInt!
+  makerGave: BigInt!
+
+  offer: Offer
+}
+
+type CleanOrder @entity {
+  id: String!
+  transactionHash: Bytes!
+  creationDate: BigInt!
+
+  taker: Account!
+  offersToBeCleaned: BigInt!
+  orders: [Order!]! @derivedFrom(field: "cleanOrder")
+
+  market: Market
 }
 
 type Order @entity {
@@ -47,31 +95,61 @@ type Order @entity {
   transactionHash: Bytes!
   creationDate: BigInt!
 
-  taker: Bytes
-  takerGot: BigInt
-  takerGave: BigInt
-  penalty: BigInt
-  feePaid: BigInt
+  fillVolume: BigInt!
+  fillWants: Boolean!
+  maxTick: BigInt!
+  taker: Account
+  takerGot: BigInt!
+  takerGave: BigInt!
+  penalty: BigInt!
+  feePaid: BigInt!
 
   market: Market
-  limitOrder: LimitOrder 
+  limitOrder: LimitOrder
+  cleanOrder: CleanOrder
+}
+
+type AmplifiedOffer @entity {
+  id: String!
+
+  inboundRoute: Bytes
+  outboundRoute: Bytes
+
+  bundle: AmplifiedOfferBundle!
+  owner: Account
+  offer: Offer!
+}
+
+type AmplifiedOfferBundle @entity {
+  id: String!
+  creationDate: BigInt!
+  bundleId: BigInt!
+  expiryDate: BigInt!
+
+  offers: [AmplifiedOffer!]!
+  owner: Account
 }
 
 type LimitOrder @entity {
   id: String!
   creationDate: BigInt!
   latestUpdateDate: BigInt!
-  wants: BigInt!
-  gives: BigInt!
   expiryDate: BigInt
+  maxVolume: BigInt
+  orderType: Int!
+  tick: BigInt!
+  fillVolume: BigInt!
   fillWants: Boolean!
-  fillOrKill: Boolean!
-  restingOrder: Boolean!
-  realTaker: Bytes 
-  offer: Offer
-  isOpen: Boolean
 
-  order: Order! 
+  realTaker: Account!
+
+  inboundRoute: Bytes!
+  outboundRoute: Bytes!
+
+  offer: Offer
+  order: Order
+
+  isOpen: Boolean
 }
 
 type KandelDepositWithdraw @entity {
@@ -88,25 +166,43 @@ type KandelDepositWithdraw @entity {
 type Kandel @entity {
   id: Bytes!
   transactionHash: Bytes!
+  creationDate: BigInt!
 
   seeder: Bytes!
   address: Bytes!
 
-  base: Bytes! 
+  base: Bytes!
   quote: Bytes!
+  baseQuoteOlKeyHash: Bytes!
+  quoteBaseOlKeyHash: Bytes!
   deployer: Account!
   admin: Account!
-  reserveId: Account
-  router: Account
+
+  inboundRoute: Bytes
+  outboundRoute: Bytes
+
+  type: String!
+
+  # Only for kandel AAVE
+  reserveId: Bytes
+  router: Bytes
 
   depositedBase: BigInt!
   depositedQuote: BigInt!
+
+  # Parameters
+  gasprice: BigInt
+  gasreq: BigInt
+  stepSize: BigInt
+  baseQuoteTickOffset: BigInt
+  length: BigInt
 
   offerIndexes: [String!]!
 
   offers: [Offer!]! @derivedFrom(field: "kandel")
   depositWithdraws: [KandelDepositWithdraw!]! @derivedFrom(field: "kandel")
   parameters: [KandelParameters!]! @derivedFrom(field: "kandel")
+  populateRetracts: [KandelPopulateRetract!]! @derivedFrom(field: "kandel")
 }
 
 type KandelPopulateRetract @entity {
@@ -117,7 +213,7 @@ type KandelPopulateRetract @entity {
 
   isRetract: Boolean!
   offerGives: [String!]!
-  
+
   kandel: Kandel!
 }
 
@@ -128,20 +224,26 @@ type KandelParameters @entity {
 
   gasprice: BigInt
   gasreq: BigInt
-  compoundRateBase: BigInt
-  compoundRateQuote: BigInt
-  spread: BigInt
-  ratio: BigInt
+  baseQuoteTickOffset: BigInt
+  stepSize: BigInt
   length: BigInt
 
   kandel: Kandel!
-
 }
 
-type OrderStack @entity {
+type Stack @entity {
   id: String!
   ids: String!
-  last: Order
 }
 
-
+type Weight @entity {
+  id: String!
+  base: Bytes!
+  quote: Bytes!
+  fromBlock: BigInt!
+  toBlock: BigInt!
+  takerPointsPerDollar: BigInt!
+  makerToTakerRatio: BigInt!
+  ncMakerToCMakerRatio: BigInt!
+  reffererPointsPerDollar: BigInt!
+}
