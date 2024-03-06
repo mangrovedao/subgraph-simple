@@ -24,8 +24,8 @@ function getLatestFromStack(type: string, shouldThrow: boolean): Entity | null {
   return entity;
 }
 
-export function getLatestOrderFromStack(): Order {
-  const order = getLatestFromStack("Order", true);
+export function getLatestOrderFromStack(shouldThrow: boolean): Order {
+  const order = getLatestFromStack("Order", shouldThrow);
   return changetype<Order>(order);
 }
 
