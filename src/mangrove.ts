@@ -28,8 +28,8 @@ import {
   SetNotify,
   SetUseOracle
 } from "../generated/Mangrove/Mangrove";
-import { CleanOrder, Kandel, Market, Offer, Order } from "../generated/schema";
-import { getEventUniqueId, getOfferId, getOrCreateAccount, getOrCreateAccountVolumeByPair, getOrCreateToken, increaseAccountVolume } from "./helpers";
+import { CleanOrder, Kandel, Market, Offer, OfferFilled, Order } from "../generated/schema";
+import { getEventUniqueId, getOfferId, getOrCreateAccount, getOrCreateToken } from "./helpers";
 import {
   addCleanOrderToStack,
   addOrderToStack,
@@ -143,16 +143,16 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
   offer.posthookFailReason = posthookData;
   offer.latestPenalty = BigInt.fromI32(0);
 
-  let market = Market.load(event.params.olKeyHash.toHex())!;
+  const owner = Address.fromBytes(offer.owner !== null ? offer.owner! : offer.maker);
 
-  const volume = getOrCreateAccountVolumeByPair(
-    Address.fromBytes(offer.owner !== null ? offer.owner! : offer.maker),
-    market.outbound_tkn,
-    market.inbound_tkn,
-    event.block.timestamp,
-    true
-  );
-  increaseAccountVolume(volume, market.inbound_tkn, event.params.takerGives, event.params.takerWants, true);
+  const offerFilled = new OfferFilled(getEventUniqueId(event));
+  offerFilled.creationDate = event.block.timestamp;
+  offerFilled.transactionHash = event.transaction.hash;
+  offerFilled.account = owner;
+  offerFilled.makerGot = event.params.takerGives;
+  offerFilled.makerGave = event.params.takerWants;
+  offerFilled.offer = offer.id;
+  offerFilled.save();
 
   let order = getLatestOrderFromStack();
   order.takerGot = order.takerGot ? order.takerGot.plus(event.params.takerWants) : event.params.takerWants;
@@ -260,8 +260,6 @@ export function handleOrderComplete(event: OrderComplete): void {
   order.save();
 
   let market = Market.load(event.params.olKeyHash.toHex())!;
-  const volume = getOrCreateAccountVolumeByPair(event.params.taker, market.outbound_tkn, market.inbound_tkn, event.block.timestamp, false);
-  increaseAccountVolume(volume, market.outbound_tkn, order.takerGot, order.takerGave, true);
 
   removeLatestOrderFromStack();
 }

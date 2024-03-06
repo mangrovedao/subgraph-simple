@@ -5,7 +5,6 @@ type Account @entity {
   latestInteractionDate: BigInt!
   proxyDeployed: Boolean!
   proxy: Bytes
-  volumes: [AccountVolumeByPair!]! @derivedFrom(field: "account")
 
   isReferrer: Boolean!
 
@@ -19,24 +18,6 @@ type Token @entity {
   name: String!
   symbol: String!
   decimals: BigInt!
-}
-
-type AccountVolumeByPair @entity {
-  id: String!
-
-  account: Account!
-  updatedDate: BigInt!
-
-  token0: Bytes!
-  token1: Bytes!
-
-  token0Sent: BigInt!
-  token0Received: BigInt!
-
-  token1Sent: BigInt!
-  token1Received: BigInt!
-
-  asMaker: Boolean!
 }
 
 type Market @entity {
@@ -81,6 +62,20 @@ type Offer @entity {
   kandel: Kandel
   kandelIndex: BigInt
   amplifiedOffer: AmplifiedOffer
+}
+
+type OfferFilled @entity {
+  id: String!
+
+  creationDate: BigInt
+  transactionHash: Bytes!
+
+  account: Account!
+
+  makerGot: BigInt!
+  makerGave: BigInt!
+
+  offer: Offer
 }
 
 type CleanOrder @entity {
