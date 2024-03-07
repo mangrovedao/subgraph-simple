@@ -432,7 +432,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("LimitOrder", "limitOrderId", "isOpen", "false");
   });
 
-  test("cffer, handleOfferSuccess, fully fill", () => {
+  test("offer, handleOfferSuccess, fully fill", () => {
     const orderStart = createOrderStartEvent(olKeyHash01, taker, BigInt.fromI32(40), BigInt.fromI32(1), false);
     handleOrderStart(orderStart);
 
@@ -450,6 +450,7 @@ describe("Describe entity assertions", () => {
     order.maxTick = BigInt.fromI32(1);
     order.penalty = BigInt.fromI32(0);
     order.feePaid = BigInt.fromI32(0);
+    order.taker = taker;
     order.save();
 
     const limitOrder = new LimitOrder(offerId);
@@ -550,6 +551,7 @@ describe("Describe entity assertions", () => {
     order.maxTick = BigInt.fromI32(1);
     order.penalty = BigInt.fromI32(0);
     order.feePaid = BigInt.fromI32(0);
+    order.taker = taker;
     order.save();
 
     const limitOrder = new LimitOrder(offerId);
@@ -917,6 +919,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("OfferFilled", offerSuccessEventId, "makerGot", "40");
     assert.fieldEquals("OfferFilled", offerSuccessEventId, "makerGave", "20");
     assert.fieldEquals("OfferFilled", offerSuccessEventId, "offer", getOfferId(olKeyHash01, BigInt.fromI32(1)));
+    assert.fieldEquals("OfferFilled", offerSuccessEventId, "taker", taker.toHex());
     assert.fieldEquals("OfferFilled", offerSuccessEventId, "market", olKeyHash01.toHex());
   });
 
