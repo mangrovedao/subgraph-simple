@@ -149,9 +149,12 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
 
   const owner = Address.fromBytes(offer.owner !== null ? offer.owner! : offer.maker);
 
+  let order = getLatestOrderFromStack(true);
+
   const offerFilled = new OfferFilled(getEventUniqueId(event));
   offerFilled.creationDate = event.block.timestamp;
   offerFilled.transactionHash = event.transaction.hash;
+  offerFilled.taker = order.taker;
   offerFilled.account = owner;
   offerFilled.makerGot = event.params.takerGives;
   offerFilled.makerGave = event.params.takerWants;
@@ -159,7 +162,6 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
   offerFilled.market = offer.market;
   offerFilled.save();
 
-  let order = getLatestOrderFromStack(true);
   order.takerGot = order.takerGot ? order.takerGot.plus(event.params.takerWants) : event.params.takerWants;
   order.takerGave = order.takerGave ? order.takerGave.plus(event.params.takerGives) : event.params.takerGives;
   order.save();
@@ -223,6 +225,11 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.posthookFailReason = null;
   offer.latestPenalty = BigInt.fromI32(0);
   limitOrderSetIsOpen(offer.limitOrder, true);
+
+  if (offer.kandel) {
+    const kandel = Kandel.load(offer.kandel!);
+    offer.owner = kandel!.admin;
+  }
 
   offer.save();
 }

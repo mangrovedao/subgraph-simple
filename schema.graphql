@@ -70,6 +70,7 @@ type OfferFilled @entity {
   creationDate: BigInt
   transactionHash: Bytes!
 
+  taker: Account!
   account: Account!
   market: Market!
 
@@ -99,7 +100,7 @@ type Order @entity {
   fillVolume: BigInt!
   fillWants: Boolean!
   maxTick: BigInt!
-  taker: Account
+  taker: Account!
   takerGot: BigInt!
   takerGave: BigInt!
   penalty: BigInt!

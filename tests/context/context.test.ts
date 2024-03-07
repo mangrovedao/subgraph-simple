@@ -1,9 +1,11 @@
 import { assert, describe, test, clearStore, beforeEach, afterEach } from "matchstick-as/assembly/index";
-import { BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
 import { Order } from "../../generated/schema";
 import { addOrderToStack, getLatestOrderFromStack, removeLatestOrderFromStack } from "../../src/stack";
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
+
+const taker = Address.fromString("0x0000000000000000000000000000000000000003");
 
 describe("Describe entity assertions", () => {
   beforeEach(() => {});
@@ -23,6 +25,7 @@ describe("Describe entity assertions", () => {
     order1.takerGave = BigInt.fromI32(1);
     order1.penalty = BigInt.fromI32(1);
     order1.feePaid = BigInt.fromI32(1);
+    order1.taker = taker;
 
     const order2 = new Order("order2");
     order2.transactionHash = Bytes.fromUTF8("0x1");
@@ -34,6 +37,7 @@ describe("Describe entity assertions", () => {
     order2.takerGave = BigInt.fromI32(1);
     order2.penalty = BigInt.fromI32(1);
     order2.feePaid = BigInt.fromI32(1);
+    order2.taker = taker;
 
     order1.save();
     order2.save();
