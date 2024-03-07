@@ -226,6 +226,11 @@ export function handleOfferWrite(event: OfferWrite): void {
   offer.latestPenalty = BigInt.fromI32(0);
   limitOrderSetIsOpen(offer.limitOrder, true);
 
+  if (offer.kandel) {
+    const kandel = Kandel.load(offer.kandel!);
+    offer.owner = kandel!.admin;
+  }
+
   offer.save();
 }
 
