@@ -1,7 +1,7 @@
 import { assert, describe, test, clearStore, beforeAll, afterAll, beforeEach, afterEach } from "matchstick-as/assembly/index";
 import { BigInt, Bytes, Address, ethereum } from "@graphprotocol/graph-ts";
-import { handleEndBundle, handleInitBundle, handleNewOwnedOffer } from "../../src/mangrove-amplifier";
-import { createEndBundleEvent, createInitBundleEvent, createNewOwnedOfferEvent } from "../mangrove/mangrove-amplifier-utils";
+import { handleEndBundle, handleInitBundle, handleNewOwnedOffer, handleSetReneging } from "../../src/mangrove-amplifier";
+import { createEndBundleEvent, createInitBundleEvent, createNewOwnedOfferEvent, createSetRenegingEvent } from "../mangrove/mangrove-amplifier-utils";
 import { createOfferWriteEvent, createSetActiveEvent } from "./mangrove-utils";
 import { handleOfferWrite, handleSetActive } from "../../src/mangrove";
 import { prepareERC20 } from "./helpers";
@@ -65,12 +65,15 @@ describe("Describe entity assertions", () => {
 
     const initId = getEventUniqueId(createBundleEvent);
 
+    const setRenegingEvent = createSetRenegingEvent(olKeyHash01, BigInt.fromI32(0), BigInt.fromI32(1), BigInt.fromI32(0));
+    handleSetReneging(setRenegingEvent);
+
     assert.entityCount("AmplifiedOfferBundle", 1);
     assert.fieldEquals("AmplifiedOfferBundle", initId, "id", initId);
     assert.fieldEquals("AmplifiedOfferBundle", initId, "bundleId", bundleId.toString());
     assert.fieldEquals("AmplifiedOfferBundle", initId, "creationDate", createBundleEvent.block.timestamp.toString());
 
-    assert.fieldEquals("AmplifiedOfferBundle", initId, "expiryDate", "0");
+    assert.fieldEquals("AmplifiedOfferBundle", initId, "expiryDate", "1");
   });
 
   test("Offers are added to the current bundle", () => {
