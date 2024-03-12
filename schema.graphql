@@ -247,5 +247,5 @@ type Weight @entity {
   takerPointsPerDollar: BigInt!
   makerToTakerRatio: BigInt!
   ncMakerToCMakerRatio: BigInt!
-  reffererPointsPerDollar: BigInt!
+  maxSpread: BigInt!
 }

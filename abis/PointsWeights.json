@@ -50,7 +50,7 @@
         "internalType": "uint256"
       },
       {
-        "name": "reffererPointsPerDollar",
+        "name": "maxSpread",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -157,7 +157,7 @@
         "internalType": "uint256"
       },
       {
-        "name": "reffererPointsPerDollar",
+        "name": "maxSpread",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
