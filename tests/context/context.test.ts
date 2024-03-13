@@ -1,11 +1,17 @@
 import { assert, describe, test, clearStore, beforeEach, afterEach } from "matchstick-as/assembly/index";
 import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
 import { Order } from "../../generated/schema";
-import { addOrderToStack, getLatestOrderFromStack, removeLatestOrderFromStack } from "../../src/stack";
+import { addOfferWriteToStack, addOrderToStack, getLatestOrderFromStack, getOfferWriteFromStack, removeLatestOrderFromStack } from "../../src/stack";
+import { createOfferWriteEvent } from "../mangrove/mangrove-utils";
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
 const taker = Address.fromString("0x0000000000000000000000000000000000000003");
+
+const maker = Address.fromString("0x0000000000000000000000000000000000000002");
+const token0 = Address.fromString("0x0000000000000000000000000000000000000000");
+const token1 = Address.fromString("0x0000000000000000000000000000000000000001");
+const olKeyHash01 = Bytes.fromHexString("0x" + token0.toHex().slice(2) + token1.toHex().slice(2));
 
 describe("Describe entity assertions", () => {
   beforeEach(() => {});
@@ -59,7 +65,27 @@ describe("Describe entity assertions", () => {
     assert.assertTrue(currentOrder.id.toString() == order1.id.toString());
     removeLatestOrderFromStack;
 
-    const lastOrder = getLatestOrderFromStack(true);
+    let lastOrder = getLatestOrderFromStack(true);
     assert.assertTrue(lastOrder.id.toString() == order1.id.toString());
+
+    let offerWrite = createOfferWriteEvent(
+      olKeyHash01,
+      maker,
+      BigInt.fromI32(1000),
+      BigInt.fromI32(2000),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0)
+    );
+
+    addOfferWriteToStack("Order", offerWrite);
+    lastOrder = getLatestOrderFromStack(true);
+
+    let offerWrites = getOfferWriteFromStack("Order");
+    assert.assertTrue(offerWrites.length == 1);
+
+    addOfferWriteToStack("Order", offerWrite);
+    offerWrites = getOfferWriteFromStack("Order");
+    assert.assertTrue(offerWrites.length == 2);
   });
 });

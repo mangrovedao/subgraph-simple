@@ -34,6 +34,7 @@ import {
 import { createMangroveOrderStartEvent } from "./mangrove-order-utils";
 import { handleMangroveOrderStart } from "../../src/mangrove-order";
 import { prepareERC20 } from "./helpers";
+import { PartialOfferWrite } from "../../src/types";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -640,7 +641,7 @@ describe("Describe entity assertions", () => {
 
     let offerWrite = createOfferWriteEvent(olKeyHash01, maker, BigInt.fromI32(1000), BigInt.fromI32(2000), BigInt.fromI32(0), BigInt.fromI32(0), id);
 
-    const offer = createNewOffer(offerWrite);
+    const offer = createNewOffer(PartialOfferWrite.fromOfferWrite(offerWrite));
     assert.entityCount("Offer", 0);
     assert.assertTrue(offer.kandel === null);
   });
@@ -667,7 +668,7 @@ describe("Describe entity assertions", () => {
     const id = BigInt.fromI32(0);
     let offerWrite = createOfferWriteEvent(olKeyHash01, maker, BigInt.fromI32(1000), BigInt.fromI32(2000), BigInt.fromI32(0), BigInt.fromI32(0), id);
 
-    const offer = createNewOffer(offerWrite);
+    const offer = createNewOffer(PartialOfferWrite.fromOfferWrite(offerWrite));
     assert.entityCount("Offer", 0);
     assert.assertTrue(offer.kandel!.toHexString() == kandel.id.toHexString());
   });
