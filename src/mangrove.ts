@@ -32,15 +32,18 @@ import { CleanOrder, Kandel, Market, Offer, OfferFilled, Order } from "../genera
 import { getEventUniqueId, getOfferId, getOrCreateAccount, getOrCreateToken } from "./helpers";
 import {
   addCleanOrderToStack,
+  addOfferWriteToStack,
   addOrderToStack,
   getLatestCleanOrderFromStack,
   getLatestLimitOrderFromStack,
   getLatestOrderFromStack,
+  getOfferWriteFromStack,
   removeLatestCleanOrderFromStack,
   removeLatestOrderFromStack
 } from "./stack";
 import { limitOrderSetIsOpen } from "./mangrove-order";
 import { addOfferToCurrentBundle } from "./mangrove-amplifier";
+import { PartialOfferWrite } from "./types";
 
 export function handleApproval(event: Approval): void {}
 
@@ -169,13 +172,13 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
   offer.save();
 }
 
-export const createNewOffer = (event: OfferWrite): Offer => {
-  const offerId = getOfferId(event.params.olKeyHash, event.params.id);
+export const createNewOffer = (event: PartialOfferWrite): Offer => {
+  const offerId = getOfferId(event.olKeyHash, event.id);
   const offer = new Offer(offerId);
   offer.latestLogIndex = event.logIndex;
-  offer.latestTransactionHash = event.transaction.hash;
+  offer.latestTransactionHash = event.transactionHash;
 
-  const kandel = Kandel.load(event.params.maker);
+  const kandel = Kandel.load(event.maker);
   if (kandel !== null) {
     offer.kandel = kandel.id;
   }
@@ -183,13 +186,13 @@ export const createNewOffer = (event: OfferWrite): Offer => {
   return offer;
 };
 
-export function handleOfferWrite(event: OfferWrite): void {
-  const offerId = getOfferId(event.params.olKeyHash, event.params.id);
+const handlePartialOfferWrite = (offerWrite: PartialOfferWrite): void => {
+  const offerId = getOfferId(offerWrite.olKeyHash, offerWrite.id);
   let offer = Offer.load(offerId);
 
   if (!offer) {
-    offer = createNewOffer(event);
-    offer.creationDate = event.block.timestamp;
+    offer = createNewOffer(offerWrite);
+    offer.creationDate = offerWrite.timestamp;
     offer.totalGot = BigInt.fromI32(0);
     offer.totalGave = BigInt.fromI32(0);
     offer.totalPenalty = BigInt.fromI32(0);
@@ -197,25 +200,25 @@ export function handleOfferWrite(event: OfferWrite): void {
     addOfferToCurrentBundle(offer);
   }
 
-  offer.latestUpdateDate = event.block.timestamp;
-  offer.latestLogIndex = event.logIndex;
-  offer.latestTransactionHash = event.transaction.hash;
+  offer.latestUpdateDate = offerWrite.timestamp;
+  offer.latestLogIndex = offerWrite.logIndex;
+  offer.latestTransactionHash = offerWrite.transactionHash;
 
-  const owner = getOrCreateAccount(event.params.maker, event.block.timestamp, true);
+  const owner = getOrCreateAccount(Address.fromBytes(offerWrite.maker), offerWrite.timestamp, true);
   offer.maker = owner.id;
 
-  const marketId = event.params.olKeyHash.toHex();
+  const marketId = offerWrite.olKeyHash.toHex();
   const market = Market.load(marketId)!;
   offer.market = market.id;
   offer.gasBase = market.gasbase;
 
-  offer.offerId = event.params.id;
+  offer.offerId = offerWrite.id;
 
-  offer.tick = event.params.tick;
-  offer.gives = event.params.gives;
+  offer.tick = offerWrite.tick;
+  offer.gives = offerWrite.gives;
 
-  offer.gasprice = event.params.gasprice;
-  offer.gasreq = event.params.gasreq;
+  offer.gasprice = offerWrite.gasprice;
+  offer.gasreq = offerWrite.gasreq;
   offer.isOpen = true;
   offer.isFailed = false;
   offer.isFilled = false;
@@ -232,6 +235,22 @@ export function handleOfferWrite(event: OfferWrite): void {
   }
 
   offer.save();
+};
+
+export function handleOfferWrite(event: OfferWrite): void {
+  const cleanStack = getLatestCleanOrderFromStack();
+  if (cleanStack) {
+    addOfferWriteToStack("CleanOrder", event);
+    return;
+  }
+
+  const orderStack = getLatestOrderFromStack(false);
+  if (orderStack) {
+    addOfferWriteToStack("Order", event);
+    return;
+  }
+
+  handlePartialOfferWrite(PartialOfferWrite.fromOfferWrite(event));
 }
 
 export function handleOrderStart(event: OrderStart): void {
@@ -271,6 +290,12 @@ export function handleOrderComplete(event: OrderComplete): void {
   order.feePaid = event.params.fee;
   order.save();
 
+  const offerWrites = getOfferWriteFromStack("Order");
+
+  for (let i = 0; i < offerWrites.length; i++) {
+    handlePartialOfferWrite(offerWrites.at(i));
+  }
+
   removeLatestOrderFromStack();
 }
 
@@ -287,6 +312,11 @@ export function handleCleanStart(event: CleanStart): void {
 }
 
 export function handleCleanComplete(event: CleanComplete): void {
+  const offerWrites = getOfferWriteFromStack("CleanOrder");
+
+  for (let i = 0; i < offerWrites.length; i++) {
+    handlePartialOfferWrite(offerWrites.at(i));
+  }
   removeLatestCleanOrderFromStack();
 }
 
