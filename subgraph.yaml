@@ -222,6 +222,26 @@ dataSources:
         - event: NewKandel(indexed address,indexed bytes32,indexed bytes32,address)
           handler: handleNewKandel
       file: ./src/kandel-seeder.ts
+  - kind: ethereum
+    name: SmartKandelSeeder
+    network: matic
+    source:
+      abi: SmartKandelSeeder
+      address: "0xA48B36E01919472fcdA56CAD574433BeCB7A87C5"
+      startBlock: 43091477
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - NewKandel
+      abis:
+        - name: SmartKandelSeeder
+          file: ./abis/SmartKandelSeeder.json
+      eventHandlers:
+        - event: NewSmartKandel(indexed address,indexed bytes32,indexed bytes32,address)
+          handler: handleNewSmartKandel
+      file: ./src/kandel-seeder.ts
   # - kind: ethereum
   #   name: AaveKandelSeeder
   #   network: matic

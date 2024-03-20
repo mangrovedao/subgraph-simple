@@ -63,8 +63,11 @@
     "MgvReferral": {
       "address": "0x07e5a2DCf82D7b5b8ab684d9b40842E174e49908",
       "startBlock": 133207
+    },
+    "SmartKandelSeeder": {
+      "address": "0x3cbb6ad1b287748b92d1b4dfc1776af1dd9284b2",
+      "startBlock": 983264
     }
-
   },
   "mangrove-private-blast-sepolia": {
     "Mangrove": {
