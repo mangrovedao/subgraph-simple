@@ -1,6 +1,7 @@
 import { newMockEvent } from "matchstick-as";
 import { ethereum, Address, Bytes } from "@graphprotocol/graph-ts";
 import { NewKandel } from "../../generated/KandelSeeder/KandelSeeder";
+import { NewSmartKandel } from "../../generated/SmartKandelSeeder/SmartKandelSeeder";
 // import { NewAaveKandel } from "../../generated/AaveKandelSeeder/AaveKandelSeeder";
 
 // export function createNewAaveKandelEvent(
@@ -25,6 +26,19 @@ import { NewKandel } from "../../generated/KandelSeeder/KandelSeeder";
 
 export function createNewKandelEvent(owner: Address, baseQuoteOlKeyHash: Bytes, quoteBaseOlKeyHash: Bytes, kandel: Address): NewKandel {
   let newKandelEvent = changetype<NewKandel>(newMockEvent());
+
+  newKandelEvent.parameters = new Array();
+
+  newKandelEvent.parameters.push(new ethereum.EventParam("owner", ethereum.Value.fromAddress(owner)));
+  newKandelEvent.parameters.push(new ethereum.EventParam("baseQuoteOlKeyHash", ethereum.Value.fromBytes(baseQuoteOlKeyHash)));
+  newKandelEvent.parameters.push(new ethereum.EventParam("quoteBaseOlKeyHash", ethereum.Value.fromBytes(quoteBaseOlKeyHash)));
+  newKandelEvent.parameters.push(new ethereum.EventParam("kandel", ethereum.Value.fromAddress(kandel)));
+
+  return newKandelEvent;
+}
+
+export function createNewSmartKandelEvent(owner: Address, baseQuoteOlKeyHash: Bytes, quoteBaseOlKeyHash: Bytes, kandel: Address): NewSmartKandel {
+  let newKandelEvent = changetype<NewSmartKandel>(newMockEvent());
 
   newKandelEvent.parameters = new Array();
 
