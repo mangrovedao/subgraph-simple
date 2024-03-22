@@ -334,6 +334,7 @@ export function handleSetActive(event: SetActive): void {
     market.inbound_tkn = event.params.inbound_tkn;
     market.tickSpacing = event.params.tickSpacing;
     market.gasbase = BigInt.fromI32(0);
+    market.fee = BigInt.fromI32(0);
   }
 
   market.active = event.params.value;
@@ -343,7 +344,17 @@ export function handleSetActive(event: SetActive): void {
 
 export function handleSetDensity(event: SetDensity96X32): void {}
 
-export function handleSetFee(event: SetFee): void {}
+export function handleSetFee(event: SetFee): void {
+  const marketId = event.params.olKeyHash.toHex();
+  let market = Market.load(marketId);
+
+  if (!market) {
+    throw new Error("Market not found for set-fee event " + marketId);
+  }
+
+  market.fee = event.params.value;
+  market.save();
+}
 
 export function handleSetGasbase(event: SetGasbase): void {
   const marketId = event.params.olKeyHash.toHex();
@@ -351,6 +362,7 @@ export function handleSetGasbase(event: SetGasbase): void {
   if (!market) {
     market = new Market(marketId);
     market.active = false;
+    market.fee = BigInt.fromI32(0);
   }
   market.gasbase = event.params.offer_gasbase;
 
