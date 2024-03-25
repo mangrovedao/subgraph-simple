@@ -31,6 +31,10 @@
     "MangroveAmplifier": {
       "address": "0x5936A0CA18C72074852Ec81147B8D3FA714c423C",
       "startBlock": 46141094
+    },
+    "SmartKandelSeeder": {
+      "address": "0x3cbb6ad1b287748b92d1b4dfc1776af1dd9284b2",
+      "startBlock": 47462689
     }
   },
   "matic": {
