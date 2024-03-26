@@ -85,7 +85,9 @@ export function handleNewKandel(event: NewKandel): void {
   kandel.quoteBaseOlKeyHash = event.params.quoteBaseOlKeyHash;
 
   kandel.depositedBase = BigInt.fromI32(0);
+  kandel.totalBase = BigInt.fromI32(0);
   kandel.depositedQuote = BigInt.fromI32(0);
+  kandel.totalQuote = BigInt.fromI32(0);
 
   const ownerAccount = getOrCreateAccount(event.params.owner, event.block.timestamp, true);
   kandel.deployer = ownerAccount.address;
