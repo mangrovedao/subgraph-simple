@@ -17,8 +17,8 @@
       "startBlock": 44653500
     },
     "RouterProxyFactory": {
-      "address": "0x2593BdD850EA25E87f3A1C83dcB8B49DAeddF0d1",
-      "startBlock": 44611263
+      "address": "0xaA1f5A0313D3AE6E1B9AA94229630679a1ffd3f2",
+      "startBlock": 44652796
     },
     "PointsWeights": {
       "address": "0x787612FA81529FECF44882Dae128254329727dCE",
@@ -33,8 +33,8 @@
       "startBlock": 46141094
     },
     "SmartKandelSeeder": {
-      "address": "0x3cbb6ad1b287748b92d1b4dfc1776af1dd9284b2",
-      "startBlock": 47462689
+      "address": "0x09356C801ca3eE28A461C3e3469acfF3a13C6E90",
+      "startBlock": 47504272
     }
   },
   "matic": {
