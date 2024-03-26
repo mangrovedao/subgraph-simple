@@ -55,7 +55,9 @@ export function handleNewSmartKandel(event: NewSmartKandel): void {
   kandel.quoteBaseOlKeyHash = event.params.quoteBaseOlKeyHash;
 
   kandel.depositedBase = BigInt.fromI32(0);
+  kandel.totalPublishedBase = BigInt.fromI32(0);
   kandel.depositedQuote = BigInt.fromI32(0);
+  kandel.totalPublishedQuote = BigInt.fromI32(0);
 
   const ownerAccount = getOrCreateAccount(event.params.owner, event.block.timestamp, true);
   kandel.deployer = ownerAccount.address;
@@ -85,7 +87,9 @@ export function handleNewKandel(event: NewKandel): void {
   kandel.quoteBaseOlKeyHash = event.params.quoteBaseOlKeyHash;
 
   kandel.depositedBase = BigInt.fromI32(0);
+  kandel.totalPublishedBase = BigInt.fromI32(0);
   kandel.depositedQuote = BigInt.fromI32(0);
+  kandel.totalPublishedQuote = BigInt.fromI32(0);
 
   const ownerAccount = getOrCreateAccount(event.params.owner, event.block.timestamp, true);
   kandel.deployer = ownerAccount.address;
