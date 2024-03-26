@@ -19,7 +19,7 @@ import {
   SetRouter,
   SetStepSize
 } from "../generated/templates/Kandel/Kandel";
-import { KandelDepositWithdraw, Kandel as KandelEntity, KandelPopulateRetract, Offer } from "../generated/schema";
+import { KandelDepositWithdraw, Kandel as KandelEntity, KandelPopulateRetract, Market, Offer } from "../generated/schema";
 import { getEventUniqueId, getOfferId, getOrCreateAccount, getOrCreateKandelParameters } from "./helpers";
 
 export function handleCredit(event: Credit): void {
@@ -41,10 +41,8 @@ export function handleCredit(event: Credit): void {
 
   if (Address.fromBytes(kandel.base).equals(event.params.token)) {
     kandel.depositedBase = kandel.depositedBase.plus(event.params.amount);
-    kandel.totalBase = kandel.totalBase.plus(event.params.amount);
   } else {
     kandel.depositedQuote = kandel.depositedQuote.plus(event.params.amount);
-    kandel.totalQuote = kandel.totalQuote.plus(event.params.amount);
   }
 
   kandel.save();
@@ -70,10 +68,8 @@ export function handleDebit(event: Debit): void {
 
   if (Address.fromBytes(kandel.base).equals(event.params.token)) {
     kandel.depositedBase = kandel.depositedBase.minus(event.params.amount);
-    kandel.totalBase = kandel.totalBase.minus(event.params.amount);
   } else {
     kandel.depositedQuote = kandel.depositedQuote.minus(event.params.amount);
-    kandel.totalQuote = kandel.totalQuote.minus(event.params.amount);
   }
 
   kandel.save();
@@ -97,9 +93,19 @@ export function handlePopulateEnd(event: PopulateEnd): void {
 
   for (let i = 0; i < offerIds.length; i++) {
     let offer = Offer.load(offerIds[i])!; // TODO: use load in block
+
+    const market = Market.load(offer.market)!;
     if (offer.latestTransactionHash == event.transaction.hash && offer.latestLogIndex.gt(kandelPopulateRetract.startLogIndex)) {
       const totalGave = offer.totalGave === null ? BigInt.fromI32(0) : offer.totalGave;
       const totalGot = offer.totalGot === null ? BigInt.fromI32(0) : offer.totalGot;
+
+      if (market.outbound_tkn == kandel.base) {
+        kandel.totalPublishedBase = kandel.totalPublishedBase.plus(offer.gives);
+      } else {
+        kandel.totalPublishedQuote = kandel.totalPublishedQuote.plus(offer.gives);
+      }
+      kandel.save();
+
       kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([
         `${offerIds[i]}-${offer.gives}-${totalGave.toString()}-${totalGot.toString()}`
       ]);
@@ -134,6 +140,12 @@ export function handlePopulateStart(event: PopulateStart): void {
   kandelPopulateRetract.kandel = event.address;
   kandelPopulateRetract.offerGives = new Array<string>();
   kandelPopulateRetract.save();
+
+  const kandel = KandelEntity.load(event.address)!;
+
+  kandel.totalPublishedBase = BigInt.fromI32(0);
+  kandel.totalPublishedQuote = BigInt.fromI32(0);
+  kandel.save();
 }
 
 export function handleRetractEnd(event: RetractEnd): void {

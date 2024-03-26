@@ -193,8 +193,8 @@ type Kandel @entity {
   depositedBase: BigInt!
   depositedQuote: BigInt!
 
-  totalBase: BigInt!
-  totalQuote: BigInt!
+  totalPublishedBase: BigInt!
+  totalPublishedQuote: BigInt!
 
   # Parameters
   gasprice: BigInt

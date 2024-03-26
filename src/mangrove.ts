@@ -175,12 +175,14 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
     const kandel = Kandel.load(offer.kandel!)!;
     const market = Market.load(offer.market)!;
     if (market.outbound_tkn == kandel.base) {
-      kandel.totalBase = kandel.totalBase.minus(event.params.takerWants);
-      kandel.totalQuote = kandel.totalQuote.plus(event.params.takerGives);
+      kandel.totalPublishedBase = kandel.totalPublishedBase.minus(event.params.takerWants);
+      kandel.totalPublishedQuote = kandel.totalPublishedQuote.plus(event.params.takerGives);
     } else {
-      kandel.totalBase = kandel.totalBase.plus(event.params.takerGives);
-      kandel.totalQuote = kandel.totalQuote.minus(event.params.takerWants);
+      kandel.totalPublishedBase = kandel.totalPublishedBase.plus(event.params.takerGives);
+      kandel.totalPublishedQuote = kandel.totalPublishedQuote.minus(event.params.takerWants);
     }
+
+    kandel.save();
   }
 }
 
