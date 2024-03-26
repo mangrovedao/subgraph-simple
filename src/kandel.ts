@@ -41,8 +41,10 @@ export function handleCredit(event: Credit): void {
 
   if (Address.fromBytes(kandel.base).equals(event.params.token)) {
     kandel.depositedBase = kandel.depositedBase.plus(event.params.amount);
+    kandel.totalBase = kandel.totalBase.plus(event.params.amount);
   } else {
     kandel.depositedQuote = kandel.depositedQuote.plus(event.params.amount);
+    kandel.totalQuote = kandel.totalQuote.plus(event.params.amount);
   }
 
   kandel.save();
@@ -68,8 +70,10 @@ export function handleDebit(event: Debit): void {
 
   if (Address.fromBytes(kandel.base).equals(event.params.token)) {
     kandel.depositedBase = kandel.depositedBase.minus(event.params.amount);
+    kandel.totalBase = kandel.totalBase.minus(event.params.amount);
   } else {
     kandel.depositedQuote = kandel.depositedQuote.minus(event.params.amount);
+    kandel.totalQuote = kandel.totalQuote.minus(event.params.amount);
   }
 
   kandel.save();
