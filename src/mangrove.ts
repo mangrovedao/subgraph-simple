@@ -172,7 +172,7 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
   offer.save();
 
   if (offer.kandel) {
-    const kandel = Kandel.load(offer.kandel)!;
+    const kandel = Kandel.load(offer.kandel!)!;
     const market = Market.load(offer.market)!;
     if (market.outbound_tkn == kandel.base) {
       kandel.totalBase = kandel.totalBase.minus(event.params.takerWants);
