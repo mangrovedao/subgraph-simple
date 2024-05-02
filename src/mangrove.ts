@@ -28,7 +28,7 @@ import {
   SetNotify,
   SetUseOracle
 } from "../generated/Mangrove/Mangrove";
-import { CleanOrder, Kandel, Market, Offer, OfferFilled, Order } from "../generated/schema";
+import { CleanOrder, Kandel, Market, Offer, OfferFilled, Order, Token } from "../generated/schema";
 import { getEventUniqueId, getOfferId, getOrCreateAccount, getOrCreateToken } from "./helpers";
 import {
   addCleanOrderToStack,
@@ -154,13 +154,27 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
 
   let order = getLatestOrderFromStack(true);
 
+  const market = Market.load(offer.market)!;
+  const outbound = Token.load(market.outbound_tkn)!;
+  const inbound = Token.load(market.inbound_tkn)!;
+
   const offerFilled = new OfferFilled(getEventUniqueId(event));
   offerFilled.creationDate = event.block.timestamp;
   offerFilled.transactionHash = event.transaction.hash;
   offerFilled.taker = order.taker;
   offerFilled.account = owner;
   offerFilled.makerGot = event.params.takerGives;
+  offerFilled.makerGotDisplay = event.params.takerGives.toBigDecimal().div(
+    BigInt.fromU32(10)
+      .pow(<u8>inbound.decimals.toU32())
+      .toBigDecimal()
+  );
   offerFilled.makerGave = event.params.takerWants;
+  offerFilled.makerGaveDisplay = event.params.takerWants.toBigDecimal().div(
+    BigInt.fromU32(10)
+      .pow(<u8>outbound.decimals.toU32())
+      .toBigDecimal()
+  );
   offerFilled.offer = offer.id;
   offerFilled.market = offer.market;
   offerFilled.save();
