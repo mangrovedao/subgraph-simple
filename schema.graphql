@@ -243,15 +243,3 @@ type Stack @entity {
   id: String!
   ids: String!
 }
-
-type Weight @entity {
-  id: String!
-  base: Bytes!
-  quote: Bytes!
-  fromBlock: BigInt!
-  toBlock: BigInt!
-  takerPointsPerDollar: BigInt!
-  makerToTakerRatio: BigInt!
-  ncMakerToCMakerRatio: BigInt!
-  maxSpread: BigInt!
-}

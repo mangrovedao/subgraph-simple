@@ -330,27 +330,6 @@ dataSources:
           handler: handleSetReneging
       file: ./src/mangrove-amplifier.ts
   - kind: ethereum
-    name: PointsWeights
-    network: blast
-    source:
-      abi: PointsWeights
-      address: "0xa3b5b77Ab0A15D8BE7736f214a2d2591f65d53C8"
-      startBlock: 710670
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - Weigths
-      abis:
-        - name: PointsWeights
-          file: ./abis/PointsWeights.json
-      eventHandlers:
-        - event: Weigths(indexed address,indexed
-            address,uint256,uint256,uint256,uint256,uint256,uint256)
-          handler: handleWeigths
-      file: ./src/points-weigths.ts
-  - kind: ethereum
     name: MgvReferral
     network: blast
     source:

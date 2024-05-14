@@ -37,8 +37,7 @@
       "startBlock": 47504272
     }
   },
-  "matic": {
-  },
+  "matic": {},
   "mangrove-private-blast": {
     "Mangrove": {
       "address": "0xb1a49C54192Ea59B233200eA38aB56650Dfb448C",
@@ -92,11 +91,7 @@
     },
     "RouterProxyFactory": {
       "address": "0x77CD6977011658019B8aF1b77C6b1310dFA35508",
-      "startBlock": 1848367 
-    },
-    "PointsWeights": {
-      "address": "0x27FF6d775F32E02044ea41B0a6CC9D7305C79224",
-      "startBlock": 1911778
+      "startBlock": 1848367
     },
     "MgvReferral": {
       "address": "0xCb62cD0Ea7aD46d5B630C1068C7bED2cBd2b7E23",
