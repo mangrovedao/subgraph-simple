@@ -22,11 +22,11 @@ type Token @entity {
 
 type Market @entity {
   id: String!
-  outbound_tkn: Bytes! # address
-  inbound_tkn: Bytes! # address
+  outboundToken: Bytes! # address
+  inboundToken: Bytes! # address
   tickSpacing: BigInt!
   active: Boolean!
-  gasbase: BigInt!
+  gasBase: BigInt!
   fee: BigInt!
 }
 
@@ -39,8 +39,8 @@ type Offer @entity {
   offerId: BigInt!
   tick: BigInt!
   gives: BigInt!
-  gasprice: BigInt!
-  gasreq: BigInt!
+  gasPrice: BigInt!
+  gasReq: BigInt!
   gasBase: BigInt!
   isOpen: Boolean!
   isFailed: Boolean!
@@ -199,8 +199,8 @@ type Kandel @entity {
   totalPublishedQuote: BigInt!
 
   # Parameters
-  gasprice: BigInt
-  gasreq: BigInt
+  gasPrice: BigInt
+  gasReq: BigInt
   stepSize: BigInt
   baseQuoteTickOffset: BigInt
   length: BigInt
@@ -230,8 +230,8 @@ type KandelParameters @entity {
   transactionHash: Bytes!
   creationDate: BigInt!
 
-  gasprice: BigInt
-  gasreq: BigInt
+  gasPrice: BigInt
+  gasReq: BigInt
   baseQuoteTickOffset: BigInt
   stepSize: BigInt
   length: BigInt

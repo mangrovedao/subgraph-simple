@@ -72,7 +72,7 @@ export function handleOfferFailEvent(event: OfferFail, posthookData: Bytes | nul
   offer.isFilled = false;
   offer.isRetracted = false;
   offer.posthookFailReason = null;
-  offer.gasprice = BigInt.fromI32(0);
+  offer.gasPrice = BigInt.fromI32(0);
 
   offer.failedReason = event.params.mgvData;
   offer.latestUpdateDate = event.block.timestamp;
@@ -106,7 +106,7 @@ export function handleOfferRetract(event: OfferRetract): void {
   offer.deprovisioned = event.params.deprovision;
 
   if (event.params.deprovision) {
-    offer.gasprice = BigInt.fromI32(0);
+    offer.gasPrice = BigInt.fromI32(0);
   }
 
   offer.latestUpdateDate = event.block.timestamp;
@@ -155,8 +155,8 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
   let order = getLatestOrderFromStack(true);
 
   const market = Market.load(offer.market)!;
-  const outbound = Token.load(market.outbound_tkn)!;
-  const inbound = Token.load(market.inbound_tkn)!;
+  const outbound = Token.load(market.outboundToken)!;
+  const inbound = Token.load(market.inboundToken)!;
 
   const offerFilled = new OfferFilled(getEventUniqueId(event));
   offerFilled.creationDate = event.block.timestamp;
@@ -188,7 +188,7 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
   if (offer.kandel) {
     const kandel = Kandel.load(offer.kandel!)!;
     const market = Market.load(offer.market)!;
-    if (market.outbound_tkn == kandel.base) {
+    if (market.outboundToken == kandel.base) {
       kandel.totalPublishedBase = kandel.totalPublishedBase.minus(event.params.takerWants);
       kandel.totalPublishedQuote = kandel.totalPublishedQuote.plus(event.params.takerGives);
     } else {
@@ -238,15 +238,15 @@ const handlePartialOfferWrite = (offerWrite: PartialOfferWrite): void => {
   const marketId = offerWrite.olKeyHash.toHex();
   const market = Market.load(marketId)!;
   offer.market = market.id;
-  offer.gasBase = market.gasbase;
+  offer.gasBase = market.gasBase;
 
   offer.offerId = offerWrite.id;
 
   offer.tick = offerWrite.tick;
   offer.gives = offerWrite.gives;
 
-  offer.gasprice = offerWrite.gasprice;
-  offer.gasreq = offerWrite.gasreq;
+  offer.gasPrice = offerWrite.gasprice;
+  offer.gasReq = offerWrite.gasreq;
   offer.isOpen = true;
   offer.isFailed = false;
   offer.isFilled = false;
@@ -358,10 +358,10 @@ export function handleSetActive(event: SetActive): void {
     getOrCreateToken(event.params.outbound_tkn);
     getOrCreateToken(event.params.inbound_tkn);
 
-    market.outbound_tkn = event.params.outbound_tkn;
-    market.inbound_tkn = event.params.inbound_tkn;
+    market.outboundToken = event.params.outbound_tkn;
+    market.inboundToken = event.params.inbound_tkn;
     market.tickSpacing = event.params.tickSpacing;
-    market.gasbase = BigInt.fromI32(0);
+    market.gasBase = BigInt.fromI32(0);
     market.fee = BigInt.fromI32(0);
   }
 
@@ -392,7 +392,7 @@ export function handleSetGasbase(event: SetGasbase): void {
     market.active = false;
     market.fee = BigInt.fromI32(0);
   }
-  market.gasbase = event.params.offer_gasbase;
+  market.gasBase = event.params.offer_gasbase;
 
   market.save();
 }

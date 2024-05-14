@@ -41,9 +41,9 @@ function setLogicOnLimitOrder(offer: Offer, event: SetRouteLogic): void {
 
   const market = Market.load(offer.market)!;
 
-  if (event.params.token.equals(market.outbound_tkn)) {
+  if (event.params.token.equals(market.outboundToken)) {
     limitOrder.outboundRoute = event.params.logic;
-  } else if (event.params.token.equals(market.inbound_tkn)) {
+  } else if (event.params.token.equals(market.inboundToken)) {
     limitOrder.inboundRoute = event.params.logic;
   } else {
   }
@@ -61,9 +61,9 @@ function setLogicOnAmplifiedOffer(offer: Offer, event: SetRouteLogic): void {
 
   const market = Market.load(offer.market)!;
 
-  if (event.params.token.equals(market.outbound_tkn)) {
+  if (event.params.token.equals(market.outboundToken)) {
     amplifiedOffer.outboundRoute = event.params.logic;
-  } else if (event.params.token.equals(market.inbound_tkn)) {
+  } else if (event.params.token.equals(market.inboundToken)) {
     amplifiedOffer.inboundRoute = event.params.logic;
   } else {
     return;
@@ -80,9 +80,9 @@ function setLogicOnKandel(offer: Offer, event: SetRouteLogic): void {
 
   const market = Market.load(offer.market)!;
 
-  if (event.params.token.equals(market.outbound_tkn)) {
+  if (event.params.token.equals(market.outboundToken)) {
     kandel.outboundRoute = event.params.logic;
-  } else if (event.params.token.equals(market.inbound_tkn)) {
+  } else if (event.params.token.equals(market.inboundToken)) {
     kandel.inboundRoute = event.params.logic;
   } else {
     return;

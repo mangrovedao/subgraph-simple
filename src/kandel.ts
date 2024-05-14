@@ -99,7 +99,7 @@ export function handlePopulateEnd(event: PopulateEnd): void {
       const totalGave = offer.totalGave === null ? BigInt.fromI32(0) : offer.totalGave;
       const totalGot = offer.totalGot === null ? BigInt.fromI32(0) : offer.totalGot;
 
-      if (market.outbound_tkn == kandel.base) {
+      if (market.outboundToken == kandel.base) {
         kandel.totalPublishedBase = kandel.totalPublishedBase.plus(offer.gives);
       } else {
         kandel.totalPublishedQuote = kandel.totalPublishedQuote.plus(offer.gives);
@@ -196,22 +196,22 @@ export function handleSetBaseQuoteTickOffset(event: SetBaseQuoteTickOffset): voi
 
 export function handleSetGasprice(event: SetGasprice): void {
   const kandel = KandelEntity.load(event.address)!;
-  kandel.gasprice = event.params.value;
+  kandel.gasPrice = event.params.value;
   kandel.save();
 
   const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
-  kandelParams.gasprice = event.params.value;
+  kandelParams.gasPrice = event.params.value;
 
   kandelParams.save();
 }
 
 export function handleSetGasreq(event: SetGasreq): void {
   const kandel = KandelEntity.load(event.address)!;
-  kandel.gasreq = event.params.value;
+  kandel.gasReq = event.params.value;
   kandel.save();
 
   const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
-  kandelParams.gasreq = event.params.value;
+  kandelParams.gasReq = event.params.value;
 
   kandelParams.save();
 }

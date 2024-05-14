@@ -128,8 +128,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Offer", offerId, "latestLogIndex", offerFail.logIndex.toString());
     assert.fieldEquals("Offer", offerId, "tick", "1234");
     assert.fieldEquals("Offer", offerId, "gives", "5678");
-    assert.fieldEquals("Offer", offerId, "gasprice", "0");
-    assert.fieldEquals("Offer", offerId, "gasreq", "20");
+    assert.fieldEquals("Offer", offerId, "gasPrice", "0");
+    assert.fieldEquals("Offer", offerId, "gasReq", "20");
     assert.fieldEquals("Offer", offerId, "gasBase", "30");
     assert.fieldEquals("Offer", offerId, "isOpen", "false");
     assert.fieldEquals("Offer", offerId, "isFailed", "true");
@@ -204,8 +204,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Offer", offerId, "latestLogIndex", offerFail.logIndex.toString());
     assert.fieldEquals("Offer", offerId, "tick", "1234");
     assert.fieldEquals("Offer", offerId, "gives", "5678");
-    assert.fieldEquals("Offer", offerId, "gasprice", "0");
-    assert.fieldEquals("Offer", offerId, "gasreq", "20");
+    assert.fieldEquals("Offer", offerId, "gasPrice", "0");
+    assert.fieldEquals("Offer", offerId, "gasReq", "20");
     assert.fieldEquals("Offer", offerId, "gasBase", "30");
     assert.fieldEquals("Offer", offerId, "isOpen", "false");
     assert.fieldEquals("Offer", offerId, "isFailed", "true");
@@ -267,8 +267,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Offer", offerId, "latestLogIndex", offerRetract.logIndex.toString());
     assert.fieldEquals("Offer", offerId, "tick", "40");
     assert.fieldEquals("Offer", offerId, "gives", "20");
-    assert.fieldEquals("Offer", offerId, "gasprice", "0");
-    assert.fieldEquals("Offer", offerId, "gasreq", "20");
+    assert.fieldEquals("Offer", offerId, "gasPrice", "0");
+    assert.fieldEquals("Offer", offerId, "gasReq", "20");
     assert.fieldEquals("Offer", offerId, "gasBase", "30");
     assert.fieldEquals("Offer", offerId, "isOpen", "false");
     assert.fieldEquals("Offer", offerId, "isFailed", "false");
@@ -331,8 +331,8 @@ describe("Describe entity assertions", () => {
     // TODO: de we want to update the tick and gives?
     assert.fieldEquals("Offer", offerId, "tick", "40");
     assert.fieldEquals("Offer", offerId, "gives", "20");
-    assert.fieldEquals("Offer", offerId, "gasprice", "10");
-    assert.fieldEquals("Offer", offerId, "gasreq", "20");
+    assert.fieldEquals("Offer", offerId, "gasPrice", "10");
+    assert.fieldEquals("Offer", offerId, "gasReq", "20");
     assert.fieldEquals("Offer", offerId, "gasBase", "30");
     assert.fieldEquals("Offer", offerId, "isOpen", "false");
     assert.fieldEquals("Offer", offerId, "isFailed", "false");
@@ -402,8 +402,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Offer", offerId, "latestLogIndex", offerSuccess.logIndex.toString());
     assert.fieldEquals("Offer", offerId, "tick", "40");
     assert.fieldEquals("Offer", offerId, "gives", "0");
-    assert.fieldEquals("Offer", offerId, "gasprice", "10");
-    assert.fieldEquals("Offer", offerId, "gasreq", "20");
+    assert.fieldEquals("Offer", offerId, "gasPrice", "10");
+    assert.fieldEquals("Offer", offerId, "gasReq", "20");
     assert.fieldEquals("Offer", offerId, "gasBase", "30");
     assert.fieldEquals("Offer", offerId, "isOpen", "false");
     assert.fieldEquals("Offer", offerId, "isFailed", "false");
@@ -504,8 +504,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Offer", offerId, "latestLogIndex", offerSuccess.logIndex.toString());
     assert.fieldEquals("Offer", offerId, "tick", "40");
     assert.fieldEquals("Offer", offerId, "gives", "0");
-    assert.fieldEquals("Offer", offerId, "gasprice", "10");
-    assert.fieldEquals("Offer", offerId, "gasreq", "20");
+    assert.fieldEquals("Offer", offerId, "gasPrice", "10");
+    assert.fieldEquals("Offer", offerId, "gasReq", "20");
     assert.fieldEquals("Offer", offerId, "gasBase", "30");
     assert.fieldEquals("Offer", offerId, "isOpen", "false");
     assert.fieldEquals("Offer", offerId, "isFailed", "false");
@@ -612,8 +612,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Offer", offerId, "latestLogIndex", offerSuccess.logIndex.toString());
     assert.fieldEquals("Offer", offerId, "tick", "40");
     assert.fieldEquals("Offer", offerId, "gives", "0");
-    assert.fieldEquals("Offer", offerId, "gasprice", "10");
-    assert.fieldEquals("Offer", offerId, "gasreq", "20");
+    assert.fieldEquals("Offer", offerId, "gasPrice", "10");
+    assert.fieldEquals("Offer", offerId, "gasReq", "20");
     assert.fieldEquals("Offer", offerId, "gasBase", "30");
     assert.fieldEquals("Offer", offerId, "isOpen", "false");
     assert.fieldEquals("Offer", offerId, "isFailed", "false");
@@ -694,8 +694,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Offer", offerId, "latestLogIndex", offerWrite.logIndex.toString());
     assert.fieldEquals("Offer", offerId, "tick", "1000");
     assert.fieldEquals("Offer", offerId, "gives", "2000");
-    assert.fieldEquals("Offer", offerId, "gasprice", "0");
-    assert.fieldEquals("Offer", offerId, "gasreq", "0");
+    assert.fieldEquals("Offer", offerId, "gasPrice", "0");
+    assert.fieldEquals("Offer", offerId, "gasReq", "0");
     assert.fieldEquals("Offer", offerId, "gasBase", "1000");
     assert.fieldEquals("Offer", offerId, "totalGot", "0");
     assert.fieldEquals("Offer", offerId, "totalGave", "0");
@@ -778,8 +778,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Offer", offerId, "latestLogIndex", offerWrite.logIndex.toString());
     assert.fieldEquals("Offer", offerId, "tick", "1000");
     assert.fieldEquals("Offer", offerId, "gives", "2000");
-    assert.fieldEquals("Offer", offerId, "gasprice", "0");
-    assert.fieldEquals("Offer", offerId, "gasreq", "0");
+    assert.fieldEquals("Offer", offerId, "gasPrice", "0");
+    assert.fieldEquals("Offer", offerId, "gasReq", "0");
     assert.fieldEquals("Offer", offerId, "gasBase", "1000");
     assert.fieldEquals("Offer", offerId, "isOpen", "true");
     assert.fieldEquals("Offer", offerId, "isFailed", "false");
@@ -920,7 +920,9 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("OfferFilled", offerSuccessEventId, "creationDate", offerSuccessEvent.block.timestamp.toString());
     assert.fieldEquals("OfferFilled", offerSuccessEventId, "transactionHash", offerSuccessEvent.transaction.hash.toHexString());
     assert.fieldEquals("OfferFilled", offerSuccessEventId, "makerGot", "40");
+    assert.fieldEquals("OfferFilled", offerSuccessEventId, "makerGotDisplay", "0.00004");
     assert.fieldEquals("OfferFilled", offerSuccessEventId, "makerGave", "20");
+    assert.fieldEquals("OfferFilled", offerSuccessEventId, "makerGaveDisplay", "0.00000000000000002");
     assert.fieldEquals("OfferFilled", offerSuccessEventId, "offer", getOfferId(olKeyHash01, BigInt.fromI32(1)));
     assert.fieldEquals("OfferFilled", offerSuccessEventId, "taker", taker.toHex());
     assert.fieldEquals("OfferFilled", offerSuccessEventId, "market", olKeyHash01.toHex());
@@ -970,8 +972,8 @@ describe("Describe entity assertions", () => {
     handleSetActive(setActiveEvent);
 
     assert.fieldEquals("Market", marketId, "active", "false");
-    assert.fieldEquals("Market", marketId, "inbound_tkn", token1.toHexString());
-    assert.fieldEquals("Market", marketId, "outbound_tkn", token0.toHexString());
+    assert.fieldEquals("Market", marketId, "inboundToken", token1.toHexString());
+    assert.fieldEquals("Market", marketId, "outboundToken", token0.toHexString());
     assert.fieldEquals("Market", marketId, "tickSpacing", "1");
   });
 
@@ -993,10 +995,10 @@ describe("Describe entity assertions", () => {
     handleSetGasbase(setGasBase);
     assert.entityCount("Market", 2);
 
-    const gasbaseId = olKeyHash01.toHexString();
-    assert.fieldEquals("Market", gasbaseId, "gasbase", "20");
-    assert.fieldEquals("Market", gasbaseId, "inbound_tkn", token1.toHexString());
-    assert.fieldEquals("Market", gasbaseId, "outbound_tkn", token0.toHexString());
+    const gasBaseId = olKeyHash01.toHexString();
+    assert.fieldEquals("Market", gasBaseId, "gasBase", "20");
+    assert.fieldEquals("Market", gasBaseId, "inboundToken", token1.toHexString());
+    assert.fieldEquals("Market", gasBaseId, "outboundToken", token0.toHexString());
   });
 
   test("Market, handleSetGasBase, update gasbase", () => {
@@ -1007,7 +1009,7 @@ describe("Describe entity assertions", () => {
     const setGasBase2 = createSetGasbaseEvent(olKeyHash01, BigInt.fromI32(40));
     handleSetGasbase(setGasBase2);
 
-    assert.fieldEquals("Market", olKeyHash01.toHexString(), "gasbase", "40");
+    assert.fieldEquals("Market", olKeyHash01.toHexString(), "gasBase", "40");
     assert.entityCount("Market", 2);
   });
 });

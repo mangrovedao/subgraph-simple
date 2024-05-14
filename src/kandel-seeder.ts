@@ -49,8 +49,8 @@ export function handleNewSmartKandel(event: NewSmartKandel): void {
   kandel.address = event.params.kandel;
   kandel.type = "SmartKandel";
   const market = Market.load(event.params.quoteBaseOlKeyHash.toHexString())!;
-  kandel.base = market.inbound_tkn;
-  kandel.quote = market.outbound_tkn;
+  kandel.base = market.inboundToken;
+  kandel.quote = market.outboundToken;
   kandel.baseQuoteOlKeyHash = event.params.baseQuoteOlKeyHash;
   kandel.quoteBaseOlKeyHash = event.params.quoteBaseOlKeyHash;
 
@@ -81,8 +81,8 @@ export function handleNewKandel(event: NewKandel): void {
   kandel.address = event.params.kandel;
   kandel.type = "Kandel";
   const market = Market.load(event.params.quoteBaseOlKeyHash.toHexString())!;
-  kandel.base = market.inbound_tkn;
-  kandel.quote = market.outbound_tkn;
+  kandel.base = market.inboundToken;
+  kandel.quote = market.outboundToken;
   kandel.baseQuoteOlKeyHash = event.params.baseQuoteOlKeyHash;
   kandel.quoteBaseOlKeyHash = event.params.quoteBaseOlKeyHash;
 

@@ -105,7 +105,6 @@ export function createOfferFailEvent(
   offerFailEvent.parameters.push(new ethereum.EventParam("takerWants", ethereum.Value.fromUnsignedBigInt(takerWants)));
   offerFailEvent.parameters.push(new ethereum.EventParam("takerGives", ethereum.Value.fromUnsignedBigInt(takerGives)));
   offerFailEvent.parameters.push(new ethereum.EventParam("penalty", ethereum.Value.fromUnsignedBigInt(penalty)));
-
   offerFailEvent.parameters.push(new ethereum.EventParam("mgvData", ethereum.Value.fromBytes(mgvData)));
 
   // push optional parameters
@@ -197,9 +196,7 @@ export function createOrderCompleteEvent(olKeyHash: Bytes, taker: Address, fee: 
   orderCompleteEvent.parameters = new Array();
 
   orderCompleteEvent.parameters.push(new ethereum.EventParam("olKeyHash", ethereum.Value.fromBytes(olKeyHash)));
-
   orderCompleteEvent.parameters.push(new ethereum.EventParam("taker", ethereum.Value.fromAddress(taker)));
-
   orderCompleteEvent.parameters.push(new ethereum.EventParam("fee", ethereum.Value.fromUnsignedBigInt(fee)));
 
   return orderCompleteEvent;
@@ -211,13 +208,9 @@ export function createOrderStartEvent(olKeyHash: Bytes, taker: Address, maxTick:
   orderStartEvent.parameters = new Array();
 
   orderStartEvent.parameters.push(new ethereum.EventParam("olKeyHash", ethereum.Value.fromBytes(olKeyHash)));
-
   orderStartEvent.parameters.push(new ethereum.EventParam("taker", ethereum.Value.fromAddress(taker)));
-
   orderStartEvent.parameters.push(new ethereum.EventParam("maxTick", ethereum.Value.fromSignedBigInt(maxTick)));
-
   orderStartEvent.parameters.push(new ethereum.EventParam("fillVolume", ethereum.Value.fromUnsignedBigInt(fillVolume)));
-
   orderStartEvent.parameters.push(new ethereum.EventParam("fillWants", ethereum.Value.fromBoolean(fillWants)));
 
   return orderStartEvent;
@@ -245,12 +238,9 @@ export function createSetActiveEvent(olKeyHash: Bytes, outbound_tkn: Address, in
   setActiveEvent.parameters = new Array();
 
   setActiveEvent.parameters.push(new ethereum.EventParam("olKeyHash", ethereum.Value.fromBytes(olKeyHash)));
-
   setActiveEvent.parameters.push(new ethereum.EventParam("outbound_tkn", ethereum.Value.fromAddress(outbound_tkn)));
   setActiveEvent.parameters.push(new ethereum.EventParam("inbound_tkn", ethereum.Value.fromAddress(inbound_tkn)));
-
   setActiveEvent.parameters.push(new ethereum.EventParam("tickSpacing", ethereum.Value.fromSignedBigInt(tickSpacing)));
-
   setActiveEvent.parameters.push(new ethereum.EventParam("value", ethereum.Value.fromBoolean(value)));
 
   return setActiveEvent;
