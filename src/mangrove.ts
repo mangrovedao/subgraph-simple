@@ -28,7 +28,7 @@ import {
   SetNotify,
   SetUseOracle
 } from "../generated/Mangrove/Mangrove";
-import { CleanOrder, Kandel, Market, Offer, OfferFilled, Order, Token } from "../generated/schema";
+import { CleanOrder, Kandel, LimitOrder, Market, Offer, OfferFilled, Order, Token } from "../generated/schema";
 import { getEventUniqueId, getOfferId, getOrCreateAccount, getOrCreateToken } from "./helpers";
 import {
   addCleanOrderToStack,
@@ -234,6 +234,7 @@ const handlePartialOfferWrite = (offerWrite: PartialOfferWrite): void => {
 
   const owner = getOrCreateAccount(Address.fromBytes(offerWrite.maker), offerWrite.timestamp, true);
   offer.maker = owner.id;
+  offer.realMaker = owner.id;
 
   const marketId = offerWrite.olKeyHash.toHex();
   const market = Market.load(marketId)!;
@@ -260,6 +261,12 @@ const handlePartialOfferWrite = (offerWrite: PartialOfferWrite): void => {
   if (offer.kandel) {
     const kandel = Kandel.load(offer.kandel!);
     offer.owner = kandel!.admin;
+    offer.realMaker = kandel!.admin;
+  }
+
+  if (offer.limitOrder) {
+    const limitOrder = LimitOrder.load(offer.limitOrder!);
+    offer.realMaker = limitOrder!.realTaker;
   }
 
   offer.save();
