@@ -54,50 +54,79 @@ type Offer @entity {
   creationDate: BigInt!
   latestUpdateDate: BigInt!
   offerId: BigInt!
+  "The tick of the offer, used to determine the price"
   tick: BigInt!
+  "The amount of the outbound token that the offer gives"
   gives: BigInt!
   gasPrice: BigInt!
   gasReq: BigInt!
   gasBase: BigInt!
+  "If the offer is open"
   isOpen: Boolean!
+  "If the offer has failed"
   isFailed: Boolean!
+  "If the offer has been filled completely"
   isFilled: Boolean!
+  "If the offer has been retracted"
   isRetracted: Boolean!
+  "The reason the offer failed, if it did"
   failedReason: Bytes
+  "The reason the posthook failed, if it did"
   posthookFailReason: Bytes
   deprovisioned: Boolean!
+  "The last penalty that the offer paid"
   latestPenalty: BigInt!
+  "The total penalty that the offer has paid across all partial fills"
   totalPenalty: BigInt!
+  "The total amount of the inbound token that the offer has got"
   totalGot: BigInt!
+  "The total amount of the outbound token that the offer has given"
   totalGave: BigInt!
+  "The previous amount of output token that the offer was promising"
   prevGives: BigInt
   prevTick: BigInt
 
+  "The market that the offer is on"
   market: Market!
+  "The wallet or contract that created the offer"
   maker: Account!
+  "The wallet that created the offer, traced through Kandels and Limit Orders"
   realMaker: Account!
   owner: Account
+  "The limit order that placed the offer, if any"
   limitOrder: LimitOrder
+  "The Kandel that placed the order, if any"
   kandel: Kandel
+  "The index of the offer in the Kandel offer list"
   kandelIndex: BigInt
+  "The amplified offer that the offer belongs to, if any"
   amplifiedOffer: AmplifiedOffer
 }
 
 type OfferFilled @entity {
   id: String!
 
+  "When the offer was filled"
   creationDate: BigInt
+  "The transaction the offer was filled on"
   transactionHash: Bytes!
 
+  "The account that filled the offer"
   taker: Account!
   account: Account!
+  "The market that the offer was on"
   market: Market!
 
+  "The amount of the inbound token that the maker got"
   makerGot: BigInt!
+  "The amount of the outbound token that the maker gave"
   makerGave: BigInt!
+  "The display value of makerGot for use in UIs"
   makerGotDisplay: BigDecimal!
+  "The display value of makerGave for use in UIs"
   makerGaveDisplay: BigDecimal!
 
+  "The offer that was filled"
   offer: Offer
 }
 
