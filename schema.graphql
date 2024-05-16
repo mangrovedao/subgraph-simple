@@ -1,32 +1,49 @@
 type Account @entity {
   id: Bytes!
+  "Address of the account"
   address: Bytes!
+  "Time that the account was first seen on Mangrove"
   creationDate: BigInt!
+  "Last time that the account interacted with Mangrove"
   latestInteractionDate: BigInt!
+  "Wether the account has deployed a proxy yet"
   proxyDeployed: Boolean!
+  "The proxy address of the account, if deployed"
   proxy: Bytes
 
+  "Wether the account is a referrer of some other user"
   isReferrer: Boolean!
 
+  "The account that referred this account"
   referrer: Account
+  "The accounts that this account has referred"
   referrals: [Account!]! @derivedFrom(field: "referrer")
 }
 
 type Token @entity {
   id: Bytes!
   address: Bytes!
+  "The ERC20 name for the token"
   name: String!
+  "The ERC20 symbol for the token"
   symbol: String!
+  "The number of decimals to use when displaying the token"
   decimals: BigInt!
 }
 
 type Market @entity {
   id: String!
-  outboundToken: Bytes! # address
-  inboundToken: Bytes! # address
+  "Outbound token of the market"
+  outboundToken: Bytes!
+  "Inbound token of the market"
+  inboundToken: Bytes!
+  "Spacing between ticks on the market"
   tickSpacing: BigInt!
+  "If the market is able to be used"
   active: Boolean!
+
   gasBase: BigInt!
+  "The fee charged when trading on the market"
   fee: BigInt!
 }
 
