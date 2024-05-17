@@ -1,4 +1,6 @@
+"A user of the Mangrove protocol, either a wallet or a contract"
 type Account @entity {
+  "The unique identifier for the account (same as address in this case)"
   id: Bytes!
   "Address of the account"
   address: Bytes!
@@ -6,22 +8,25 @@ type Account @entity {
   creationDate: BigInt!
   "Last time that the account interacted with Mangrove"
   latestInteractionDate: BigInt!
-  "Wether the account has deployed a proxy yet"
+  "If the account has deployed a proxy yet"
   proxyDeployed: Boolean!
   "The proxy address of the account, if deployed"
   proxy: Bytes
 
-  "Wether the account is a referrer of some other user"
+  # Referral system properties
+  "If the account is a referrer of some other user"
   isReferrer: Boolean!
-
   "The account that referred this account"
   referrer: Account
   "The accounts that this account has referred"
   referrals: [Account!]! @derivedFrom(field: "referrer")
 }
 
+"An ERC20 token that can be traded on Mangrove"
 type Token @entity {
+  "The unique identifier for the token (same as address in this case)"
   id: Bytes!
+  "The address of the token contract"
   address: Bytes!
   "The ERC20 name for the token"
   name: String!
@@ -31,7 +36,9 @@ type Token @entity {
   decimals: BigInt!
 }
 
+"A market on mangrove, made up of a token pair and some configuration options"
 type Market @entity {
+  "The unique identifier for the market"
   id: String!
   "Outbound token of the market"
   outboundToken: Bytes!
@@ -41,25 +48,35 @@ type Market @entity {
   tickSpacing: BigInt!
   "If the market is able to be used"
   active: Boolean!
-
+  "MISSING COMMENT"
   gasBase: BigInt!
   "The fee charged when trading on the market"
   fee: BigInt!
 }
 
+"MISSING COMMENT"
 type Offer @entity {
+  "The unique identifier for the offer"
   id: String!
+  "The hash of the latest transaction that the offer was involved in"
   latestTransactionHash: Bytes!
+  "MISSING COMMENT"
   latestLogIndex: BigInt!
+  "The time that the offer was created"
   creationDate: BigInt!
+  "The time that the offer was last updated"
   latestUpdateDate: BigInt!
+  "The id of the offer in the Offer list of the market"
   offerId: BigInt!
   "The tick of the offer, used to determine the price"
   tick: BigInt!
   "The amount of the outbound token that the offer gives"
   gives: BigInt!
+  "MISSING COMMENT"
   gasPrice: BigInt!
+  "MISSING COMMENT"
   gasReq: BigInt!
+  "MISSING COMMENT"
   gasBase: BigInt!
   "If the offer is open"
   isOpen: Boolean!
@@ -73,6 +90,7 @@ type Offer @entity {
   failedReason: Bytes
   "The reason the posthook failed, if it did"
   posthookFailReason: Bytes
+  "MISSING COMMENT"
   deprovisioned: Boolean!
   "The last penalty that the offer paid"
   latestPenalty: BigInt!
@@ -84,14 +102,15 @@ type Offer @entity {
   totalGave: BigInt!
   "The previous amount of output token that the offer was promising"
   prevGives: BigInt
+  "MISSING COMMENT"
   prevTick: BigInt
-
   "The market that the offer is on"
   market: Market!
   "The wallet or contract that created the offer"
   maker: Account!
   "The wallet that created the offer, traced through Kandels and Limit Orders"
   realMaker: Account!
+  "MISSING COMMENT"
   owner: Account
   "The limit order that placed the offer, if any"
   limitOrder: LimitOrder
@@ -103,20 +122,20 @@ type Offer @entity {
   amplifiedOffer: AmplifiedOffer
 }
 
+"An event that occurs when an offer is filled on a market"
 type OfferFilled @entity {
+  "The unique identifier for the OfferFilled event"
   id: String!
-
   "When the offer was filled"
   creationDate: BigInt
   "The transaction the offer was filled on"
   transactionHash: Bytes!
-
   "The account that filled the offer"
   taker: Account!
+  "MISSING COMMENT"
   account: Account!
   "The market that the offer was on"
   market: Market!
-
   "The amount of the inbound token that the maker got"
   makerGot: BigInt!
   "The amount of the outbound token that the maker gave"
@@ -125,168 +144,288 @@ type OfferFilled @entity {
   makerGotDisplay: BigDecimal!
   "The display value of makerGave for use in UIs"
   makerGaveDisplay: BigDecimal!
-
   "The offer that was filled"
   offer: Offer
 }
 
+"MISSING COMMENT"
 type CleanOrder @entity {
+  "MISSING COMMENT"
   id: String!
+  "MISSING COMMENT"
   transactionHash: Bytes!
+  "MISSING COMMENT"
   creationDate: BigInt!
 
+  "MISSING COMMENT"
   taker: Account!
+  "MISSING COMMENT"
   offersToBeCleaned: BigInt!
+  "MISSING COMMENT"
   orders: [Order!]! @derivedFrom(field: "cleanOrder")
 
+  "MISSING COMMENT"
   market: Market
 }
 
+"MISSING COMMENT"
 type Order @entity {
+  "MISSING COMMENT"
   id: String!
+  "MISSING COMMENT"
   transactionHash: Bytes!
+  "MISSING COMMENT"
   creationDate: BigInt!
 
+  "MISSING COMMENT"
   fillVolume: BigInt!
+  "MISSING COMMENT"
   fillWants: Boolean!
+  "MISSING COMMENT"
   maxTick: BigInt!
+  "MISSING COMMENT"
   taker: Account!
+  "MISSING COMMENT"
   takerGot: BigInt!
+  "MISSING COMMENT"
   takerGave: BigInt!
+  "MISSING COMMENT"
   penalty: BigInt!
+  "MISSING COMMENT"
   feePaid: BigInt!
 
+  "THe market that the order is on"
   market: Market
+  "The limit order that the order is tied to, if any"
   limitOrder: LimitOrder
+  "MISSING COMMENT"
   cleanOrder: CleanOrder
 }
 
+"An offer placed by an amplified offer"
 type AmplifiedOffer @entity {
+  "The unique identifier for the amplified offer"
   id: String!
 
+  "The logic to use to receive incoming tokens"
   inboundRoute: Bytes
+  "The logic to use to source outgoing tokens"
   outboundRoute: Bytes
 
+  "The bundle of offers that the offer belongs to"
   bundle: AmplifiedOfferBundle!
+  "The owner of the amplified offer"
   owner: Account
+  "The underlying offer that is tied to this amplified offer"
   offer: Offer!
 }
 
+"A bundle of offers that are tied together by an amplified offer"
 type AmplifiedOfferBundle @entity {
+  "The unique identifier for the bundle"
   id: String!
+  "The time at which the bundle was created"
   creationDate: BigInt!
+  "The id of the bundle inside of the amplifier"
   bundleId: BigInt!
+  "The time at which the offers expire, if any"
   expiryDate: BigInt!
 
+  "The offers that are tied to the bundle"
   offers: [AmplifiedOffer!]!
+  "The owner of the bundle"
   owner: Account
 }
 
+"A limit order that is placed on a market"
 type LimitOrder @entity {
+  "The unique identifier for the limit order"
   id: String!
+  "The time at which the limit order was created"
   creationDate: BigInt!
+  "The last time that the limit order was updated"
   latestUpdateDate: BigInt!
+  "The time at which the offer expires, if any"
   expiryDate: BigInt
+  "MISSING COMMENT"
   maxVolume: BigInt
+  "MISSING COMMENT"
   orderType: Int!
+  "The tick of the limit order, used to determine the price"
   tick: BigInt!
+  "MISSING COMMENT"
   fillVolume: BigInt!
+  "MISSING COMMENT"
   fillWants: Boolean!
 
+  "MISSING COMMENT"
   realTaker: Account!
 
+  "The logic to use to receive incoming tokens"
   inboundRoute: Bytes!
+  "The logic to use to source outgoing tokens"
   outboundRoute: Bytes!
 
+  "The underlying offer that is tied to this limit order"
   offer: Offer
+  "The order that is tied to the limit order"
   order: Order
 
+  "If the limit order is open"
   isOpen: Boolean
 }
 
+"An event that occurs when a token is deposited or withdrawn from a Kandel"
 type KandelDepositWithdraw @entity {
+  "The unique identifier for the deposit or withdraw event"
   id: String!
+  "The transaction that the event occurred in"
   transactionHash: Bytes!
+  "The time that the event occurred"
   date: BigInt!
+  "The token that was moved"
   token: Bytes!
+  "The amount of the token that was moved"
   amount: BigInt!
+  "If the event was a deposit, otherwise it was a withdraw"
   isDeposit: Boolean!
 
+  "The Kandel that the event occurred in"
   kandel: Kandel!
 }
 
+"The type of Kandel contract"
+enum KandelType {
+  "A Kandel contract"
+  Kandel
+  "A SmartKandel contract that uses Liquidity Sourcing, not deposit/withdrawing"
+  SmartKandel
+}
+
+"A Kandel contract with some configuration options and parameters"
 type Kandel @entity {
+  "The unique identifier for the Kandel"
   id: Bytes!
+  "The transaction that created the Kandel"
   transactionHash: Bytes!
+  "When the Kandel was created"
   creationDate: BigInt!
 
+  "The address of the KandelSeeder contract that seeded the Kandel"
   seeder: Bytes!
+  "The address of the Kandel contract"
   address: Bytes!
 
+  "The base token of the Kandel"
   base: Bytes!
+  "The quote token of the Kandel"
   quote: Bytes!
+  "The hash of the OL key for the market that is inbound base, outbound quote"
   baseQuoteOlKeyHash: Bytes!
+  "The hash of the OL key for the market that is inbound quote, outbound base"
   quoteBaseOlKeyHash: Bytes!
+  "The account that deployed the Kandel"
   deployer: Account!
+  "The account that is allowed to manage the Kandel"
   admin: Account!
 
+  "The logic used to receive incoming tokens"
   inboundRoute: Bytes
+  "The logic used to source outgoing tokens"
   outboundRoute: Bytes
 
-  type: String!
+  "The type of the Kandel contract"
+  type: KandelType!
 
   # Only for kandel AAVE
+  "MISSING COMMENT"
   reserveId: Bytes
+  "MISSING COMMENT"
   router: Bytes
 
+  "The amount of the base token that has been deposited into the Kandel"
   depositedBase: BigInt!
+  "The amount of the quote token that has been deposited into the Kandel"
   depositedQuote: BigInt!
 
+  "The total amount of the base token that has been published"
   totalPublishedBase: BigInt!
+  "The total amount of the quote token that has been published"
   totalPublishedQuote: BigInt!
 
   # Parameters
+  "MISSING COMMENT"
   gasPrice: BigInt
+  "MISSING COMMENT"
   gasReq: BigInt
+  "MISSING COMMENT"
   stepSize: BigInt
+  "MISSING COMMENT"
   baseQuoteTickOffset: BigInt
+  "MISSING COMMENT"
   length: BigInt
 
+  "MISSING COMMENT"
   offerIndexes: [String!]!
 
+  "The underlying offers that are managed by this Kandel"
   offers: [Offer!]! @derivedFrom(field: "kandel")
+  "The deposit or withdraw events that have occurred for this Kandel"
   depositWithdraws: [KandelDepositWithdraw!]! @derivedFrom(field: "kandel")
+  "The collection of historical parameters that the Kandel has been configured with"
   parameters: [KandelParameters!]! @derivedFrom(field: "kandel")
+  "MISSING COMMENT"
   populateRetracts: [KandelPopulateRetract!]! @derivedFrom(field: "kandel")
 }
 
+"MISSING COMMENT"
 type KandelPopulateRetract @entity {
+  "MISSING COMMENT"
   id: String!
+  "MISSING COMMENT"
   transactionHash: Bytes!
+  "MISSING COMMENT"
   creationDate: BigInt!
+  "MISSING COMMENT"
   startLogIndex: BigInt!
 
+  "If the event is a retract, otherwise it is a populate"
   isRetract: Boolean!
+  "MISSING COMMENT"
   offerGives: [String!]!
 
+  "The Kandel that the event is tied to"
   kandel: Kandel!
 }
 
+"The collection of parameters that a Kandel is configured with, used for historical purposes"
 type KandelParameters @entity {
+  "The unique identifier for the Kandel parameters"
   id: String!
+  "The transaction that the parameters were set in"
   transactionHash: Bytes!
+  "The time that the parameters were set"
   creationDate: BigInt!
 
+  "MISSING COMMENT"
   gasPrice: BigInt
+  "MISSING COMMENT"
   gasReq: BigInt
+  "MISSING COMMENT"
   baseQuoteTickOffset: BigInt
+  "MISSING COMMENT"
   stepSize: BigInt
+  "MISSING COMMENT"
   length: BigInt
 
+  "The Kandel that the parameters are for"
   kandel: Kandel!
 }
 
+"Internal - Used for storing items that span multiple events"
 type Stack @entity {
+  "The id of the stack"
   id: String!
+  "The items currently in the stack, encoded as a single string"
   ids: String!
 }
