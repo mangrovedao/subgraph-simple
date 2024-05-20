@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
 import {
   Approval,
   CleanComplete,
@@ -28,8 +28,28 @@ import {
   SetNotify,
   SetUseOracle
 } from "../generated/Mangrove/Mangrove";
-import { CleanOrder, Kandel, LimitOrder, Market, Offer, OfferFilled, Order, Token } from "../generated/schema";
-import { getEventUniqueId, getOfferId, getOrCreateAccount, getOrCreateToken } from "./helpers";
+import {
+  CleanOrder,
+  Kandel,
+  LimitOrder,
+  Market,
+  MarketActivity,
+  MarketActivityPair,
+  Offer,
+  OfferFilled,
+  Order,
+  Token,
+  TokenActivity
+} from "../generated/schema";
+import {
+  getEventUniqueId,
+  getMarketActivityId,
+  getMarketActivityPairId,
+  getOfferId,
+  getOrCreateAccount,
+  getOrCreateToken,
+  getTokenActivityId
+} from "./helpers";
 import {
   addCleanOrderToStack,
   addOfferWriteToStack,
@@ -126,6 +146,127 @@ export function handleOfferSuccess(event: OfferSuccess): void {
   handleOfferSuccessEvent(event);
 }
 
+const createNewMarketActivityEntry = (user: Address, market: Market, timestamp: BigInt): MarketActivity => {
+  const marketActivityId = getMarketActivityId(user, market);
+  const activity = new MarketActivity(marketActivityId);
+
+  activity.creationDate = BigInt.fromI32(0);
+  activity.latestInteractionDate = BigInt.fromI32(0);
+  activity.account = user;
+  activity.market = market.id;
+  activity.inboundAmountGot = BigInt.fromI32(0);
+  activity.inboundAmountGave = BigInt.fromI32(0);
+
+  activity.outboundAmountGot = BigInt.fromI32(0);
+  activity.outboundAmountGave = BigInt.fromI32(0);
+
+  activity.inboundAmountGotDisplay = BigInt.fromI32(0).toBigDecimal();
+  activity.inboundAmountGaveDisplay = BigInt.fromI32(0).toBigDecimal();
+
+  activity.outboundAmountGotDisplay = BigInt.fromI32(0).toBigDecimal();
+  activity.outboundAmountGaveDisplay = BigInt.fromI32(0).toBigDecimal();
+
+  activity.creationDate = timestamp;
+
+  return activity;
+};
+
+const createNewMarketActivityPairEntry = (maker: Address, taker: Address, market: Market, timestamp: BigInt): MarketActivityPair => {
+  const marketActivityPairId = getMarketActivityPairId(maker, taker, market);
+  const activity = new MarketActivityPair(marketActivityPairId);
+
+  activity.creationDate = BigInt.fromI32(0);
+  activity.latestInteractionDate = BigInt.fromI32(0);
+  activity.maker = maker;
+  activity.taker = taker;
+  activity.market = market.id;
+  activity.inboundAmount = BigInt.fromI32(0);
+  activity.outboundAmount = BigInt.fromI32(0);
+  activity.inboundAmountDisplay = BigInt.fromI32(0).toBigDecimal();
+
+  activity.outboundAmountDisplay = BigInt.fromI32(0).toBigDecimal();
+
+  activity.creationDate = timestamp;
+
+  return activity;
+};
+
+const createNewTokenActivityEntry = (user: Address, token: Token, timestamp: BigInt): TokenActivity => {
+  const tokenActivityId = getTokenActivityId(user, token);
+  const activity = new TokenActivity(tokenActivityId);
+
+  activity.creationDate = BigInt.fromI32(0);
+  activity.latestInteractionDate = BigInt.fromI32(0);
+  activity.account = user;
+  activity.token = token.id;
+  activity.amountSent = BigInt.fromI32(0);
+  activity.amountReceived = BigInt.fromI32(0);
+  activity.amountReceivedDisplay = BigInt.fromI32(0).toBigDecimal();
+  activity.amountSentDisplay = BigInt.fromI32(0).toBigDecimal();
+
+  activity.creationDate = timestamp;
+
+  return activity;
+};
+
+const getOrCreateMarketActivityEntry = (user: Address, market: Market, block: ethereum.Block): MarketActivity => {
+  const marketActivityId = getMarketActivityId(user, market);
+  let activity = MarketActivity.load(marketActivityId);
+  if (!activity) {
+    activity = createNewMarketActivityEntry(user, market, block.timestamp);
+  }
+  return activity;
+};
+
+const getOrCreateTokenActivityEntry = (user: Address, token: Token, block: ethereum.Block): TokenActivity => {
+  const tokenActivityId = getTokenActivityId(user, token);
+  let activity = TokenActivity.load(tokenActivityId);
+  if (!activity) {
+    activity = createNewTokenActivityEntry(user, token, block.timestamp);
+  }
+  return activity;
+};
+
+const getOrCreateMarketActivityPairEntry = (maker: Address, taker: Address, market: Market, block: ethereum.Block): MarketActivityPair => {
+  const marketActivityPairId = getMarketActivityPairId(maker, taker, market);
+  let activity = MarketActivityPair.load(marketActivityPairId);
+  if (!activity) {
+    activity = createNewMarketActivityPairEntry(maker, taker, market, block.timestamp);
+  }
+  return activity;
+};
+
+export function scale(amount: BigInt, decimals: BigInt): BigDecimal {
+  return amount.toBigDecimal().div(
+    BigInt.fromU32(10)
+      .pow(<u8>decimals.toU32())
+      .toBigDecimal()
+  );
+}
+
+function setDisplayValuesAndSaveMarket(activity: MarketActivity, inbound: Token, outbound: Token, block: ethereum.Block): void {
+  activity.inboundAmountGotDisplay = scale(activity.inboundAmountGot, inbound.decimals);
+  activity.inboundAmountGaveDisplay = scale(activity.inboundAmountGave, inbound.decimals);
+  activity.outboundAmountGotDisplay = scale(activity.outboundAmountGot, outbound.decimals);
+  activity.outboundAmountGaveDisplay = scale(activity.outboundAmountGave, outbound.decimals);
+  activity.latestInteractionDate = block.timestamp;
+  activity.save();
+}
+
+function setDisplayValuesAndSaveMarketPair(activity: MarketActivityPair, inbound: Token, outbound: Token, block: ethereum.Block): void {
+  activity.inboundAmountDisplay = scale(activity.inboundAmount, inbound.decimals);
+  activity.outboundAmountDisplay = scale(activity.outboundAmount, outbound.decimals);
+  activity.latestInteractionDate = block.timestamp;
+  activity.save();
+}
+
+function setDisplayValuesAndSaveToken(activity: TokenActivity, token: Token, block: ethereum.Block): void {
+  activity.amountReceivedDisplay = scale(activity.amountReceived, token.decimals);
+  activity.amountSentDisplay = scale(activity.amountSent, token.decimals);
+  activity.latestInteractionDate = block.timestamp;
+  activity.save();
+}
+
 export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes | null = null): void {
   const offerId = getOfferId(event.params.olKeyHash, event.params.id);
   const offer = Offer.load(offerId)!;
@@ -178,6 +319,70 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
   offerFilled.offer = offer.id;
   offerFilled.market = offer.market;
   offerFilled.save();
+
+  const taker = Address.fromBytes(order.taker);
+  const maker = Address.fromBytes(offer.realMaker);
+  const zero = Address.fromBytes(Address.fromHexString("0x0000000000000000000000000000000000000000"));
+
+  const rootAcc = getOrCreateAccount(zero, event.block.timestamp, true);
+  rootAcc.save();
+
+  // TODO: Could use MarketPair here with maker or taker = zero to replace the others
+  // TODO: Could use MarketPair with maker AND taker = zero to replace token activity
+  const marketActivityPair = getOrCreateMarketActivityPairEntry(taker, maker, market, event.block);
+
+  const tokenActivityInboundTaker = getOrCreateTokenActivityEntry(taker, inbound, event.block);
+  const tokenActivityOutboundTaker = getOrCreateTokenActivityEntry(taker, outbound, event.block);
+
+  const tokenActivityInboundMaker = getOrCreateTokenActivityEntry(maker, inbound, event.block);
+  const tokenActivityOutboundMaker = getOrCreateTokenActivityEntry(maker, outbound, event.block);
+
+  const tokenActivityTotalInbound = getOrCreateTokenActivityEntry(zero, inbound, event.block);
+  const tokenActivityTotalOutbound = getOrCreateTokenActivityEntry(zero, outbound, event.block);
+
+  const marketActivityTaker = getOrCreateMarketActivityEntry(taker, market, event.block); // TODO: Should be "real taker"
+  const marketActivityMaker = getOrCreateMarketActivityEntry(maker, market, event.block); // TODO: Should be "real maker"
+  const marketActivityTotal = getOrCreateMarketActivityEntry(zero, market, event.block);
+
+  // TODO: Review exactly what is being added here
+  marketActivityMaker.outboundAmountGave = marketActivityMaker.outboundAmountGave.plus(offerFilled.makerGave);
+  marketActivityMaker.inboundAmountGot = marketActivityMaker.inboundAmountGot.plus(offerFilled.makerGot);
+
+  marketActivityTaker.inboundAmountGave = marketActivityTaker.inboundAmountGave.plus(offerFilled.makerGot);
+  marketActivityTaker.outboundAmountGot = marketActivityTaker.outboundAmountGot.plus(offerFilled.makerGave);
+
+  marketActivityTotal.inboundAmountGave = marketActivityTotal.inboundAmountGave.plus(offerFilled.makerGot);
+  marketActivityTotal.inboundAmountGot = marketActivityTotal.inboundAmountGot.plus(offerFilled.makerGot);
+
+  marketActivityTotal.outboundAmountGot = marketActivityTotal.outboundAmountGot.plus(offerFilled.makerGave);
+  marketActivityTotal.outboundAmountGave = marketActivityTotal.outboundAmountGave.plus(offerFilled.makerGave);
+
+  tokenActivityInboundTaker.amountSent = tokenActivityInboundTaker.amountSent.plus(offerFilled.makerGot);
+  tokenActivityOutboundTaker.amountReceived = tokenActivityOutboundTaker.amountReceived.plus(offerFilled.makerGave);
+
+  tokenActivityInboundMaker.amountReceived = tokenActivityInboundMaker.amountReceived.plus(offerFilled.makerGot);
+  tokenActivityOutboundMaker.amountSent = tokenActivityOutboundMaker.amountSent.plus(offerFilled.makerGave);
+
+  tokenActivityTotalInbound.amountReceived = tokenActivityTotalInbound.amountReceived.plus(offerFilled.makerGot);
+  tokenActivityTotalOutbound.amountSent = tokenActivityTotalOutbound.amountSent.plus(offerFilled.makerGave);
+
+  marketActivityPair.inboundAmount = marketActivityPair.inboundAmount.plus(offerFilled.makerGot);
+  marketActivityPair.outboundAmount = marketActivityPair.outboundAmount.plus(offerFilled.makerGave);
+
+  setDisplayValuesAndSaveMarket(marketActivityTaker, inbound, outbound, event.block);
+  setDisplayValuesAndSaveMarket(marketActivityMaker, inbound, outbound, event.block);
+  setDisplayValuesAndSaveMarket(marketActivityTotal, inbound, outbound, event.block);
+
+  setDisplayValuesAndSaveToken(tokenActivityInboundTaker, inbound, event.block);
+  setDisplayValuesAndSaveToken(tokenActivityOutboundTaker, outbound, event.block);
+
+  setDisplayValuesAndSaveToken(tokenActivityInboundMaker, inbound, event.block);
+  setDisplayValuesAndSaveToken(tokenActivityOutboundMaker, outbound, event.block);
+
+  setDisplayValuesAndSaveToken(tokenActivityTotalInbound, inbound, event.block);
+  setDisplayValuesAndSaveToken(tokenActivityTotalOutbound, outbound, event.block);
+
+  setDisplayValuesAndSaveMarketPair(marketActivityPair, inbound, outbound, event.block);
 
   order.takerGot = order.takerGot ? order.takerGot.plus(event.params.takerWants) : event.params.takerWants;
   order.takerGave = order.takerGave ? order.takerGave.plus(event.params.takerGives) : event.params.takerGives;

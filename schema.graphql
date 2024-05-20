@@ -22,6 +22,86 @@ type Account @entity {
   referrals: [Account!]! @derivedFrom(field: "referrer")
 }
 
+"The total amount of a token that has been sent or received by an account on a market"
+type MarketActivity @entity {
+  "The unique identifier for the market activity"
+  id: String!
+  "The first time the user interacted with the market"
+  creationDate: BigInt!
+  "The last time the user interacted with the market"
+  latestInteractionDate: BigInt!
+  "The market that the activity occurred on"
+  market: Market!
+  "The account that the activity occurred for"
+  account: Account!
+  "The total inbound token that has been sent by the user"
+  inboundAmountGave: BigInt!
+  "The total inbound token that has been received by the user"
+  inboundAmountGot: BigInt!
+  "The total outbound token that has been sent by the user"
+  outboundAmountGave: BigInt!
+  "The total outbound token that has been received by the user"
+  outboundAmountGot: BigInt!
+
+  "The display value of inboundAmountGave for use in UIs"
+  inboundAmountGaveDisplay: BigDecimal!
+  "The display value of inboundAmountGot for use in UIs"
+  inboundAmountGotDisplay: BigDecimal!
+  "The display value of outboundAmountGave for use in UIs"
+  outboundAmountGaveDisplay: BigDecimal!
+  "The display value of outboundAmountGot for use in UIs"
+  outboundAmountGotDisplay: BigDecimal!
+}
+
+# TODO: We could merge this with `maker = 0x0` or `taker = 0x0` to get the same as above with less entities
+# TODO: We could even use market = 0x0 to replace TokenActivity?
+"The total amount of a token that has been sent or received by an account on a market"
+type MarketActivityPair @entity {
+  "The unique identifier for the market activity"
+  id: String!
+  "The first time the user interacted with the market"
+  creationDate: BigInt!
+  "The last time the user interacted with the market"
+  latestInteractionDate: BigInt!
+  "The market that the activity occurred on"
+  market: Market!
+  "The maker that the activity occurred for"
+  maker: Account!
+  "The taker that the activity occurred for"
+  taker: Account!
+  "The total inbound token that has been sent by the taker"
+  inboundAmount: BigInt!
+  "The total outbound token that has been sent by the maker"
+  outboundAmount: BigInt!
+
+  "The display value of inboundAmount for use in UIs"
+  inboundAmountDisplay: BigDecimal!
+  "The display value of outboundAmount for use in UIs"
+  outboundAmountDisplay: BigDecimal!
+}
+
+type TokenActivity @entity {
+  "The unique identifier for the token activity"
+  id: String!
+  "The first time the user interacted with the token"
+  creationDate: BigInt!
+  "The last time the user interacted with the token"
+  latestInteractionDate: BigInt!
+  "The token that the activity with"
+  token: Token!
+  "The account that the activity occurred for"
+  account: Account!
+  "Total amount of the token that has been sent by the user"
+  amountSent: BigInt!
+  "Total amount of the token that has been received by the user"
+  amountReceived: BigInt!
+
+  "The display value of amountSent for use in UIs"
+  amountSentDisplay: BigDecimal!
+  "The display value of amountReceived for use in UIs"
+  amountReceivedDisplay: BigDecimal!
+}
+
 "An ERC20 token that can be traded on Mangrove"
 type Token @entity {
   "The unique identifier for the token (same as address in this case)"

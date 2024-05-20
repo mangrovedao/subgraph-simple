@@ -1,5 +1,5 @@
 import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
-import { Account, KandelParameters, LimitOrder, Offer, Token } from "../generated/schema";
+import { Account, KandelParameters, LimitOrder, Market, Offer, Token } from "../generated/schema";
 
 export const getKandelParamsId = (txHash: Bytes, kandel: Address): string => {
   return `${txHash}-${kandel.toHex()}`;
@@ -7,6 +7,18 @@ export const getKandelParamsId = (txHash: Bytes, kandel: Address): string => {
 
 export const getOfferId = (olKeyHash: Bytes, id: BigInt): string => {
   return `${olKeyHash.toHex()}-${id.toString()}`;
+};
+
+export const getMarketActivityId = (user: Address, market: Market): string => {
+  return `${user.toHex()}-${market.id.toString()}`;
+};
+
+export const getMarketActivityPairId = (maker: Address, taker: Address, market: Market): string => {
+  return `${maker.toHex()}-${taker.toHex()}-${market.id.toString()}`;
+};
+
+export const getTokenActivityId = (user: Address, token: Token): string => {
+  return `${user.toHex()}-${token.address.toHex()}`;
 };
 
 export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnInteraction: boolean): Account => {
