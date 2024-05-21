@@ -9,8 +9,8 @@ import { createOfferWriteEvent } from "../mangrove/mangrove-utils";
 const taker = Address.fromString("0x0000000000000000000000000000000000000003");
 
 const maker = Address.fromString("0x0000000000000000000000000000000000000002");
-const token0 = Address.fromString("0x0000000000000000000000000000000000000000");
-const token1 = Address.fromString("0x0000000000000000000000000000000000000001");
+const token0 = Address.fromString("0x4300000000000000000000000000000000000003");
+const token1 = Address.fromString("0x4300000000000000000000000000000000000004");
 const olKeyHash01 = Bytes.fromHexString("0x" + token0.toHex().slice(2) + token1.toHex().slice(2));
 
 describe("Describe entity assertions", () => {

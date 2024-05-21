@@ -7,8 +7,8 @@ import { createSetActiveEvent } from "../mangrove/mangrove-utils";
 import { handleSetActive } from "../../src/mangrove";
 import { prepareERC20 } from "../mangrove/helpers";
 
-const token0 = Address.fromString("0x0000000000000000000000000000000000000000");
-const token1 = Address.fromString("0x0000000000000000000000000000000000000001");
+const token0 = Address.fromString("0x4300000000000000000000000000000000000003");
+const token1 = Address.fromString("0x4300000000000000000000000000000000000004");
 prepareERC20(token0, "token0", "tkn0", 18);
 prepareERC20(token1, "token1", "tkn1", 6);
 
@@ -58,24 +58,5 @@ describe("KandelSeeder", () => {
     assert.fieldEquals("Kandel", kandelAddress.toHex(), "deployer", owner.toHex());
     assert.fieldEquals("Kandel", kandelAddress.toHex(), "admin", owner.toHex());
     assert.fieldEquals("Kandel", kandelAddress.toHex(), "offerIndexes", "[]");
-
   });
-
-  // test("NewKandelAave", () => {
-  //   const kandel = createNewAaveKandelEvent(owner, olKeyHash01, olKeyHash10, kandelAddress, reservedId);
-  //   handleNewAaveKandel(kandel);
-  //
-  //   assert.fieldEquals("Kandel", kandelAddress.toHex(), "transactionHash", kandel.transaction.hash.toHex());
-  //   assert.fieldEquals("Kandel", kandelAddress.toHex(), "creationDate", kandel.block.timestamp.toI32().toString());
-  //   assert.fieldEquals("Kandel", kandelAddress.toHex(), "seeder", kandel.address.toHex());
-  //   assert.fieldEquals("Kandel", kandelAddress.toHex(), "type", "KandelAAVE");
-  //   assert.fieldEquals("Kandel", kandelAddress.toHex(), "base", token0.toHex());
-  //   assert.fieldEquals("Kandel", kandelAddress.toHex(), "quote", token1.toHex());
-  //   assert.fieldEquals("Kandel", kandelAddress.toHex(), "baseQuoteOlKeyHash", olKeyHash01.toHex());
-  //   assert.fieldEquals("Kandel", kandelAddress.toHex(), "quoteBaseOlKeyHash", olKeyHash10.toHex());
-  //   assert.fieldEquals("Kandel", kandelAddress.toHex(), "deployer", owner.toHex());
-  //   assert.fieldEquals("Kandel", kandelAddress.toHex(), "admin", owner.toHex());
-  //   assert.fieldEquals("Kandel", kandelAddress.toHex(), "reserveId", reservedId.toHex());
-  //   assert.fieldEquals("Kandel", kandelAddress.toHex(), "offerIndexes", "[]");
-  // });
 });

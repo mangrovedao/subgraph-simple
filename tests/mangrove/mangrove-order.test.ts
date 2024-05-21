@@ -13,8 +13,8 @@ import { handleSetRouteLogic } from "../../src/smart-router-proxy";
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
-const token0 = Address.fromString("0x0000000000000000000000000000000000000000");
-const token1 = Address.fromString("0x0000000000000000000000000000000000000001");
+const token0 = Address.fromString("0x4300000000000000000000000000000000000003");
+const token1 = Address.fromString("0x4300000000000000000000000000000000000004");
 prepareERC20(token0, "token0", "tkn0", 18);
 prepareERC20(token1, "token1", "tkn1", 6);
 

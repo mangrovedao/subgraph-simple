@@ -322,7 +322,10 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
   offerFilled.save();
 
   const taker = Address.fromBytes(order.taker);
-  const maker = Address.fromBytes(offer.realMaker);
+  let maker = Address.fromBytes(offer.maker);
+  if (offer.realMaker) {
+    maker = Address.fromBytes(offer.realMaker!);
+  }
   const zero = Address.fromBytes(Address.fromHexString("0x0000000000000000000000000000000000000000"));
 
   const rootAcc = getOrCreateAccount(zero, event.block.timestamp, true);
@@ -593,6 +596,15 @@ export function handleSetActive(event: SetActive): void {
   if (!market) {
     market = new Market(marketId);
 
+    getOrCreateToken(event.params.outbound_tkn);
+    getOrCreateToken(event.params.inbound_tkn);
+
+    market.outboundToken = event.params.outbound_tkn;
+    market.inboundToken = event.params.inbound_tkn;
+    market.tickSpacing = event.params.tickSpacing;
+    market.gasBase = BigInt.fromI32(0);
+    market.fee = BigInt.fromI32(0);
+
     let base = event.params.outbound_tkn;
     let quote = event.params.inbound_tkn;
 
@@ -626,15 +638,6 @@ export function handleSetActive(event: SetActive): void {
     }
     marketPair.latestUpdateDate = event.block.timestamp;
     marketPair.save();
-
-    getOrCreateToken(event.params.outbound_tkn);
-    getOrCreateToken(event.params.inbound_tkn);
-
-    market.outboundToken = event.params.outbound_tkn;
-    market.inboundToken = event.params.inbound_tkn;
-    market.tickSpacing = event.params.tickSpacing;
-    market.gasBase = BigInt.fromI32(0);
-    market.fee = BigInt.fromI32(0);
   }
 
   market.active = event.params.value;

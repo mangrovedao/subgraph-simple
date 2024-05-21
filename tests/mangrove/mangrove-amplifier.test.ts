@@ -16,8 +16,8 @@ import { Offer } from "../../generated/schema";
 
 const bundleId = BigInt.fromI32(1);
 
-const token0 = Address.fromString("0x0000000000000000000000000000000000000000");
-const token1 = Address.fromString("0x0000000000000000000000000000000000000001");
+const token0 = Address.fromString("0x4300000000000000000000000000000000000003");
+const token1 = Address.fromString("0x4300000000000000000000000000000000000004");
 prepareERC20(token0, "token0", "tkn0", 18);
 prepareERC20(token1, "token1", "tkn1", 6);
 
@@ -36,6 +36,7 @@ describe("Describe entity assertions", () => {
     const setActiveEvent = createSetActiveEvent(olKeyHash01, token0, token1, BigInt.fromI32(1), true);
     handleSetActive(setActiveEvent);
     assert.entityCount("Market", 1);
+    assert.entityCount("MarketPair", 1);
   });
 
   afterEach(() => {
