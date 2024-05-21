@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, Bytes, ethereum, log } from "@graphprotocol/graph-ts";
 import {
   Approval,
   CleanComplete,
@@ -35,6 +35,7 @@ import {
   Market,
   MarketActivity,
   MarketActivityPair,
+  MarketPair,
   Offer,
   OfferFilled,
   Order,
@@ -474,6 +475,9 @@ const handlePartialOfferWrite = (offerWrite: PartialOfferWrite): void => {
     offer.realMaker = limitOrder!.realTaker;
   }
 
+  // Find market pair
+  // Update()
+
   offer.save();
 };
 
@@ -560,12 +564,68 @@ export function handleCleanComplete(event: CleanComplete): void {
   removeLatestCleanOrderFromStack();
 }
 
+const WETH = "0x4300000000000000000000000000000000000004";
+const USDB = "0x4300000000000000000000000000000000000003";
+const PUNKS20 = "0x9a50953716ba58e3d6719ea5c437452ac578705f";
+const PUNKS40 = "0x999f220296b5843b2909cc5f8b4204aaca5341d8";
+
+const askOrBid = (inboundToken: string, outboundToken: string): string => {
+  const pair = `${inboundToken}-${outboundToken}`;
+  log.info("Creating new market {}", [pair]);
+  if (pair == `${WETH}-${USDB}`) return "bid";
+  if (pair == `${USDB}-${WETH}`) return "ask";
+  if (pair == `${PUNKS20}-${WETH}`) return "bid";
+  if (pair == `${WETH}-${PUNKS20}`) return "ask";
+  if (pair == `${PUNKS40}-${WETH}`) return "bid";
+  if (pair == `${WETH}-${PUNKS40}`) return "ask";
+  log.error("Unknown market {}", [pair]);
+  throw new Error("Unknown market");
+};
+
+const firstIsBase = (inboundToken: Address, outboundToken: Address): boolean => {
+  return askOrBid(inboundToken.toHex(), outboundToken.toHex()) === "bid";
+};
+
 export function handleSetActive(event: SetActive): void {
   const marketId = event.params.olKeyHash.toHex();
   let market = Market.load(marketId);
 
   if (!market) {
     market = new Market(marketId);
+
+    let base = event.params.outbound_tkn;
+    let quote = event.params.inbound_tkn;
+
+    if (firstIsBase(event.params.inbound_tkn, event.params.outbound_tkn)) {
+      base = event.params.inbound_tkn;
+      quote = event.params.outbound_tkn;
+    } else {
+      base = event.params.outbound_tkn;
+      quote = event.params.inbound_tkn;
+    }
+
+    const marketPairId = `${base.toHex()}-${quote.toHex()}-${market.tickSpacing.toString()}`;
+    let marketPair = MarketPair.load(marketPairId);
+    const marketSide = askOrBid(event.params.inbound_tkn.toHex(), event.params.outbound_tkn.toHex());
+
+    if (!marketPair) {
+      marketPair = new MarketPair(marketPairId);
+      marketPair.creationDate = event.block.timestamp;
+
+      marketPair.base = base;
+      marketPair.quote = quote;
+
+      marketPair.totalVolumePromisedBase = BigInt.fromI32(0);
+      marketPair.totalVolumePromisedQuote = BigInt.fromI32(0);
+    }
+
+    if (marketSide === "bid") {
+      marketPair.bid = marketId;
+    } else {
+      marketPair.ask = marketId;
+    }
+    marketPair.latestUpdateDate = event.block.timestamp;
+    marketPair.save();
 
     getOrCreateToken(event.params.outbound_tkn);
     getOrCreateToken(event.params.inbound_tkn);

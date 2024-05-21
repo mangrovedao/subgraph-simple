@@ -134,6 +134,37 @@ type Market @entity {
   fee: BigInt!
 }
 
+"A pair of Markets that make up a bid/ask pair"
+type MarketPair @entity {
+  "The unique identifier for the market pair"
+  id: String!
+  "The time that the pair was created"
+  creationDate: BigInt!
+  "The time that the pair was updated"
+  latestUpdateDate: BigInt!
+  "The market that contains the bids"
+  bid: Market
+  "The market that contains the asks"
+  ask: Market
+  "The base token of the pair"
+  base: Token!
+  "The quote token of the pair"
+  quote: Token!
+
+  "The mid price of the pair"
+  midPrice: BigDecimal
+  "Min ask price in tick"
+  minAsk: BigInt
+  "Max bid price in tick"
+  maxBid: BigInt
+  "The spread of the pair"
+  spread: BigDecimal
+  "The total promised base volume of the pair"
+  totalVolumePromisedBase: BigInt!
+  "The total promised quote volume of the pair"
+  totalVolumePromisedQuote: BigInt!
+}
+
 "MISSING COMMENT"
 type Offer @entity {
   "The unique identifier for the offer"
