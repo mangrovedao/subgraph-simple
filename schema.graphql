@@ -220,7 +220,7 @@ type Offer @entity {
   "The wallet or contract that created the offer"
   maker: Account!
   "The wallet that created the offer, traced through Kandels and Limit Orders"
-  realMaker: Account!
+  realMaker: Account
   "MISSING COMMENT"
   owner: Account
   "The limit order that placed the offer, if any"
