@@ -1,10 +1,15 @@
 specVersion: 0.0.6
 schema:
   file: ./schema.graphql
+features:
+  - grafting
+graft:
+  base: QmbDfGa8DFWS5M5SutD66PnEmTZQ1ntnEmxoK2WbSpA5Ae
+  block: 3600000
 templates:
   - kind: ethereum
     name: Kandel
-    network: blast
+    network: mangrove-private-blast
     source:
       abi: Kandel
     mapping:
@@ -73,7 +78,7 @@ templates:
       file: ./src/kandel.ts
   - kind: ethereum
     name: SmartRouterProxy
-    network: blast
+    network: mangrove-private-blast
     source:
       abi: SmartRouter
     mapping:
@@ -101,7 +106,7 @@ templates:
 dataSources:
   - kind: ethereum
     name: Mangrove
-    network: blast
+    network: mangrove-private-blast
     source:
       abi: Mangrove
       address: "0xb1a49C54192Ea59B233200eA38aB56650Dfb448C"
@@ -206,7 +211,7 @@ dataSources:
       file: ./src/mangrove.ts
   - kind: ethereum
     name: KandelSeeder
-    network: blast
+    network: mangrove-private-blast
     source:
       abi: KandelSeeder
       address: "0x4BB7567303C8BDE27a4b490B3e5f1593c891B03d"
@@ -226,7 +231,7 @@ dataSources:
       file: ./src/kandel-seeder.ts
   - kind: ethereum
     name: SmartKandelSeeder
-    network: blast
+    network: mangrove-private-blast
     source:
       abi: SmartKandelSeeder
       address: "0x3cbb6ad1b287748b92d1b4dfc1776af1dd9284b2"
@@ -246,7 +251,7 @@ dataSources:
       file: ./src/kandel-seeder.ts
   - kind: ethereum
     name: MangroveOrder
-    network: blast
+    network: mangrove-private-blast
     source:
       abi: MangroveOrder
       address: "0x83251E7F36a51c5238C9aa0c6Bb7cc209b32d80e"
@@ -281,7 +286,7 @@ dataSources:
           handler: handleSetAdmin
       file: ./src/mangrove-order.ts
   - kind: ethereum
-    network: blast
+    network: mangrove-private-blast
     name: RouterProxyFactory
     source:
       abi: RouterProxyFactory
@@ -302,7 +307,7 @@ dataSources:
       file: ./src/router-proxy-factory.ts
   - kind: ethereum
     name: MangroveAmplifier
-    network: blast
+    network: mangrove-private-blast
     source:
       abi: MangroveAmplifier
       address: "0x8d1B8aa759A40EF0B5121d1F1b6F9A2694996612"
@@ -331,7 +336,7 @@ dataSources:
       file: ./src/mangrove-amplifier.ts
   - kind: ethereum
     name: PointsWeights
-    network: blast
+    network: mangrove-private-blast
     source:
       abi: PointsWeights
       address: "0xa3b5b77Ab0A15D8BE7736f214a2d2591f65d53C8"
@@ -352,7 +357,7 @@ dataSources:
       file: ./src/points-weigths.ts
   - kind: ethereum
     name: MgvReferral
-    network: blast
+    network: mangrove-private-blast
     source:
       abi: MgvReferral
       address: "0x07e5a2DCf82D7b5b8ab684d9b40842E174e49908"
