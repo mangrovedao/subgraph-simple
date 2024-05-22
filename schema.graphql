@@ -77,8 +77,6 @@ type OfferFilled @entity {
 
   makerGot: BigInt!
   makerGave: BigInt!
-  makerGotDisplay: BigDecimal!
-  makerGaveDisplay: BigDecimal!
 
   offer: Offer
 }

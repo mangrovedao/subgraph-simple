@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Bytes, log } from "@graphprotocol/graph-ts";
 import {
   Approval,
   CleanComplete,
@@ -95,7 +95,12 @@ export function handleOfferFailEvent(event: OfferFail, posthookData: Bytes | nul
 
 export function handleOfferRetract(event: OfferRetract): void {
   const offerId = getOfferId(event.params.olKeyHash, event.params.id);
-  const offer = Offer.load(offerId)!;
+
+  const offer = Offer.load(offerId);
+  if (!offer) {
+    log.error("Offer not found for id {} in list {}", [offerId, event.params.olKeyHash.toHex()]);
+    return;
+  }
 
   offer.isOpen = false;
   offer.isRetracted = true;
@@ -154,27 +159,13 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
 
   let order = getLatestOrderFromStack(true);
 
-  const market = Market.load(offer.market)!;
-  const outbound = Token.load(market.outbound_tkn)!;
-  const inbound = Token.load(market.inbound_tkn)!;
-
   const offerFilled = new OfferFilled(getEventUniqueId(event));
   offerFilled.creationDate = event.block.timestamp;
   offerFilled.transactionHash = event.transaction.hash;
   offerFilled.taker = order.taker;
   offerFilled.account = owner;
   offerFilled.makerGot = event.params.takerGives;
-  offerFilled.makerGotDisplay = event.params.takerGives.toBigDecimal().div(
-    BigInt.fromU32(10)
-      .pow(<u8>inbound.decimals.toU32())
-      .toBigDecimal()
-  );
   offerFilled.makerGave = event.params.takerWants;
-  offerFilled.makerGaveDisplay = event.params.takerWants.toBigDecimal().div(
-    BigInt.fromU32(10)
-      .pow(<u8>outbound.decimals.toU32())
-      .toBigDecimal()
-  );
   offerFilled.offer = offer.id;
   offerFilled.market = offer.market;
   offerFilled.save();
