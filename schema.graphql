@@ -157,12 +157,20 @@ type MarketPair @entity {
   minAsk: BigInt
   "Max bid price in tick"
   maxBid: BigInt
+  "Number of open asks"
+  asks: BigInt
+  "Number of open bids"
+  bids: BigInt
   "The spread of the pair"
   spread: BigDecimal
   "The total promised base volume of the pair"
   totalVolumePromisedBase: BigInt!
   "The total promised quote volume of the pair"
   totalVolumePromisedQuote: BigInt!
+  "The total promised base volume of the pair in display format"
+  totalVolumePromisedBaseDisplay: BigDecimal!
+  "The total promised quote volume of the pair in display format"
+  totalVolumePromisedQuoteDisplay: BigDecimal!
 }
 
 "MISSING COMMENT"

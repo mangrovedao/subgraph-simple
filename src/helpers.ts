@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { Account, KandelParameters, LimitOrder, Market, Offer, Token } from "../generated/schema";
 
 export const getKandelParamsId = (txHash: Bytes, kandel: Address): string => {
@@ -195,3 +195,31 @@ export const getOrCreateToken = (address: Address): Token => {
 
   return token;
 };
+
+export function scale(amount: BigInt, decimals: BigInt): BigDecimal {
+  return amount.toBigDecimal().div(
+    BigInt.fromU32(10)
+      .pow(<u8>decimals.toU32())
+      .toBigDecimal()
+  );
+}
+
+export function scaleByToken(amount: BigInt, token: Token): BigDecimal {
+  return amount.toBigDecimal().div(
+    BigInt.fromU32(10)
+      .pow(<u8>token.decimals.toU32())
+      .toBigDecimal()
+  );
+}
+
+function sortTokens(token0: Address, token1: Address): Array<Address> {
+  if (token0.toHex() <= token1.toHex()) {
+    return [token0, token1];
+  }
+  return [token1, token0];
+}
+
+export function getMarketPairId(market: Market): string {
+  const tokens = sortTokens(Address.fromBytes(market.inboundToken), Address.fromBytes(market.outboundToken));
+  return `${tokens[0].toHex()}-${tokens[1].toHex()}-${market.tickSpacing.toString()}`;
+}
