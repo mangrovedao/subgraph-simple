@@ -42,7 +42,6 @@ import {
   removeLatestOrderFromStack
 } from "./stack";
 import { limitOrderSetIsOpen } from "./mangrove-order";
-import { addOfferToCurrentBundle } from "./mangrove-amplifier";
 import { PartialOfferWrite } from "./types";
 import { askOrBid, firstIsBase, handleTPV, sendAmount } from "./metrics";
 
@@ -240,8 +239,6 @@ const handlePartialOfferWrite = (offerWrite: PartialOfferWrite, block: ethereum.
     offer.totalGot = BigInt.fromI32(0);
     offer.totalGave = BigInt.fromI32(0);
     offer.totalPenalty = BigInt.fromI32(0);
-    // Adds to current bundle if creating one
-    addOfferToCurrentBundle(offer);
   }
 
   offer.latestUpdateDate = offerWrite.timestamp;
