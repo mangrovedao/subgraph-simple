@@ -301,35 +301,6 @@ dataSources:
           handler: handleNewRouterProxy
       file: ./src/router-proxy-factory.ts
   - kind: ethereum
-    name: MangroveAmplifier
-    network: blast
-    source:
-      abi: MangroveAmplifier
-      address: "0x8d1B8aa759A40EF0B5121d1F1b6F9A2694996612"
-      startBlock: 133207
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - EndBundle
-        - InitBundle
-        - NewOwnedOffer
-        - SetReneging
-      abis:
-        - name: MangroveAmplifier
-          file: ./abis/MangroveAmplifier.json
-      eventHandlers:
-        - event: EndBundle()
-          handler: handleEndBundle
-        - event: InitBundle(indexed uint256,indexed address)
-          handler: handleInitBundle
-        - event: NewOwnedOffer(indexed bytes32,indexed uint256,indexed address)
-          handler: handleNewOwnedOffer
-        - event: SetReneging(indexed bytes32,indexed uint256,uint256,uint256)
-          handler: handleSetReneging
-      file: ./src/mangrove-amplifier.ts
-  - kind: ethereum
     name: MgvReferral
     network: blast
     source:

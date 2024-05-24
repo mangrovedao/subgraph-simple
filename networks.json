@@ -28,10 +28,6 @@
       "address": "0x5e852CA313995f7C5382061e9119a96b74Ccc928",
       "startBlock": 45942861
     },
-    "MangroveAmplifier": {
-      "address": "0x5936A0CA18C72074852Ec81147B8D3FA714c423C",
-      "startBlock": 46141094
-    },
     "SmartKandelSeeder": {
       "address": "0x09356C801ca3eE28A461C3e3469acfF3a13C6E90",
       "startBlock": 47504272
@@ -49,10 +45,6 @@
     },
     "MangroveOrder": {
       "address": "0x83251E7F36a51c5238C9aa0c6Bb7cc209b32d80e",
-      "startBlock": 133207
-    },
-    "MangroveAmplifier": {
-      "address": "0x8d1B8aa759A40EF0B5121d1F1b6F9A2694996612",
       "startBlock": 133207
     },
     "RouterProxyFactory": {
@@ -84,10 +76,6 @@
     "MangroveOrder": {
       "address": "0x710cE7BB7eC4c4e76C716A9c0F8Ba8Fe55445460",
       "startBlock": 1848609
-    },
-    "MangroveAmplifier": {
-      "address": "0xCbB118083D78f424b73602E05c141313215b732d",
-      "startBlock": 1848773
     },
     "RouterProxyFactory": {
       "address": "0x77CD6977011658019B8aF1b77C6b1310dFA35508",

@@ -1,13 +1,16 @@
 "A user of the Mangrove protocol, either a wallet or a contract"
 type Account @entity {
-  "The unique identifier for the account (same as address in this case)"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: Bytes!
+  "Time that the entity was first seen on Mangrove"
+  creationDate: BigInt!
+  "Last time that the entity was updated"
+  latestUpdateDate: BigInt!
+
   "Address of the account"
   address: Bytes!
-  "Time that the account was first seen on Mangrove"
-  creationDate: BigInt!
-  "Last time that the account interacted with Mangrove"
-  latestInteractionDate: BigInt!
+
   "If the account has deployed a proxy yet"
   proxyDeployed: Boolean!
   "The proxy address of the account, if deployed"
@@ -24,12 +27,14 @@ type Account @entity {
 
 "The total amount of a token that has been sent or received by an account on a market"
 type MarketActivity @entity {
-  "The unique identifier for the market activity"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: String!
-  "The first time the user interacted with the market"
+  "Time that the entity was first seen on Mangrove"
   creationDate: BigInt!
-  "The last time the user interacted with the market"
-  latestInteractionDate: BigInt!
+  "Last time that the entity was updated"
+  latestUpdateDate: BigInt!
+
   "The market that the activity occurred on"
   market: Market!
   "The account that the activity occurred for"
@@ -57,12 +62,14 @@ type MarketActivity @entity {
 # TODO: We could even use market = 0x0 to replace TokenActivity?
 "The total amount of a token that has been sent or received by an account on a market"
 type MarketActivityPair @entity {
-  "The unique identifier for the market activity"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: String!
-  "The first time the user interacted with the market"
+  "Time that the entity was first seen on Mangrove"
   creationDate: BigInt!
-  "The last time the user interacted with the market"
-  latestInteractionDate: BigInt!
+  "Last time that the entity was updated"
+  latestUpdateDate: BigInt!
+
   "The market that the activity occurred on"
   market: Market!
   "The maker that the activity occurred for"
@@ -81,12 +88,14 @@ type MarketActivityPair @entity {
 }
 
 type TokenActivity @entity {
-  "The unique identifier for the token activity"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: String!
-  "The first time the user interacted with the token"
+  "Time that the entity was first seen on Mangrove"
   creationDate: BigInt!
-  "The last time the user interacted with the token"
-  latestInteractionDate: BigInt!
+  "Last time that the entity was updated"
+  latestUpdateDate: BigInt!
+
   "The token that the activity with"
   token: Token!
   "The account that the activity occurred for"
@@ -104,8 +113,14 @@ type TokenActivity @entity {
 
 "An ERC20 token that can be traded on Mangrove"
 type Token @entity {
-  "The unique identifier for the token (same as address in this case)"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: Bytes!
+  "Time that the entity was first seen on Mangrove"
+  creationDate: BigInt!
+  "Last time that the entity was updated"
+  latestUpdateDate: BigInt!
+
   "The address of the token contract"
   address: Bytes!
   "The ERC20 name for the token"
@@ -118,8 +133,14 @@ type Token @entity {
 
 "A market on mangrove, made up of a token pair and some configuration options"
 type Market @entity {
-  "The unique identifier for the market"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: String!
+  "Time that the entity was first seen on Mangrove"
+  creationDate: BigInt!
+  "Last time that the entity was updated"
+  latestUpdateDate: BigInt!
+
   "Outbound token of the market"
   outboundToken: Bytes!
   "Inbound token of the market"
@@ -136,12 +157,14 @@ type Market @entity {
 
 "A pair of Markets that make up a bid/ask pair"
 type MarketPair @entity {
-  "The unique identifier for the market pair"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: String!
-  "The time that the pair was created"
+  "Time that the entity was first seen on Mangrove"
   creationDate: BigInt!
-  "The time that the pair was updated"
+  "Last time that the entity was updated"
   latestUpdateDate: BigInt!
+
   "The market that contains the bids"
   bid: Market
   "The market that contains the asks"
@@ -175,16 +198,18 @@ type MarketPair @entity {
 
 "MISSING COMMENT"
 type Offer @entity {
-  "The unique identifier for the offer"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: String!
+  "Time that the entity was first seen on Mangrove"
+  creationDate: BigInt!
+  "Last time that the entity was updated"
+  latestUpdateDate: BigInt!
+
   "The hash of the latest transaction that the offer was involved in"
   latestTransactionHash: Bytes!
   "MISSING COMMENT"
   latestLogIndex: BigInt!
-  "The time that the offer was created"
-  creationDate: BigInt!
-  "The time that the offer was last updated"
-  latestUpdateDate: BigInt!
   "The id of the offer in the Offer list of the market"
   offerId: BigInt!
   "The tick of the offer, used to determine the price"
@@ -235,16 +260,18 @@ type Offer @entity {
   kandel: Kandel
   "The index of the offer in the Kandel offer list"
   kandelIndex: BigInt
-  "The amplified offer that the offer belongs to, if any"
-  amplifiedOffer: AmplifiedOffer
 }
 
 "An event that occurs when an offer is filled on a market"
 type OfferFilled @entity {
-  "The unique identifier for the OfferFilled event"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: String!
-  "When the offer was filled"
-  creationDate: BigInt
+  "Time that the entity was first seen on Mangrove"
+  creationDate: BigInt!
+  "Last time that the entity was updated"
+  latestUpdateDate: BigInt!
+
   "The transaction the offer was filled on"
   transactionHash: Bytes!
   "The account that filled the offer"
@@ -269,12 +296,16 @@ type OfferFilled @entity {
 
 "MISSING COMMENT"
 type CleanOrder @entity {
-  "MISSING COMMENT"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: String!
+  "Time that the entity was first seen on Mangrove"
+  creationDate: BigInt!
+  "Last time that the entity was updated"
+  latestUpdateDate: BigInt!
+
   "MISSING COMMENT"
   transactionHash: Bytes!
-  "MISSING COMMENT"
-  creationDate: BigInt!
 
   "MISSING COMMENT"
   taker: Account!
@@ -289,12 +320,16 @@ type CleanOrder @entity {
 
 "MISSING COMMENT"
 type Order @entity {
-  "MISSING COMMENT"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: String!
+  "Time that the entity was first seen on Mangrove"
+  creationDate: BigInt!
+  "Last time that the entity was updated"
+  latestUpdateDate: BigInt!
+
   "MISSING COMMENT"
   transactionHash: Bytes!
-  "MISSING COMMENT"
-  creationDate: BigInt!
 
   "MISSING COMMENT"
   fillVolume: BigInt!
@@ -321,49 +356,16 @@ type Order @entity {
   cleanOrder: CleanOrder
 }
 
-"An offer placed by an amplified offer"
-type AmplifiedOffer @entity {
-  "The unique identifier for the amplified offer"
-  id: String!
-
-  "The logic to use to receive incoming tokens"
-  inboundRoute: Bytes
-  "The logic to use to source outgoing tokens"
-  outboundRoute: Bytes
-
-  "The bundle of offers that the offer belongs to"
-  bundle: AmplifiedOfferBundle!
-  "The owner of the amplified offer"
-  owner: Account
-  "The underlying offer that is tied to this amplified offer"
-  offer: Offer!
-}
-
-"A bundle of offers that are tied together by an amplified offer"
-type AmplifiedOfferBundle @entity {
-  "The unique identifier for the bundle"
-  id: String!
-  "The time at which the bundle was created"
-  creationDate: BigInt!
-  "The id of the bundle inside of the amplifier"
-  bundleId: BigInt!
-  "The time at which the offers expire, if any"
-  expiryDate: BigInt!
-
-  "The offers that are tied to the bundle"
-  offers: [AmplifiedOffer!]!
-  "The owner of the bundle"
-  owner: Account
-}
-
 "A limit order that is placed on a market"
 type LimitOrder @entity {
-  "The unique identifier for the limit order"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: String!
-  "The time at which the limit order was created"
+  "Time that the entity was first seen on Mangrove"
   creationDate: BigInt!
-  "The last time that the limit order was updated"
+  "Last time that the entity was updated"
   latestUpdateDate: BigInt!
+
   "The time at which the offer expires, if any"
   expiryDate: BigInt
   "MISSING COMMENT"
@@ -396,12 +398,16 @@ type LimitOrder @entity {
 
 "An event that occurs when a token is deposited or withdrawn from a Kandel"
 type KandelDepositWithdraw @entity {
-  "The unique identifier for the deposit or withdraw event"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: String!
+  "Time that the entity was first seen on Mangrove"
+  creationDate: BigInt!
+  "Last time that the entity was updated"
+  latestUpdateDate: BigInt!
+
   "The transaction that the event occurred in"
   transactionHash: Bytes!
-  "The time that the event occurred"
-  date: BigInt!
   "The token that was moved"
   token: Bytes!
   "The amount of the token that was moved"
@@ -423,12 +429,16 @@ enum KandelType {
 
 "A Kandel contract with some configuration options and parameters"
 type Kandel @entity {
-  "The unique identifier for the Kandel"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: Bytes!
+  "Time that the entity was first seen on Mangrove"
+  creationDate: BigInt!
+  "Last time that the entity was updated"
+  latestUpdateDate: BigInt!
+
   "The transaction that created the Kandel"
   transactionHash: Bytes!
-  "When the Kandel was created"
-  creationDate: BigInt!
 
   "The address of the KandelSeeder contract that seeded the Kandel"
   seeder: Bytes!
@@ -499,15 +509,18 @@ type Kandel @entity {
 
 "MISSING COMMENT"
 type KandelPopulateRetract @entity {
-  "MISSING COMMENT"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: String!
+  "Time that the entity was first seen on Mangrove"
+  creationDate: BigInt!
+  "Last time that the entity was updated"
+  latestUpdateDate: BigInt!
+
   "MISSING COMMENT"
   transactionHash: Bytes!
   "MISSING COMMENT"
-  creationDate: BigInt!
-  "MISSING COMMENT"
   startLogIndex: BigInt!
-
   "If the event is a retract, otherwise it is a populate"
   isRetract: Boolean!
   "MISSING COMMENT"
@@ -519,13 +532,16 @@ type KandelPopulateRetract @entity {
 
 "The collection of parameters that a Kandel is configured with, used for historical purposes"
 type KandelParameters @entity {
-  "The unique identifier for the Kandel parameters"
+  # Core properties for all entities
+  "The unique identifier for the entity"
   id: String!
+  "Time that the entity was first seen on Mangrove"
+  creationDate: BigInt!
+  "Last time that the entity was updated"
+  latestUpdateDate: BigInt!
+
   "The transaction that the parameters were set in"
   transactionHash: Bytes!
-  "The time that the parameters were set"
-  creationDate: BigInt!
-
   "MISSING COMMENT"
   gasPrice: BigInt
   "MISSING COMMENT"
