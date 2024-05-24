@@ -93,7 +93,7 @@ export function handleOfferFailEvent(event: OfferFail, posthookData: Bytes | nul
     // TODO: add proper handling of clean order
   }
 
-  handleTPV(Market.load(offer.market)!);
+  handleTPV(Market.load(offer.market)!, event.block);
 }
 
 export function handleOfferRetract(event: OfferRetract): void {
@@ -119,7 +119,7 @@ export function handleOfferRetract(event: OfferRetract): void {
   limitOrderSetIsOpen(offer.limitOrder, false);
 
   offer.save();
-  handleTPV(Market.load(offer.market)!);
+  handleTPV(Market.load(offer.market)!, event.block);
 }
 
 export function handleOfferSuccessWithPosthookData(event: OfferSuccessWithPosthookData): void {
@@ -211,7 +211,7 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
     kandel.save();
   }
 
-  handleTPV(Market.load(offer.market)!);
+  handleTPV(Market.load(offer.market)!, event.block);
 }
 
 export const createNewOffer = (event: PartialOfferWrite): Offer => {
@@ -228,7 +228,7 @@ export const createNewOffer = (event: PartialOfferWrite): Offer => {
   return offer;
 };
 
-const handlePartialOfferWrite = (offerWrite: PartialOfferWrite): void => {
+const handlePartialOfferWrite = (offerWrite: PartialOfferWrite, block: ethereum.Block): void => {
   const offerId = getOfferId(offerWrite.olKeyHash, offerWrite.id);
   let offer = Offer.load(offerId);
 
@@ -284,7 +284,7 @@ const handlePartialOfferWrite = (offerWrite: PartialOfferWrite): void => {
   }
 
   offer.save();
-  handleTPV(Market.load(offer.market)!);
+  handleTPV(Market.load(offer.market)!, block);
 };
 
 export function handleOfferWrite(event: OfferWrite): void {
@@ -300,7 +300,7 @@ export function handleOfferWrite(event: OfferWrite): void {
     return;
   }
 
-  handlePartialOfferWrite(PartialOfferWrite.fromOfferWrite(event));
+  handlePartialOfferWrite(PartialOfferWrite.fromOfferWrite(event), event.block);
 }
 
 export function handleOrderStart(event: OrderStart): void {
@@ -343,7 +343,7 @@ export function handleOrderComplete(event: OrderComplete): void {
   const offerWrites = getOfferWriteFromStack("Order");
 
   for (let i = 0; i < offerWrites.length; i++) {
-    handlePartialOfferWrite(offerWrites.at(i));
+    handlePartialOfferWrite(offerWrites.at(i), event.block);
   }
 
   removeLatestOrderFromStack();
@@ -365,7 +365,7 @@ export function handleCleanComplete(event: CleanComplete): void {
   const offerWrites = getOfferWriteFromStack("CleanOrder");
 
   for (let i = 0; i < offerWrites.length; i++) {
-    handlePartialOfferWrite(offerWrites.at(i));
+    handlePartialOfferWrite(offerWrites.at(i), event.block);
   }
   removeLatestCleanOrderFromStack();
 }

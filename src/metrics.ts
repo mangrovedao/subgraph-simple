@@ -208,7 +208,7 @@ export const firstIsBase = (inboundToken: Address, outboundToken: Address): bool
   return askOrBid(inboundToken.toHex(), outboundToken.toHex()) === "bid";
 };
 
-export function handleTPV(market: Market): void {
+export function handleTPV(market: Market, block: ethereum.Block): void {
   const MGVReaderContract = MgvReader.bind(Address.fromString("0x26fD9643Baf1f8A44b752B28f0D90AEBd04AB3F8"));
 
   const marketSide = askOrBid(market.inboundToken.toHex(), market.outboundToken.toHex());
@@ -261,5 +261,6 @@ export function handleTPV(market: Market): void {
     marketPair.midPrice = BigDecimal.fromString(((minAskPrice + maxBidPrice) / 2).toString());
     marketPair.spread = BigDecimal.fromString(((maxBidPrice - minAskPrice) / maxBidPrice).toString());
   }
+  marketPair.latestUpdateDate = block.timestamp;
   marketPair.save();
 }
