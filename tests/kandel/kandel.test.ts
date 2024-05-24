@@ -1,7 +1,8 @@
 import { Address, BigInt, Bytes, log } from "@graphprotocol/graph-ts";
-import { afterEach, assert, beforeEach, clearStore, describe, test } from "matchstick-as/assembly/index";
+import { afterEach, assert, beforeEach, clearStore, describe, newMockEvent, test } from "matchstick-as/assembly/index";
 import { Kandel, KandelPopulateRetract } from "../../generated/schema";
-import { createDummyOffer, getEventUniqueId, getKandelParamsId, getOfferId } from "../../src/helpers";
+import { createDummyOffer } from "../../src/helpers";
+import { getEventUniqueId, getKandelParamsId, getOfferId } from "../../src/helpers/ids";
 import {
   getOfferIdsForKandel,
   handleCredit,
@@ -41,6 +42,7 @@ import {
 } from "./kandel-utils";
 import { prepareERC20 } from "../mangrove/helpers";
 import { handleSetRouteLogic } from "../../src/smart-router-proxy";
+import { saveKandel, saveKandelPopulateRetract, saveOffer } from "../../src/helpers/save";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -81,7 +83,7 @@ describe("Describe entity assertions", () => {
     kandel.deployer = Bytes.fromUTF8("owner");
     kandel.admin = Bytes.fromUTF8("admin");
     kandel.offerIndexes = [];
-    kandel.save();
+    saveKandel(kandel, newMockEvent().block);
     assert.entityCount("Kandel", 1);
 
     const setActiveEvent = createSetActiveEvent(olKeyHash01, token0, token1, BigInt.fromI32(1), true);
@@ -104,7 +106,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Kandel", kandelAddress.toHexString(), "depositedBase", "110");
     assert.fieldEquals("Kandel", kandelAddress.toHexString(), "creationDate", "1000");
     assert.fieldEquals("KandelDepositWithdraw", creditId, "transactionHash", creditEvent.transaction.hash.toHexString());
-    assert.fieldEquals("KandelDepositWithdraw", creditId, "date", creditEvent.block.timestamp.toString());
+    assert.fieldEquals("KandelDepositWithdraw", creditId, "creationDate", creditEvent.block.timestamp.toString());
     assert.fieldEquals("KandelDepositWithdraw", creditId, "token", creditEvent.params.token.toHexString());
     assert.fieldEquals("KandelDepositWithdraw", creditId, "amount", creditEvent.params.amount.toString());
     assert.fieldEquals("KandelDepositWithdraw", creditId, "isDeposit", "true");
@@ -117,7 +119,7 @@ describe("Describe entity assertions", () => {
     const creditId2 = getEventUniqueId(creditEvent2);
     assert.fieldEquals("Kandel", kandelAddress.toHexString(), "depositedQuote", "120");
     assert.fieldEquals("KandelDepositWithdraw", creditId2, "transactionHash", creditEvent2.transaction.hash.toHexString());
-    assert.fieldEquals("KandelDepositWithdraw", creditId2, "date", creditEvent2.block.timestamp.toString());
+    assert.fieldEquals("KandelDepositWithdraw", creditId2, "creationDate", creditEvent2.block.timestamp.toString());
     assert.fieldEquals("KandelDepositWithdraw", creditId2, "token", creditEvent2.params.token.toHexString());
     assert.fieldEquals("KandelDepositWithdraw", creditId2, "amount", creditEvent2.params.amount.toString());
     assert.fieldEquals("KandelDepositWithdraw", creditId2, "isDeposit", "true");
@@ -130,7 +132,7 @@ describe("Describe entity assertions", () => {
     const debitId = getEventUniqueId(debitEvent);
     assert.fieldEquals("Kandel", kandelAddress.toHexString(), "depositedBase", "90");
     assert.fieldEquals("KandelDepositWithdraw", debitId, "transactionHash", debitEvent.transaction.hash.toHexString());
-    assert.fieldEquals("KandelDepositWithdraw", debitId, "date", debitEvent.block.timestamp.toString());
+    assert.fieldEquals("KandelDepositWithdraw", debitId, "creationDate", debitEvent.block.timestamp.toString());
     assert.fieldEquals("KandelDepositWithdraw", debitId, "token", debitEvent.params.token.toHexString());
     assert.fieldEquals("KandelDepositWithdraw", debitId, "amount", debitEvent.params.amount.toString());
     assert.fieldEquals("KandelDepositWithdraw", debitId, "isDeposit", "false");
@@ -143,7 +145,7 @@ describe("Describe entity assertions", () => {
     const debitId2 = getEventUniqueId(debitEvent2);
     assert.fieldEquals("Kandel", kandelAddress.toHexString(), "depositedQuote", "80");
     assert.fieldEquals("KandelDepositWithdraw", debitId2, "transactionHash", debitEvent2.transaction.hash.toHexString());
-    assert.fieldEquals("KandelDepositWithdraw", debitId2, "date", debitEvent2.block.timestamp.toString());
+    assert.fieldEquals("KandelDepositWithdraw", debitId2, "creationDate", debitEvent2.block.timestamp.toString());
     assert.fieldEquals("KandelDepositWithdraw", debitId2, "token", debitEvent2.params.token.toHexString());
     assert.fieldEquals("KandelDepositWithdraw", debitId2, "amount", debitEvent2.params.amount.toString());
     assert.fieldEquals("KandelDepositWithdraw", debitId2, "isDeposit", "false");
@@ -165,45 +167,45 @@ describe("Describe entity assertions", () => {
   test("KandelPopulateRetract, handlePopulateEnd", () => {
     const kandel = Kandel.load(kandelAddress)!;
     kandel.offerIndexes = [`${0}-${1}-${0}`, `${1}-${2}-${0}`, `${2}-${3}-${0}`, `${3}-${1}-${1}`, `${4}-${2}-${1}`, `${5}-${3}-${1}`];
-    kandel.save();
-    const offer1 = createDummyOffer(BigInt.fromI32(1), olKeyHash10);
+    saveKandel(kandel, newMockEvent().block);
+    const offer1 = createDummyOffer(BigInt.fromI32(1), olKeyHash10, newMockEvent().block);
     offer1.gives = BigInt.fromI32(10);
     offer1.totalGave = BigInt.fromI32(10);
     offer1.totalGot = BigInt.fromI32(100);
     offer1.latestLogIndex = BigInt.fromI32(4);
-    offer1.save();
-    const offer2 = createDummyOffer(BigInt.fromI32(2), olKeyHash10);
+    saveOffer(offer1, newMockEvent().block);
+    const offer2 = createDummyOffer(BigInt.fromI32(2), olKeyHash10, newMockEvent().block);
     offer2.gives = BigInt.fromI32(20);
     offer2.totalGave = BigInt.fromI32(20);
     offer2.totalGot = BigInt.fromI32(200);
     offer2.latestLogIndex = BigInt.fromI32(5);
     offer2.latestTransactionHash = Bytes.fromUTF8("0x1234567890");
-    offer2.save();
-    const offer3 = createDummyOffer(BigInt.fromI32(3), olKeyHash10);
+    saveOffer(offer2, newMockEvent().block);
+    const offer3 = createDummyOffer(BigInt.fromI32(3), olKeyHash10, newMockEvent().block);
     offer3.gives = BigInt.fromI32(30);
     offer3.totalGave = BigInt.fromI32(30);
     offer3.totalGot = BigInt.fromI32(300);
     offer3.latestLogIndex = BigInt.fromI32(6);
-    offer3.save();
-    const offer4 = createDummyOffer(BigInt.fromI32(1), olKeyHash01);
+    saveOffer(offer3, newMockEvent().block);
+    const offer4 = createDummyOffer(BigInt.fromI32(1), olKeyHash01, newMockEvent().block);
     offer4.gives = BigInt.fromI32(40);
     offer4.totalGave = BigInt.fromI32(40);
     offer4.totalGot = BigInt.fromI32(400);
     offer4.latestLogIndex = BigInt.fromI32(7);
-    offer4.save();
-    const offer5 = createDummyOffer(BigInt.fromI32(2), olKeyHash01);
+    saveOffer(offer4, newMockEvent().block);
+    const offer5 = createDummyOffer(BigInt.fromI32(2), olKeyHash01, newMockEvent().block);
     offer5.gives = BigInt.fromI32(50);
     offer5.totalGave = BigInt.fromI32(50);
     offer5.totalGot = BigInt.fromI32(500);
     offer5.latestLogIndex = BigInt.fromI32(8);
     offer5.latestTransactionHash = Bytes.fromUTF8("0x1234567890");
-    offer5.save();
-    const offer6 = createDummyOffer(BigInt.fromI32(3), olKeyHash01);
+    saveOffer(offer5, newMockEvent().block);
+    const offer6 = createDummyOffer(BigInt.fromI32(3), olKeyHash01, newMockEvent().block);
     offer6.gives = BigInt.fromI32(60);
     offer6.totalGave = BigInt.fromI32(60);
     offer6.totalGot = BigInt.fromI32(600);
     offer6.latestLogIndex = BigInt.fromI32(9);
-    offer6.save();
+    saveOffer(offer6, newMockEvent().block);
 
     const kandelPopulateRetract = new KandelPopulateRetract(offer1.latestTransactionHash.toHex());
     kandelPopulateRetract.transactionHash = offer1.latestTransactionHash;
@@ -212,7 +214,7 @@ describe("Describe entity assertions", () => {
     kandelPopulateRetract.startLogIndex = BigInt.fromI32(4);
     kandelPopulateRetract.kandel = kandelAddress;
     kandelPopulateRetract.offerGives = [];
-    kandelPopulateRetract.save();
+    saveKandelPopulateRetract(kandelPopulateRetract, newMockEvent().block);
 
     const populateEndEvent = createPopulateEndEvent();
     populateEndEvent.transaction.hash = offer1.latestTransactionHash;
@@ -247,45 +249,45 @@ describe("Describe entity assertions", () => {
   test("KandelPopulateRetract, handleRetractEnd", () => {
     const kandel = Kandel.load(kandelAddress)!;
     kandel.offerIndexes = [`${0}-${1}-${0}`, `${1}-${2}-${0}`, `${2}-${3}-${0}`, `${3}-${1}-${1}`, `${4}-${2}-${1}`, `${5}-${3}-${1}`];
-    kandel.save();
-    const offer1 = createDummyOffer(BigInt.fromI32(1), olKeyHash10);
+    saveKandel(kandel, newMockEvent().block);
+    const offer1 = createDummyOffer(BigInt.fromI32(1), olKeyHash10, newMockEvent().block);
     offer1.gives = BigInt.fromI32(10);
     offer1.totalGave = BigInt.fromI32(10);
     offer1.totalGot = BigInt.fromI32(100);
     offer1.latestLogIndex = BigInt.fromI32(4);
-    offer1.save();
-    const offer2 = createDummyOffer(BigInt.fromI32(2), olKeyHash10);
+    saveOffer(offer1, newMockEvent().block);
+    const offer2 = createDummyOffer(BigInt.fromI32(2), olKeyHash10, newMockEvent().block);
     offer2.gives = BigInt.fromI32(20);
     offer2.totalGave = BigInt.fromI32(20);
     offer2.totalGot = BigInt.fromI32(200);
     offer2.latestLogIndex = BigInt.fromI32(5);
     offer2.latestTransactionHash = Bytes.fromUTF8("0x1234567890");
-    offer2.save();
-    const offer3 = createDummyOffer(BigInt.fromI32(3), olKeyHash10);
+    saveOffer(offer2, newMockEvent().block);
+    const offer3 = createDummyOffer(BigInt.fromI32(3), olKeyHash10, newMockEvent().block);
     offer3.gives = BigInt.fromI32(30);
     offer3.totalGave = BigInt.fromI32(30);
     offer3.totalGot = BigInt.fromI32(300);
     offer3.latestLogIndex = BigInt.fromI32(6);
-    offer3.save();
-    const offer4 = createDummyOffer(BigInt.fromI32(1), olKeyHash01);
+    saveOffer(offer3, newMockEvent().block);
+    const offer4 = createDummyOffer(BigInt.fromI32(1), olKeyHash01, newMockEvent().block);
     offer4.gives = BigInt.fromI32(40);
     offer4.totalGave = BigInt.fromI32(40);
     offer4.totalGot = BigInt.fromI32(400);
     offer4.latestLogIndex = BigInt.fromI32(7);
-    offer4.save();
-    const offer5 = createDummyOffer(BigInt.fromI32(2), olKeyHash01);
+    saveOffer(offer4, newMockEvent().block);
+    const offer5 = createDummyOffer(BigInt.fromI32(2), olKeyHash01, newMockEvent().block);
     offer5.gives = BigInt.fromI32(50);
     offer5.totalGave = BigInt.fromI32(50);
     offer5.totalGot = BigInt.fromI32(500);
     offer5.latestLogIndex = BigInt.fromI32(8);
     offer5.latestTransactionHash = Bytes.fromUTF8("0x1234567890");
-    offer5.save();
-    const offer6 = createDummyOffer(BigInt.fromI32(3), olKeyHash01);
+    saveOffer(offer5, newMockEvent().block);
+    const offer6 = createDummyOffer(BigInt.fromI32(3), olKeyHash01, newMockEvent().block);
     offer6.gives = BigInt.fromI32(60);
     offer6.totalGave = BigInt.fromI32(60);
     offer6.totalGot = BigInt.fromI32(600);
     offer6.latestLogIndex = BigInt.fromI32(9);
-    offer6.save();
+    saveOffer(offer6, newMockEvent().block);
 
     const kandelPopulateRetract = new KandelPopulateRetract(offer1.latestTransactionHash.toHex());
     kandelPopulateRetract.transactionHash = offer1.latestTransactionHash;
@@ -294,7 +296,7 @@ describe("Describe entity assertions", () => {
     kandelPopulateRetract.startLogIndex = BigInt.fromI32(4);
     kandelPopulateRetract.kandel = kandelAddress;
     kandelPopulateRetract.offerGives = [];
-    kandelPopulateRetract.save();
+    saveKandelPopulateRetract(kandelPopulateRetract, newMockEvent().block);
 
     const retractEndEvent = createRetractEndEvent();
     retractEndEvent.transaction.hash = offer1.latestTransactionHash;
@@ -331,15 +333,15 @@ describe("Describe entity assertions", () => {
 
   test("Kandel smart router", () => {
     const kandel = Kandel.load(kandelAddress)!;
-    kandel.save();
+    saveKandel(kandel, newMockEvent().block);
 
-    const offer1 = createDummyOffer(BigInt.fromI32(1), olKeyHash01);
+    const offer1 = createDummyOffer(BigInt.fromI32(1), olKeyHash01, newMockEvent().block);
     offer1.gives = BigInt.fromI32(10);
     offer1.totalGave = BigInt.fromI32(10);
     offer1.totalGot = BigInt.fromI32(100);
     offer1.latestLogIndex = BigInt.fromI32(4);
     offer1.kandel = kandel.id;
-    offer1.save();
+    saveOffer(offer1, newMockEvent().block);
 
     const setRouteLogicEvent1 = createSetRouteLogicEvent(olKeyHash01, token0, BigInt.fromI32(1), outboundLogic);
     handleSetRouteLogic(setRouteLogicEvent1);
@@ -398,14 +400,14 @@ describe("Describe entity assertions", () => {
   });
 
   test("Kandel, handleSetIndexMapping", () => {
-    const offer10 = createDummyOffer(BigInt.fromI32(10), olKeyHash01);
+    const offer10 = createDummyOffer(BigInt.fromI32(10), olKeyHash01, newMockEvent().block);
     offer10.kandel = kandelAddress;
 
     const setIndexMapping1 = createSetIndexMappingEvent(1, BigInt.fromI32(1), offer10.offerId);
     setIndexMapping1.address = kandelAddress;
     handleSetIndexMapping(setIndexMapping1);
 
-    const offer1000 = createDummyOffer(BigInt.fromI32(1000), olKeyHash10);
+    const offer1000 = createDummyOffer(BigInt.fromI32(1000), olKeyHash10, newMockEvent().block);
     offer1000.kandel = kandelAddress;
     const setIndexMapping2 = createSetIndexMappingEvent(0, BigInt.fromI32(2), offer1000.offerId);
     setIndexMapping2.address = kandelAddress;

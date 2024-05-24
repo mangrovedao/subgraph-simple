@@ -1,20 +1,17 @@
-import {
-  ReferStarted as ReferStartedEvent,
-  ReferralRecorded as ReferralRecordedEvent
-} from "../generated/MgvReferral/MgvReferral"
-import { getOrCreateAccount } from "./helpers"
+import { ReferStarted as ReferStartedEvent, ReferralRecorded as ReferralRecordedEvent } from "../generated/MgvReferral/MgvReferral";
+import { getOrCreateAccount } from "./helpers/create";
+import { saveAccount } from "./helpers/save";
 
 export function handleReferStarted(event: ReferStartedEvent): void {
-  const user = getOrCreateAccount(event.params.owner, event.block.timestamp, false);
+  const user = getOrCreateAccount(event.params.owner, event.block, false);
 
   user.isReferrer = true;
-
-  user.save();
-};
+  saveAccount(user, event.block);
+}
 
 export function handleReferralRecorded(event: ReferralRecordedEvent): void {
-  const user = getOrCreateAccount(event.params.referee, event.block.timestamp, false);
+  const user = getOrCreateAccount(event.params.referee, event.block, false);
 
-  user.referrer = event.params.referrer; 
-  user.save();
-};
+  user.referrer = event.params.referrer;
+  saveAccount(user, event.block);
+}

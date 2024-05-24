@@ -20,7 +20,10 @@ import {
   SetStepSize
 } from "../generated/templates/Kandel/Kandel";
 import { KandelDepositWithdraw, Kandel as KandelEntity, KandelPopulateRetract, Market, Offer } from "../generated/schema";
-import { getEventUniqueId, getOfferId, getOrCreateAccount, getOrCreateKandelParameters } from "./helpers";
+import { getOrCreateKandelParameters } from "./helpers";
+import { getOrCreateAccount } from "./helpers/create";
+import { saveKandel, saveKandelDepositWithdraw, saveKandelParameters, saveKandelPopulateRetract, saveOffer } from "./helpers/save";
+import { getEventUniqueId, getOfferId } from "./helpers/ids";
 
 export function handleCredit(event: Credit): void {
   if (event.params.amount.equals(BigInt.fromI32(0))) {
@@ -30,7 +33,6 @@ export function handleCredit(event: Credit): void {
   const deposit = new KandelDepositWithdraw(getEventUniqueId(event));
 
   deposit.transactionHash = event.transaction.hash;
-  deposit.date = event.block.timestamp;
   deposit.token = event.params.token;
   deposit.amount = event.params.amount;
   deposit.isDeposit = true;
@@ -45,8 +47,8 @@ export function handleCredit(event: Credit): void {
     kandel.depositedQuote = kandel.depositedQuote.plus(event.params.amount);
   }
 
-  kandel.save();
-  deposit.save();
+  saveKandel(kandel, event.block);
+  saveKandelDepositWithdraw(deposit, event.block);
 }
 
 export function handleDebit(event: Debit): void {
@@ -57,7 +59,6 @@ export function handleDebit(event: Debit): void {
   const withdraw = new KandelDepositWithdraw(getEventUniqueId(event));
 
   withdraw.transactionHash = event.transaction.hash;
-  withdraw.date = event.block.timestamp;
   withdraw.token = event.params.token;
   withdraw.amount = event.params.amount;
   withdraw.isDeposit = false;
@@ -72,8 +73,8 @@ export function handleDebit(event: Debit): void {
     kandel.depositedQuote = kandel.depositedQuote.minus(event.params.amount);
   }
 
-  kandel.save();
-  withdraw.save();
+  saveKandel(kandel, event.block);
+  saveKandelDepositWithdraw(withdraw, event.block);
 }
 
 export function handleLogIncident(event: LogIncident): void {}
@@ -104,14 +105,14 @@ export function handlePopulateEnd(event: PopulateEnd): void {
       } else {
         kandel.totalPublishedQuote = kandel.totalPublishedQuote.plus(offer.gives);
       }
-      kandel.save();
+      saveKandel(kandel, event.block);
 
       kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([
         `${offerIds[i]}-${offer.gives}-${totalGave.toString()}-${totalGot.toString()}`
       ]);
     }
   }
-  kandelPopulateRetract.save();
+  saveKandelPopulateRetract(kandelPopulateRetract, event.block);
 }
 
 export function getOfferIdsForKandel(kandel: KandelEntity): string[] {
@@ -134,17 +135,16 @@ export function getOfferIdsForKandel(kandel: KandelEntity): string[] {
 export function handlePopulateStart(event: PopulateStart): void {
   const kandelPopulateRetract = new KandelPopulateRetract(event.transaction.hash.toHex());
   kandelPopulateRetract.transactionHash = event.transaction.hash;
-  kandelPopulateRetract.creationDate = event.block.timestamp;
   kandelPopulateRetract.isRetract = false;
   kandelPopulateRetract.startLogIndex = event.logIndex;
   kandelPopulateRetract.kandel = event.address;
   kandelPopulateRetract.offerGives = new Array<string>();
-  kandelPopulateRetract.save();
+  saveKandelPopulateRetract(kandelPopulateRetract, event.block);
 
   const kandel = KandelEntity.load(event.address)!;
   kandel.totalPublishedBase = BigInt.fromI32(0);
   kandel.totalPublishedQuote = BigInt.fromI32(0);
-  kandel.save();
+  saveKandel(kandel, event.block);
 }
 
 export function handleRetractEnd(event: RetractEnd): void {
@@ -160,59 +160,57 @@ export function handleRetractEnd(event: RetractEnd): void {
       kandelPopulateRetract.offerGives = kandelPopulateRetract.offerGives.concat([`${offerIds[i]}-${0}-${totalGave.toString()}-${totalGot.toString()}`]);
     }
   }
-  kandelPopulateRetract.save();
+  saveKandelPopulateRetract(kandelPopulateRetract, event.block);
 }
 
 export function handleRetractStart(event: RetractStart): void {
   const kandelPopulateRetract = new KandelPopulateRetract(event.transaction.hash.toHex());
   kandelPopulateRetract.transactionHash = event.transaction.hash;
-  kandelPopulateRetract.creationDate = event.block.timestamp;
   kandelPopulateRetract.isRetract = true;
   kandelPopulateRetract.startLogIndex = event.logIndex;
   kandelPopulateRetract.kandel = event.address;
   kandelPopulateRetract.offerGives = new Array<string>();
-  kandelPopulateRetract.save();
+  saveKandelPopulateRetract(kandelPopulateRetract, event.block);
 }
 
 export function handleSetAdmin(event: SetAdmin): void {
   const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
 
-  const adminAccount = getOrCreateAccount(event.params.admin, event.block.timestamp, false);
+  const adminAccount = getOrCreateAccount(event.params.admin, event.block, false);
   kandel.admin = adminAccount.address;
-  kandel.save();
+  saveKandel(kandel, event.block);
 }
 
 export function handleSetBaseQuoteTickOffset(event: SetBaseQuoteTickOffset): void {
   const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
   kandel.baseQuoteTickOffset = event.params.value;
-  kandel.save();
+  saveKandel(kandel, event.block);
 
-  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address, event.block);
   kandelParams.baseQuoteTickOffset = event.params.value;
-
-  kandelParams.save();
+  saveKandelParameters(kandelParams, event.block);
 }
 
 export function handleSetGasprice(event: SetGasprice): void {
   const kandel = KandelEntity.load(event.address)!;
   kandel.gasPrice = event.params.value;
-  kandel.save();
+  saveKandel(kandel, event.block);
 
-  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address, event.block);
   kandelParams.gasPrice = event.params.value;
 
-  kandelParams.save();
+  saveKandelParameters(kandelParams, event.block);
 }
 
 export function handleSetGasreq(event: SetGasreq): void {
   const kandel = KandelEntity.load(event.address)!;
   kandel.gasReq = event.params.value;
-  kandel.save();
+  saveKandel(kandel, event.block);
 
-  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address, event.block);
   kandelParams.gasReq = event.params.value;
 
-  kandelParams.save();
+  saveKandelParameters(kandelParams, event.block);
 }
 
 export function handleSetIndexMapping(event: SetIndexMapping): void {
@@ -222,50 +220,49 @@ export function handleSetIndexMapping(event: SetIndexMapping): void {
 
     const offer = Offer.load(getOfferId(kandel.quoteBaseOlKeyHash, event.params.offerId))!;
     offer.kandelIndex = event.params.index;
-    offer.save();
+    saveOffer(offer, event.block);
   } else {
     // ask
     const offer = Offer.load(getOfferId(kandel.baseQuoteOlKeyHash, event.params.offerId))!;
     offer.kandelIndex = event.params.index;
-    offer.save();
+    saveOffer(offer, event.block);
   }
 
   kandel.offerIndexes = kandel.offerIndexes.concat([`${event.params.index}-${event.params.offerId}-${event.params.ba}`]);
-  kandel.save();
+  saveKandel(kandel, event.block);
 }
 
 export function handleSetLength(event: SetLength): void {
   const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
   kandel.length = event.params.value;
-  kandel.save();
+  saveKandel(kandel, event.block);
 
-  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address, event.block);
   kandelParams.length = event.params.value;
 
-  kandelParams.save();
+  saveKandelParameters(kandelParams, event.block);
 }
 
 export function handleSetReserveId(event: SetReserveId): void {
   const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
   kandel.reserveId = event.params.reserveId;
-
-  kandel.save();
+  saveKandel(kandel, event.block);
 }
 
 export function handleSetRouter(event: SetRouter): void {
   const kandel = KandelEntity.load(event.address)!; //TODO: use load in block
   kandel.router = event.params.router;
 
-  kandel.save();
+  saveKandel(kandel, event.block);
 }
 
 export function handleSetStepSize(event: SetStepSize): void {
   const kandel = KandelEntity.load(event.address)!; // TODO: use load in block
   kandel.stepSize = event.params.value;
-  kandel.save();
+  saveKandel(kandel, event.block);
 
-  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address);
+  const kandelParams = getOrCreateKandelParameters(event.transaction.hash, event.block.timestamp, event.address, event.block);
   kandelParams.stepSize = event.params.value;
 
-  kandelParams.save();
+  saveKandelParameters(kandelParams, event.block);
 }

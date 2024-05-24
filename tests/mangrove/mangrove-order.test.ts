@@ -1,14 +1,16 @@
-import { assert, describe, test, clearStore, beforeEach, afterEach } from "matchstick-as/assembly/index";
+import { assert, describe, test, clearStore, beforeEach, afterEach, newMockCall, newMockEvent } from "matchstick-as/assembly/index";
 import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
 import { handleOfferWrite, handleSetActive } from "../../src/mangrove";
 import { createOfferWriteEvent, createSetActiveEvent, createSetRouteLogicEvent } from "./mangrove-utils";
 import { createNewOwnedOfferEvent, createMangroveOrderStartEvent, createSetRenegingEvent, createMangroveOrderCompleteEvent } from "./mangrove-order-utils";
 import { handleNewOwnedOffer, handleMangroveOrderStart, handleSetReneging, limitOrderSetIsOpen, handleMangroveOrderComplete } from "../../src/mangrove-order";
-import { createDummyOffer, getEventUniqueId, getOfferId } from "../../src/helpers";
+import { createDummyOffer } from "../../src/helpers";
+import { getEventUniqueId, getOfferId } from "../../src/helpers/ids";
 import { LimitOrder, Offer } from "../../generated/schema";
 import { getLatestLimitOrderFromStack } from "../../src/stack";
-import { prepareERC20 } from "./helpers";
+import { prepareERC20, mockOfferList } from "./helpers";
 import { handleSetRouteLogic } from "../../src/smart-router-proxy";
+import { saveLimitOrder, saveOffer } from "../../src/helpers/save";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -17,6 +19,8 @@ const token0 = Address.fromString("0x4300000000000000000000000000000000000003");
 const token1 = Address.fromString("0x4300000000000000000000000000000000000004");
 prepareERC20(token0, "token0", "tkn0", 18);
 prepareERC20(token1, "token1", "tkn1", 6);
+
+mockOfferList(Address.fromString("0x26fD9643Baf1f8A44b752B28f0D90AEBd04AB3F8"));
 
 const maker = Address.fromString("0x0000000000000000000000000000000000000002");
 const taker = Address.fromString("0x0000000000000000000000000000000000000003");
@@ -40,11 +44,11 @@ describe("Describe entity assertions", () => {
   });
 
   test("LimitOrder, limitOrderSetIsOpen, id is null", () => {
-    limitOrderSetIsOpen(null, true); // should not throw
+    limitOrderSetIsOpen(null, true, newMockEvent().block); // should not throw
   });
 
   test("LimitOrder, limitOrderSetIsOpen, id is not null, id does not exist", () => {
-    limitOrderSetIsOpen("LimitOrder1", true); // should not throw
+    limitOrderSetIsOpen("LimitOrder1", true, newMockEvent().block); // should not throw
   });
 
   test("LimitOrder, limitOrderSetIsOpen, id is not null, id exists", () => {
@@ -61,16 +65,16 @@ describe("Describe entity assertions", () => {
     limitOrder.realTaker = taker;
     limitOrder.inboundRoute = Address.zero();
     limitOrder.outboundRoute = Address.zero();
-    limitOrder.save();
+    saveLimitOrder(limitOrder, newMockEvent().block);
 
-    limitOrderSetIsOpen("limitOrder", true);
+    limitOrderSetIsOpen("limitOrder", true, newMockEvent().block);
 
     assert.fieldEquals("LimitOrder", "limitOrder", "isOpen", "true");
   });
 
   test("Offer, handleNewOwnedOffer, offer exists", () => {
     const id = BigInt.fromI32(1);
-    const offer = createDummyOffer(id, olKeyHash01);
+    const offer = createDummyOffer(id, olKeyHash01, newMockEvent().block);
 
     const orderStartEvent = createMangroveOrderStartEvent(
       olKeyHash01,
@@ -91,33 +95,11 @@ describe("Describe entity assertions", () => {
     const offerId = getOfferId(olKeyHash01, id);
     const limitOrderId = getEventUniqueId(orderStartEvent);
 
-    assert.fieldEquals("Offer", offerId, "owner", owner.toHex());
+    assert.fieldEquals("Offer", offerId, "realMaker", owner.toHex());
     assert.fieldEquals("Offer", offerId, "limitOrder", limitOrderId);
     assert.fieldEquals("LimitOrder", limitOrderId, "offer", offer.id);
     assert.fieldEquals("LimitOrder", limitOrderId, "isOpen", "true");
   });
-
-  // test("Offer, handleNewOwnedOffer, limit order does exist", () => {
-  //   const id = BigInt.fromI32(1);
-  //   createDummyOffer(
-  //     id,
-  //     olKeyHash01,
-  //   )
-
-  //   const newOwnerOffer = createNewOwnedOfferEvent(
-  //     olKeyHash01,
-  //     id,
-  //     owner,
-  //   );
-  //   let error = false;
-  //   try {
-  //     handleNewOwnedOffer(newOwnerOffer);
-  //   } catch (error) {
-  //     error = true;
-  //   }
-  //   assert.assertTrue(error); // should have thrown
-
-  // });
 
   //TODO: would like to test negative case, where the offer does not exist. And where limit order does not exists How?
 
@@ -127,7 +109,7 @@ describe("Describe entity assertions", () => {
     assert.entityCount("Market", 1);
 
     const id = BigInt.fromI32(1);
-    createDummyOffer(id, olKeyHash01);
+    createDummyOffer(id, olKeyHash01, newMockEvent().block);
 
     const tick = BigInt.fromI32(1000);
     const fillVolume = BigInt.fromI32(2000);
@@ -152,7 +134,7 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("LimitOrder", limitOrderId, "inboundRoute", takerGivesLogic.toHex());
     assert.fieldEquals("LimitOrder", limitOrderId, "outboundRoute", takerWantsLogic.toHex());
 
-    assert.fieldEquals("Account", taker.toHex(), "latestInteractionDate", orderStartEvent.block.timestamp.toI32().toString());
+    assert.fieldEquals("Account", taker.toHex(), "latestUpdateDate", orderStartEvent.block.timestamp.toI32().toString());
   });
 
   test("LimitOrder, handleMangroveOrderComplete", () => {
@@ -245,7 +227,7 @@ describe("Describe entity assertions", () => {
     const limitOrderId = getEventUniqueId(limitOrderStartEvent);
     offer.limitOrder = limitOrderId;
 
-    offer.save();
+    saveOffer(offer, newMockEvent().block);
 
     const setRouteLogicEvent1 = createSetRouteLogicEvent(olKeyHash01, token0, offerId, logic1);
     handleSetRouteLogic(setRouteLogicEvent1);

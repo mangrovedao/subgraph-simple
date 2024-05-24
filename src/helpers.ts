@@ -1,90 +1,24 @@
 import { Address, BigDecimal, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
-import { Account, KandelParameters, LimitOrder, Market, Offer, Token } from "../generated/schema";
+import { KandelParameters, LimitOrder, Offer, Token } from "../generated/schema";
+import { saveKandelParameters, saveLimitOrder, saveOffer } from "./helpers/save";
+import { getKandelParamsId, getOfferId } from "./helpers/ids";
 
-export const getKandelParamsId = (txHash: Bytes, kandel: Address): string => {
-  return `${txHash.toHex()}-${kandel.toHex()}`;
-};
-
-export const getOfferId = (olKeyHash: Bytes, id: BigInt): string => {
-  return `${olKeyHash.toHex()}-${id.toString()}`;
-};
-
-export const getMarketActivityId = (user: Address, market: Market): string => {
-  return `${user.toHex()}-${market.id.toString()}`;
-};
-
-export const getMarketActivityPairId = (maker: Address, taker: Address, market: Market): string => {
-  return `${maker.toHex()}-${taker.toHex()}-${market.id.toString()}`;
-};
-
-export const getTokenActivityId = (user: Address, token: Token): string => {
-  return `${user.toHex()}-${token.address.toHex()}`;
-};
-
-export const getOrCreateAccount = (address: Address, currentDate: BigInt, isAnInteraction: boolean): Account => {
-  let account = Account.load(address);
-
-  if (!account) {
-    account = new Account(address);
-    account.address = address;
-    account.creationDate = currentDate;
-    account.latestInteractionDate = currentDate;
-    account.proxyDeployed = false;
-    account.isReferrer = false;
-    account.save();
-  }
-
-  if (isAnInteraction) {
-    account.latestInteractionDate = currentDate;
-    account.save();
-  }
-
-  return account;
-};
-
-export const getAccountVolumeByPairId = (account: Address, token0: Bytes, token1: Bytes, asMaker: boolean): string => {
-  if (token0.toHex() > token1.toHex()) {
-    const _token1 = token1;
-    token1 = token0;
-    token0 = _token1;
-  }
-
-  const suffix = asMaker ? "maker" : "taker";
-
-  return `${account.toHex()}-${token0.toHex()}-${token1.toHex()}-${suffix}`;
-};
-
-export const getOrCreateKandelParameters = (txHash: Bytes, timestamp: BigInt, kandel: Address): KandelParameters => {
+export function getOrCreateKandelParameters(txHash: Bytes, timestamp: BigInt, kandel: Address, block: ethereum.Block): KandelParameters {
   let kandelParameters = KandelParameters.load(getKandelParamsId(txHash, kandel)); // TODO: use load in block
 
   if (kandelParameters === null) {
     kandelParameters = new KandelParameters(getKandelParamsId(txHash, kandel));
     kandelParameters.transactionHash = txHash;
-    kandelParameters.creationDate = timestamp;
     kandelParameters.kandel = kandel;
-    kandelParameters.save();
+    saveKandelParameters(kandelParameters, block);
   }
   return kandelParameters;
-};
+}
 
-export const getEventUniqueId = (event: ethereum.Event): string => {
-  return `${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
-};
-
-export const createLimitOrder = (
-  id: string,
-  realTaker: Address,
-  orderType: number,
-  creationDate: BigInt,
-  latestUpdateDate: BigInt,
-  isOpen: boolean,
-  offer: string
-): LimitOrder => {
+export const createLimitOrder = (id: string, realTaker: Address, orderType: number, isOpen: boolean, offer: string, block: ethereum.Block): LimitOrder => {
   let limitOrder = new LimitOrder(id);
   limitOrder.realTaker = realTaker;
   limitOrder.orderType = i32(orderType);
-  limitOrder.creationDate = creationDate;
-  limitOrder.latestUpdateDate = latestUpdateDate;
   limitOrder.isOpen = isOpen;
   limitOrder.offer = offer;
   limitOrder.order = "";
@@ -93,7 +27,7 @@ export const createLimitOrder = (
   limitOrder.tick = BigInt.fromI32(0);
   limitOrder.inboundRoute = Address.zero();
   limitOrder.outboundRoute = Address.zero();
-  limitOrder.save();
+  saveLimitOrder(limitOrder, block);
   return limitOrder;
 };
 
@@ -120,7 +54,8 @@ export const createOffer = (
   latestPenalty: BigInt,
   totalPenalty: BigInt,
   totalGot: BigInt,
-  totalGave: BigInt
+  totalGave: BigInt,
+  block: ethereum.Block
 ): Offer => {
   let id = getOfferId(olKeyHash, offerId);
   let offer = new Offer(id);
@@ -141,17 +76,16 @@ export const createOffer = (
   offer.deprovisioned = deprovisioned;
   offer.market = olKeyHash.toHex();
   offer.maker = maker;
-  offer.creationDate = creationDate;
-  offer.latestUpdateDate = latestUpdateDate;
+  offer.realMaker = maker;
   offer.latestPenalty = latestPenalty;
   offer.totalPenalty = totalPenalty;
   offer.totalGave = totalGave;
   offer.totalGot = totalGot;
-  offer.save();
+  saveOffer(offer, block);
   return offer;
 };
 
-export const createDummyOffer = (offerNumber: BigInt, olKeyHash: Bytes): Offer => {
+export const createDummyOffer = (offerNumber: BigInt, olKeyHash: Bytes, block: ethereum.Block): Offer => {
   return createOffer(
     offerNumber,
     olKeyHash,
@@ -175,25 +109,9 @@ export const createDummyOffer = (offerNumber: BigInt, olKeyHash: Bytes): Offer =
     BigInt.fromI32(0),
     BigInt.fromI32(0),
     BigInt.fromI32(0),
-    BigInt.fromI32(0)
+    BigInt.fromI32(0),
+    block
   );
-};
-
-export const getOrCreateToken = (address: Address): Token => {
-  let token = Token.load(address);
-
-  if (!token) {
-    token = new Token(address);
-    token.address = address;
-
-    token.name = ethereum.call(new ethereum.SmartContractCall("ERC20", address, "name", "name():(string)", new Array()))![0].toString();
-    token.symbol = ethereum.call(new ethereum.SmartContractCall("ERC20", address, "symbol", "symbol():(string)", new Array()))![0].toString();
-    token.decimals = ethereum.call(new ethereum.SmartContractCall("ERC20", address, "decimals", "decimals():(uint8)", new Array()))![0].toBigInt();
-
-    token.save();
-  }
-
-  return token;
 };
 
 export function scale(amount: BigInt, decimals: BigInt): BigDecimal {
@@ -212,14 +130,9 @@ export function scaleByToken(amount: BigInt, token: Token): BigDecimal {
   );
 }
 
-function sortTokens(token0: Address, token1: Address): Array<Address> {
+export function sortTokens(token0: Address, token1: Address): Array<Address> {
   if (token0.toHex() <= token1.toHex()) {
     return [token0, token1];
   }
   return [token1, token0];
-}
-
-export function getMarketPairId(market: Market): string {
-  const tokens = sortTokens(Address.fromBytes(market.inboundToken), Address.fromBytes(market.outboundToken));
-  return `${tokens[0].toHex()}-${tokens[1].toHex()}-${market.tickSpacing.toString()}`;
 }

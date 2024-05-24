@@ -1,7 +1,8 @@
 import { MakerBind, MakerUnbind, SetAdmin, SetRouteLogic } from "../generated/templates/SmartRouterProxy/SmartRouter";
-import { getOfferId } from "./helpers";
-import { AmplifiedOffer, Kandel, LimitOrder, Market, Offer } from "../generated/schema";
+import { Kandel, LimitOrder, Market, Offer } from "../generated/schema";
 import { log } from "matchstick-as";
+import { saveKandel, saveLimitOrder } from "./helpers/save";
+import { getOfferId } from "./helpers/ids";
 
 export function handleMakerBind(event: MakerBind): void {}
 
@@ -23,8 +24,6 @@ export function handleSetRouteLogic(event: SetRouteLogic): void {
   }
   if (offer.limitOrder) {
     setLogicOnLimitOrder(offer, event);
-  } else if (offer.amplifiedOffer) {
-    setLogicOnAmplifiedOffer(offer, event);
   } else if (offer.kandel) {
     setLogicOnKandel(offer, event);
   }
@@ -47,28 +46,7 @@ function setLogicOnLimitOrder(offer: Offer, event: SetRouteLogic): void {
     limitOrder.inboundRoute = event.params.logic;
   } else {
   }
-  limitOrder.save();
-}
-
-function setLogicOnAmplifiedOffer(offer: Offer, event: SetRouteLogic): void {
-  const amplifiedOfferId = offer.amplifiedOffer!;
-
-  const amplifiedOffer = AmplifiedOffer.load(amplifiedOfferId);
-  if (!amplifiedOffer) {
-    log.error("Setting logic on amplified order: missing mangrove order with id: {}", [amplifiedOfferId]);
-    return;
-  }
-
-  const market = Market.load(offer.market)!;
-
-  if (event.params.token.equals(market.outboundToken)) {
-    amplifiedOffer.outboundRoute = event.params.logic;
-  } else if (event.params.token.equals(market.inboundToken)) {
-    amplifiedOffer.inboundRoute = event.params.logic;
-  } else {
-    return;
-  }
-  amplifiedOffer.save();
+  saveLimitOrder(limitOrder, event.block);
 }
 
 function setLogicOnKandel(offer: Offer, event: SetRouteLogic): void {
@@ -87,5 +65,5 @@ function setLogicOnKandel(offer: Offer, event: SetRouteLogic): void {
   } else {
     return;
   }
-  kandel.save();
+  saveKandel(kandel, event.block);
 }

@@ -1,113 +1,29 @@
 import { Address, BigDecimal, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
 import { Market, MarketActivity, MarketActivityPair, MarketPair, Token, TokenActivity } from "../generated/schema";
-import { getMarketActivityId, getMarketActivityPairId, getMarketPairId, getOrCreateAccount, getTokenActivityId, scale, scaleByToken } from "./helpers";
+import { scale, scaleByToken } from "./helpers";
+import { getMarketPairId } from "./helpers/ids";
 import { MgvReader, MgvReader__offerListInputOlKeyStruct, MgvReader__offerListResultValue2Struct } from "../generated/Mangrove/MgvReader";
-
-const createNewMarketActivityEntry = (user: Address, market: Market, timestamp: BigInt): MarketActivity => {
-  const marketActivityId = getMarketActivityId(user, market);
-  const activity = new MarketActivity(marketActivityId);
-
-  activity.creationDate = timestamp;
-  activity.latestInteractionDate = timestamp;
-  activity.account = user;
-  activity.market = market.id;
-  activity.inboundAmountGot = BigInt.fromI32(0);
-  activity.inboundAmountGave = BigInt.fromI32(0);
-
-  activity.outboundAmountGot = BigInt.fromI32(0);
-  activity.outboundAmountGave = BigInt.fromI32(0);
-
-  activity.inboundAmountGotDisplay = BigInt.fromI32(0).toBigDecimal();
-  activity.inboundAmountGaveDisplay = BigInt.fromI32(0).toBigDecimal();
-
-  activity.outboundAmountGotDisplay = BigInt.fromI32(0).toBigDecimal();
-  activity.outboundAmountGaveDisplay = BigInt.fromI32(0).toBigDecimal();
-
-  return activity;
-};
-
-const createNewMarketActivityPairEntry = (maker: Address, taker: Address, market: Market, timestamp: BigInt): MarketActivityPair => {
-  const marketActivityPairId = getMarketActivityPairId(maker, taker, market);
-  const activity = new MarketActivityPair(marketActivityPairId);
-
-  activity.creationDate = timestamp;
-  activity.latestInteractionDate = timestamp;
-  activity.maker = maker;
-  activity.taker = taker;
-  activity.market = market.id;
-  activity.inboundAmount = BigInt.fromI32(0);
-  activity.outboundAmount = BigInt.fromI32(0);
-  activity.inboundAmountDisplay = BigInt.fromI32(0).toBigDecimal();
-
-  activity.outboundAmountDisplay = BigInt.fromI32(0).toBigDecimal();
-
-  return activity;
-};
-
-const createNewTokenActivityEntry = (user: Address, token: Token, timestamp: BigInt): TokenActivity => {
-  const tokenActivityId = getTokenActivityId(user, token);
-  const activity = new TokenActivity(tokenActivityId);
-
-  activity.creationDate = timestamp;
-  activity.latestInteractionDate = timestamp;
-  activity.account = user;
-  activity.token = token.id;
-  activity.amountSent = BigInt.fromI32(0);
-  activity.amountReceived = BigInt.fromI32(0);
-  activity.amountReceivedDisplay = BigInt.fromI32(0).toBigDecimal();
-  activity.amountSentDisplay = BigInt.fromI32(0).toBigDecimal();
-
-  return activity;
-};
-
-const getOrCreateMarketActivityEntry = (user: Address, market: Market, block: ethereum.Block): MarketActivity => {
-  const marketActivityId = getMarketActivityId(user, market);
-  let activity = MarketActivity.load(marketActivityId);
-  if (!activity) {
-    activity = createNewMarketActivityEntry(user, market, block.timestamp);
-  }
-  return activity;
-};
-
-const getOrCreateTokenActivityEntry = (user: Address, token: Token, block: ethereum.Block): TokenActivity => {
-  const tokenActivityId = getTokenActivityId(user, token);
-  let activity = TokenActivity.load(tokenActivityId);
-  if (!activity) {
-    activity = createNewTokenActivityEntry(user, token, block.timestamp);
-  }
-  return activity;
-};
-
-const getOrCreateMarketActivityPairEntry = (maker: Address, taker: Address, market: Market, block: ethereum.Block): MarketActivityPair => {
-  const marketActivityPairId = getMarketActivityPairId(maker, taker, market);
-  let activity = MarketActivityPair.load(marketActivityPairId);
-  if (!activity) {
-    activity = createNewMarketActivityPairEntry(maker, taker, market, block.timestamp);
-  }
-  return activity;
-};
+import { getOrCreateAccount, getOrCreateMarketActivityEntry, getOrCreateMarketActivityPairEntry, getOrCreateTokenActivityEntry } from "./helpers/create";
+import { saveMarketActivity, saveMarketActivityPair, saveMarketPair, saveTokenActivity } from "./helpers/save";
 
 function setDisplayValuesAndSaveMarket(activity: MarketActivity, inbound: Token, outbound: Token, block: ethereum.Block): void {
   activity.inboundAmountGotDisplay = scale(activity.inboundAmountGot, inbound.decimals);
   activity.inboundAmountGaveDisplay = scale(activity.inboundAmountGave, inbound.decimals);
   activity.outboundAmountGotDisplay = scale(activity.outboundAmountGot, outbound.decimals);
   activity.outboundAmountGaveDisplay = scale(activity.outboundAmountGave, outbound.decimals);
-  activity.latestInteractionDate = block.timestamp;
-  activity.save();
+  saveMarketActivity(activity, block);
 }
 
 function setDisplayValuesAndSaveMarketPair(activity: MarketActivityPair, inbound: Token, outbound: Token, block: ethereum.Block): void {
   activity.inboundAmountDisplay = scale(activity.inboundAmount, inbound.decimals);
   activity.outboundAmountDisplay = scale(activity.outboundAmount, outbound.decimals);
-  activity.latestInteractionDate = block.timestamp;
-  activity.save();
+  saveMarketActivityPair(activity, block);
 }
 
 function setDisplayValuesAndSaveToken(activity: TokenActivity, token: Token, block: ethereum.Block): void {
   activity.amountReceivedDisplay = scale(activity.amountReceived, token.decimals);
   activity.amountSentDisplay = scale(activity.amountSent, token.decimals);
-  activity.latestInteractionDate = block.timestamp;
-  activity.save();
+  saveTokenActivity(activity, block);
 }
 
 const zero = Address.fromBytes(Address.fromHexString("0x0000000000000000000000000000000000000000"));
@@ -122,8 +38,7 @@ export function sendAmount(
   makerGave: BigInt,
   block: ethereum.Block
 ): void {
-  const rootAcc = getOrCreateAccount(zero, block.timestamp, true);
-  rootAcc.save();
+  getOrCreateAccount(zero, block, true);
 
   const marketActivityPair = getOrCreateMarketActivityPairEntry(maker, taker, market, block);
 
@@ -203,6 +118,7 @@ export const firstIsBase = (inboundToken: Address, outboundToken: Address): bool
 };
 
 export function handleTPV(market: Market, block: ethereum.Block): void {
+  log.info("{}", ["Attempting to handle TPV"]);
   const MGVReaderContract = MgvReader.bind(Address.fromString("0x26fD9643Baf1f8A44b752B28f0D90AEBd04AB3F8"));
 
   const marketSide = askOrBid(market.inboundToken.toHex(), market.outboundToken.toHex());
@@ -256,11 +172,11 @@ export function handleTPV(market: Market, block: ethereum.Block): void {
     let maxBidPrice = 1.0001 ** <f64>marketPair.maxBid!.toI64();
     marketPair.midPrice = BigDecimal.fromString(((minAskPrice + maxBidPrice) / 2).toString());
     marketPair.spread = BigDecimal.fromString(((maxBidPrice - minAskPrice) / maxBidPrice).toString());
-  } else if (!hasBid) {
+  } else if (hasAsk && !hasBid) {
     let minAskPrice = 1.0001 ** <f64>marketPair.minAsk!.toI64();
     marketPair.midPrice = BigDecimal.fromString(minAskPrice.toString());
     marketPair.spread = null;
-  } else if (!hasAsk) {
+  } else if (hasBid && !hasAsk) {
     let maxBidPrice = 1.0001 ** <f64>marketPair.maxBid!.toI64();
     marketPair.midPrice = BigDecimal.fromString(maxBidPrice.toString());
     marketPair.spread = null;
@@ -268,6 +184,5 @@ export function handleTPV(market: Market, block: ethereum.Block): void {
     marketPair.midPrice = null;
     marketPair.spread = null;
   }
-  marketPair.latestUpdateDate = block.timestamp;
-  marketPair.save();
+  saveMarketPair(marketPair, block);
 }

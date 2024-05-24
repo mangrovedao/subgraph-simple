@@ -1,12 +1,5 @@
-import {
-  assert,
-  describe,
-  test,
-  clearStore,
-  beforeAll,
-  afterAll
-} from "matchstick-as/assembly/index"
-import { Address } from "@graphprotocol/graph-ts"
+import { assert, describe, test, clearStore, beforeAll, afterAll } from "matchstick-as/assembly/index";
+import { Address } from "@graphprotocol/graph-ts";
 import { createReferStartedEvent, createReferralRecordedEvent } from "./mgv-referral-utils";
 import { handleReferStarted, handleReferralRecorded } from "../../src/mgv-referral";
 
@@ -16,12 +9,11 @@ const alice = Address.fromString("0x0000000000000000000000000000000000000000");
 const bob = Address.fromString("0x0000000000000000000000000000000000000001");
 
 describe("Incentives: Referrals", () => {
-  beforeAll(() => {
-  })
+  beforeAll(() => {});
 
   afterAll(() => {
-    clearStore()
-  })
+    clearStore();
+  });
 
   // For more test scenarios, see:
   // https://thegraph.com/docs/en/developer/matchstick/#write-a-unit-test
@@ -38,4 +30,4 @@ describe("Incentives: Referrals", () => {
     assert.fieldEquals("Account", bob.toHex(), "isReferrer", "false");
     assert.fieldEquals("Account", bob.toHex(), "referrer", alice.toHex());
   });
-})
+});

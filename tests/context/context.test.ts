@@ -1,8 +1,9 @@
-import { assert, describe, test, clearStore, beforeEach, afterEach } from "matchstick-as/assembly/index";
+import { assert, describe, test, clearStore, beforeEach, afterEach, newMockEvent } from "matchstick-as/assembly/index";
 import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
 import { Order } from "../../generated/schema";
 import { addOfferWriteToStack, addOrderToStack, getLatestOrderFromStack, getOfferWriteFromStack, removeLatestOrderFromStack } from "../../src/stack";
 import { createOfferWriteEvent } from "../mangrove/mangrove-utils";
+import { saveOrder } from "../../src/helpers/save";
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
@@ -45,8 +46,8 @@ describe("Describe entity assertions", () => {
     order2.feePaid = BigInt.fromI32(1);
     order2.taker = taker;
 
-    order1.save();
-    order2.save();
+    saveOrder(order1, newMockEvent().block);
+    saveOrder(order2, newMockEvent().block);
 
     addOrderToStack(order1);
     let currentOrder = getLatestOrderFromStack(true);

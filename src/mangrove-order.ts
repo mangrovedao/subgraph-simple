@@ -1,12 +1,15 @@
 import { log } from "matchstick-as";
 import { LogIncident, MangroveOrderComplete, MangroveOrderStart, NewOwnedOffer, SetAdmin, SetReneging } from "../generated/MangroveOrder/MangroveOrder";
 import { LimitOrder, Offer } from "../generated/schema";
-import { getEventUniqueId, getOfferId, getOrCreateAccount } from "./helpers";
 import { addLimitOrderToStack, getLatestLimitOrderFromStack, removeLatestLimitOrderFromStack } from "./stack";
+import { getOrCreateAccount } from "./helpers/create";
+import { saveLimitOrder, saveOffer } from "./helpers/save";
+import { ethereum } from "@graphprotocol/graph-ts";
+import { getEventUniqueId, getOfferId } from "./helpers/ids";
 
 export function handleLogIncident(event: LogIncident): void {}
 
-export const limitOrderSetIsOpen = (limitOrderId: string | null, value: boolean): void => {
+export const limitOrderSetIsOpen = (limitOrderId: string | null, value: boolean, block: ethereum.Block): void => {
   if (limitOrderId === null) {
     return;
   }
@@ -15,8 +18,7 @@ export const limitOrderSetIsOpen = (limitOrderId: string | null, value: boolean)
     return;
   }
   limitOrder.isOpen = value;
-
-  limitOrder.save();
+  saveLimitOrder(limitOrder, block);
 };
 
 export function handleNewOwnedOffer(event: NewOwnedOffer): void {
@@ -27,26 +29,24 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
     return;
   }
 
-  const owner = getOrCreateAccount(event.params.owner, event.block.timestamp, true);
+  const owner = getOrCreateAccount(event.params.owner, event.block, true);
   offer.realMaker = owner.id;
   const limitOrder = getLatestLimitOrderFromStack();
   if (limitOrder !== null) {
     limitOrder.offer = offer.id;
     limitOrder.isOpen = true;
     offer.limitOrder = limitOrder.id;
-    limitOrder.save();
+    saveLimitOrder(limitOrder, event.block);
   } else {
     throw new Error(`Missing mangrove order for offer id:${offer.offerId} - market: ${offer.market} - tx: ${event.transaction.hash.toHex()}`);
   }
-  offer.save();
+  saveOffer(offer, event.block);
 }
 
 export function handleMangroveOrderStart(event: MangroveOrderStart): void {
   let limitOrder = new LimitOrder(getEventUniqueId(event));
-  limitOrder.realTaker = getOrCreateAccount(event.params.taker, event.block.timestamp, true).id;
+  limitOrder.realTaker = getOrCreateAccount(event.params.taker, event.block, true).id;
   limitOrder.orderType = event.params.orderType;
-  limitOrder.creationDate = event.block.timestamp;
-  limitOrder.latestUpdateDate = event.block.timestamp;
   limitOrder.isOpen = false;
   limitOrder.fillVolume = event.params.fillVolume;
   limitOrder.fillWants = event.params.fillWants;
@@ -55,7 +55,7 @@ export function handleMangroveOrderStart(event: MangroveOrderStart): void {
   limitOrder.inboundRoute = event.params.takerWantsLogic;
   limitOrder.outboundRoute = event.params.takerGivesLogic;
 
-  limitOrder.save();
+  saveLimitOrder(limitOrder, event.block);
   addLimitOrderToStack(limitOrder);
 }
 
@@ -74,6 +74,5 @@ export function handleSetReneging(event: SetReneging): void {
   }
   limitOrder.expiryDate = event.params.date;
   limitOrder.maxVolume = event.params.volume;
-  limitOrder.latestUpdateDate = event.block.timestamp;
-  limitOrder.save();
+  saveLimitOrder(limitOrder, event.block);
 }

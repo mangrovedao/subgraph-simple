@@ -1,7 +1,8 @@
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
-import { afterEach, assert, beforeEach, clearStore, describe, test } from "matchstick-as/assembly/index";
-import { CleanOrder, Kandel, LimitOrder, Market, Offer, Order } from "../../generated/schema";
-import { createDummyOffer, createLimitOrder, createOffer, getAccountVolumeByPairId, getEventUniqueId, getOfferId } from "../../src/helpers";
+import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
+import { afterEach, assert, beforeEach, clearStore, describe, newMockEvent, test } from "matchstick-as/assembly/index";
+import { Kandel, LimitOrder, Market, Offer, Order } from "../../generated/schema";
+import { createDummyOffer, createLimitOrder, createOffer } from "../../src/helpers";
+import { getEventUniqueId, getOfferId } from "../../src/helpers/ids";
 import {
   createNewOffer,
   handleCleanComplete,
@@ -33,8 +34,9 @@ import {
 } from "./mangrove-utils";
 import { createMangroveOrderStartEvent } from "./mangrove-order-utils";
 import { handleMangroveOrderStart } from "../../src/mangrove-order";
-import { prepareERC20 } from "./helpers";
+import { prepareERC20, mockOfferList } from "./helpers";
 import { PartialOfferWrite } from "../../src/types";
+import { saveKandel, saveLimitOrder, saveOffer, saveOrder } from "../../src/helpers/save";
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -43,6 +45,8 @@ let token0 = Address.fromString("0x4300000000000000000000000000000000000003");
 let token1 = Address.fromString("0x4300000000000000000000000000000000000004");
 prepareERC20(token0, "token0", "tkn0", 18);
 prepareERC20(token1, "token1", "tkn1", 6);
+
+mockOfferList(Address.fromString("0x26fD9643Baf1f8A44b752B28f0D90AEBd04AB3F8"));
 
 let maker = Address.fromString("0x0000000000000000000000000000000000000002");
 let taker = Address.fromString("0x0000000000000000000000000000000000000003");
@@ -106,7 +110,8 @@ describe("Describe entity assertions", () => {
       BigInt.fromI32(0),
       BigInt.fromI32(0),
       BigInt.fromI32(0),
-      BigInt.fromI32(0)
+      BigInt.fromI32(0),
+      orderStart.block
     );
 
     let offerFail = createOfferFailEvent(
@@ -142,14 +147,14 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Offer", offerId, "deprovisioned", "false");
     assert.fieldEquals("Offer", offerId, "market", olKeyHash01.toHexString());
     assert.fieldEquals("Offer", offerId, "maker", maker.toHexString());
-    assert.fieldEquals("Offer", offerId, "creationDate", "100");
+    assert.fieldEquals("Offer", offerId, "creationDate", orderStart.block.timestamp.toString());
     assert.fieldEquals("Offer", offerId, "latestUpdateDate", "20");
     assert.entityCount("Offer", 1);
     let updatedOffer = Offer.load(offerId)!;
     assert.assertTrue(updatedOffer.prevGives === null);
     assert.assertTrue(updatedOffer.prevTick === null);
     assert.assertTrue(updatedOffer.kandel === null);
-    assert.assertTrue(updatedOffer.owner === null);
+    // assert.assertTrue(updatedOffer.realMaker === null);
   });
 
   test("Offer, handleOfferFailWithPosthookData", () => {
@@ -181,7 +186,8 @@ describe("Describe entity assertions", () => {
       BigInt.fromI32(0),
       BigInt.fromI32(0),
       BigInt.fromI32(0),
-      BigInt.fromI32(0)
+      BigInt.fromI32(0),
+      orderStart.block
     );
 
     let offerFail = createOfferFailWithPosthookDataEvent(
@@ -218,14 +224,14 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Offer", offerId, "deprovisioned", "false");
     assert.fieldEquals("Offer", offerId, "market", olKeyHash01.toHexString());
     assert.fieldEquals("Offer", offerId, "maker", maker.toHexString());
-    assert.fieldEquals("Offer", offerId, "creationDate", "100");
+    assert.fieldEquals("Offer", offerId, "creationDate", orderStart.block.timestamp.toString());
     assert.fieldEquals("Offer", offerId, "latestUpdateDate", "20");
     assert.entityCount("Offer", 1);
     let updatedOffer = Offer.load(offerId)!;
     assert.assertTrue(updatedOffer.prevGives === null);
     assert.assertTrue(updatedOffer.prevTick === null);
     assert.assertTrue(updatedOffer.kandel === null);
-    assert.assertTrue(updatedOffer.owner === null);
+    // assert.assertTrue(updatedOffer.realMaker === null);
   });
 
   test("Offer, handleOfferRetract, with deprovision", () => {
@@ -255,7 +261,8 @@ describe("Describe entity assertions", () => {
       BigInt.fromI32(0),
       BigInt.fromI32(0),
       BigInt.fromI32(0),
-      BigInt.fromI32(0)
+      BigInt.fromI32(0),
+      newMockEvent().block
     );
 
     let offerRetract = createOfferRetractEvent(olKeyHash01, maker, id, true);
@@ -285,9 +292,9 @@ describe("Describe entity assertions", () => {
     assert.assertTrue(updatedOffer.prevGives === null);
     assert.assertTrue(updatedOffer.prevTick === null);
     assert.assertTrue(updatedOffer.kandel === null);
-    assert.assertTrue(updatedOffer.owner === null);
-    assert.fieldEquals("Offer", offerId, "creationDate", "100");
-    assert.fieldEquals("Offer", offerId, "latestUpdateDate", "1");
+    // assert.assertTrue(updatedOffer.realMaker === null);
+    assert.fieldEquals("Offer", offerId, "creationDate", newMockEvent().block.timestamp.toString());
+    assert.fieldEquals("Offer", offerId, "latestUpdateDate", newMockEvent().block.timestamp.toString());
     assert.entityCount("Offer", 1);
   });
 
@@ -318,7 +325,8 @@ describe("Describe entity assertions", () => {
       BigInt.fromI32(0),
       BigInt.fromI32(0),
       BigInt.fromI32(0),
-      BigInt.fromI32(0)
+      BigInt.fromI32(0),
+      newMockEvent().block
     );
 
     let offerRetract = createOfferRetractEvent(olKeyHash01, maker, id, false);
@@ -349,9 +357,9 @@ describe("Describe entity assertions", () => {
     assert.assertTrue(updatedOffer.prevGives === null);
     assert.assertTrue(updatedOffer.prevTick === null);
     assert.assertTrue(updatedOffer.kandel === null);
-    assert.assertTrue(updatedOffer.owner === null);
-    assert.fieldEquals("Offer", offerId, "creationDate", "100");
-    assert.fieldEquals("Offer", offerId, "latestUpdateDate", "1");
+    // assert.assertTrue(updatedOffer.realMaker === null);
+    assert.fieldEquals("Offer", offerId, "creationDate", newMockEvent().block.timestamp.toString());
+    assert.fieldEquals("Offer", offerId, "latestUpdateDate", newMockEvent().block.timestamp.toString());
     assert.entityCount("Offer", 1);
   });
 
@@ -385,14 +393,15 @@ describe("Describe entity assertions", () => {
       BigInt.fromI32(0),
       BigInt.fromI32(0),
       BigInt.fromI32(0),
-      BigInt.fromI32(0)
+      BigInt.fromI32(0),
+      newMockEvent().block
     );
 
-    createLimitOrder("limitOrderId", taker, 0, orderStart.block.timestamp, orderStart.block.timestamp, true, offerId);
+    createLimitOrder("limitOrderId", taker, 0, true, offerId, orderStart.block);
 
     const offer = Offer.load(offerId)!;
     offer.limitOrder = "limitOrderId";
-    offer.save();
+    saveOffer(offer, orderStart.block);
 
     let offerSuccess = createOfferSuccessEvent(olKeyHash01, id, taker, BigInt.fromI32(10), BigInt.fromI32(20));
     handleOfferSuccess(offerSuccess);
@@ -421,9 +430,9 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Offer", offerId, "maker", maker.toHexString());
     let updatedOffer = Offer.load(offerId)!;
     assert.assertTrue(updatedOffer.kandel === null);
-    assert.assertTrue(updatedOffer.owner === null);
-    assert.fieldEquals("Offer", offerId, "creationDate", "100");
-    assert.fieldEquals("Offer", offerId, "latestUpdateDate", "1");
+    // assert.assertTrue(updatedOffer.realMaker === null);
+    assert.fieldEquals("Offer", offerId, "creationDate", orderStart.block.timestamp.toString());
+    assert.fieldEquals("Offer", offerId, "latestUpdateDate", orderStart.block.timestamp.toString());
     assert.entityCount("Offer", 1);
 
     const orderId = getEventUniqueId(orderStart);
@@ -452,7 +461,7 @@ describe("Describe entity assertions", () => {
     order.penalty = BigInt.fromI32(0);
     order.feePaid = BigInt.fromI32(0);
     order.taker = taker;
-    order.save();
+    saveOrder(order, orderStart.block);
 
     const limitOrder = new LimitOrder(offerId);
     limitOrder.realTaker = taker;
@@ -467,7 +476,7 @@ describe("Describe entity assertions", () => {
     limitOrder.order = orderId;
     limitOrder.inboundRoute = Address.zero();
     limitOrder.outboundRoute = Address.zero();
-    limitOrder.save();
+    saveLimitOrder(limitOrder, orderStart.block);
 
     createOffer(
       id,
@@ -492,7 +501,8 @@ describe("Describe entity assertions", () => {
       BigInt.fromI32(20),
       BigInt.fromI32(30),
       BigInt.fromI32(40),
-      BigInt.fromI32(50)
+      BigInt.fromI32(50),
+      newMockEvent().block
     );
 
     let offerSuccess = createOfferSuccessEvent(olKeyHash01, id, taker, BigInt.fromI32(20), BigInt.fromI32(40));
@@ -522,9 +532,9 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Offer", offerId, "maker", maker.toHexString());
     let updatedOffer = Offer.load(offerId)!;
     assert.assertTrue(updatedOffer.kandel === null);
-    assert.assertTrue(updatedOffer.owner === null);
-    assert.fieldEquals("Offer", offerId, "creationDate", "100");
-    assert.fieldEquals("Offer", offerId, "latestUpdateDate", "1");
+    // assert.assertTrue(updatedOffer.realMaker === null);
+    assert.fieldEquals("Offer", offerId, "creationDate", orderStart.block.timestamp.toString());
+    assert.fieldEquals("Offer", offerId, "latestUpdateDate", orderStart.block.timestamp.toString());
     assert.entityCount("Offer", 1);
 
     offerSuccess = createOfferSuccessEvent(olKeyHash01, id, taker, BigInt.fromI32(20), BigInt.fromI32(40));
@@ -553,7 +563,7 @@ describe("Describe entity assertions", () => {
     order.penalty = BigInt.fromI32(0);
     order.feePaid = BigInt.fromI32(0);
     order.taker = taker;
-    order.save();
+    saveOrder(order, orderStart.block);
 
     const limitOrder = new LimitOrder(offerId);
     limitOrder.realTaker = taker;
@@ -568,7 +578,7 @@ describe("Describe entity assertions", () => {
     limitOrder.order = orderId;
     limitOrder.inboundRoute = Address.zero();
     limitOrder.outboundRoute = Address.zero();
-    limitOrder.save();
+    saveLimitOrder(limitOrder, orderStart.block);
 
     createOffer(
       id,
@@ -593,7 +603,8 @@ describe("Describe entity assertions", () => {
       BigInt.fromI32(20),
       BigInt.fromI32(30),
       BigInt.fromI32(40),
-      BigInt.fromI32(50)
+      BigInt.fromI32(50),
+      newMockEvent().block
     );
 
     let offerSuccess = createOfferSuccessWithPosthookDataEvent(
@@ -630,9 +641,9 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Offer", offerId, "maker", maker.toHexString());
     let updatedOffer = Offer.load(offerId)!;
     assert.assertTrue(updatedOffer.kandel === null);
-    assert.assertTrue(updatedOffer.owner === null);
-    assert.fieldEquals("Offer", offerId, "creationDate", "100");
-    assert.fieldEquals("Offer", offerId, "latestUpdateDate", "1");
+    // assert.assertTrue(updatedOffer.realMaker === null);
+    assert.fieldEquals("Offer", offerId, "creationDate", orderStart.block.timestamp.toString());
+    assert.fieldEquals("Offer", offerId, "latestUpdateDate", orderStart.block.timestamp.toString());
     assert.entityCount("Offer", 1);
   });
 
@@ -665,7 +676,7 @@ describe("Describe entity assertions", () => {
     kandel.deployer = Bytes.fromUTF8("owner");
     kandel.admin = Bytes.fromUTF8("admin");
     kandel.offerIndexes = [];
-    kandel.save();
+    saveKandel(kandel, newMockEvent().block);
 
     const id = BigInt.fromI32(0);
     let offerWrite = createOfferWriteEvent(olKeyHash01, maker, BigInt.fromI32(1000), BigInt.fromI32(2000), BigInt.fromI32(0), BigInt.fromI32(0), id);
@@ -709,13 +720,13 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals("Offer", offerId, "market", olKeyHash01.toHexString());
     assert.fieldEquals("Offer", offerId, "maker", maker.toHexString());
     assert.assertTrue(offer.kandel === null);
-    assert.assertTrue(offer.owner === null);
-    assert.fieldEquals("Offer", offerId, "creationDate", "1");
-    assert.fieldEquals("Offer", offerId, "latestUpdateDate", "1");
+    // assert.assertTrue(offer.realMaker === null);
+    assert.fieldEquals("Offer", offerId, "creationDate", offerWrite.block.timestamp.toString());
+    assert.fieldEquals("Offer", offerId, "latestUpdateDate", offerWrite.block.timestamp.toString());
     assert.fieldEquals("Offer", offerId, "latestPenalty", "0");
     assert.fieldEquals("Offer", offerId, "totalPenalty", "0");
     assert.fieldEquals("Account", maker.toHex(), "creationDate", offerWrite.block.timestamp.toI32().toString());
-    assert.fieldEquals("Account", maker.toHex(), "latestInteractionDate", offerWrite.block.timestamp.toI32().toString());
+    assert.fieldEquals("Account", maker.toHex(), "latestUpdateDate", offerWrite.block.timestamp.toI32().toString());
   });
 
   test("Offer, handleOfferWrite, Update existing offer", () => {
@@ -752,22 +763,22 @@ describe("Describe entity assertions", () => {
       BigInt.fromI32(10),
       BigInt.fromI32(20),
       BigInt.fromI32(30),
-      BigInt.fromI32(40)
+      BigInt.fromI32(40),
+      newMockEvent().block
     );
 
     createLimitOrder(
       "limitOrderId",
       taker,
       0,
-      gasbaseEvent.block.timestamp,
-      gasbaseEvent.block.timestamp,
       false, // should not be open
-      offerId
+      offerId,
+      gasbaseEvent.block
     );
 
     const offer = Offer.load(offerId)!;
     offer.limitOrder = "limitOrderId";
-    offer.save();
+    saveOffer(offer, gasbaseEvent.block);
 
     let offerWrite = createOfferWriteEvent(olKeyHash01, maker, BigInt.fromI32(1000), BigInt.fromI32(2000), BigInt.fromI32(0), BigInt.fromI32(0), id);
     handleOfferWrite(offerWrite);
@@ -796,11 +807,11 @@ describe("Describe entity assertions", () => {
     let updatedOffer = Offer.load(offerId)!;
 
     assert.assertTrue(updatedOffer.kandel === null);
-    assert.assertTrue(updatedOffer.owner === null);
+    // assert.assertTrue(updatedOffer.realMaker === null);
     assert.assertTrue(updatedOffer.prevGives === null);
     assert.assertTrue(updatedOffer.prevTick === null);
-    assert.fieldEquals("Offer", offerId, "creationDate", "100");
-    assert.fieldEquals("Offer", offerId, "latestUpdateDate", "1");
+    assert.fieldEquals("Offer", offerId, "creationDate", gasbaseEvent.block.timestamp.toString());
+    assert.fieldEquals("Offer", offerId, "latestUpdateDate", gasbaseEvent.block.timestamp.toString());
     assert.fieldEquals("Offer", offerId, "latestPenalty", "0");
     assert.fieldEquals("Offer", offerId, "totalPenalty", "20");
     assert.entityCount("Offer", 1);
@@ -892,7 +903,7 @@ describe("Describe entity assertions", () => {
   });
 
   test("Order, handleOrderComplete", () => {
-    createDummyOffer(BigInt.fromI32(1), olKeyHash01);
+    createDummyOffer(BigInt.fromI32(1), olKeyHash01, newMockEvent().block);
     const orderStart = createOrderStartEvent(olKeyHash01, taker, BigInt.fromI32(40), BigInt.fromI32(1), false);
     handleOrderStart(orderStart);
 
@@ -914,7 +925,7 @@ describe("Describe entity assertions", () => {
 
     assert.fieldEquals("Stack", "Order", "ids", ``);
     assert.fieldEquals("Account", taker.toHex(), "creationDate", orderComplete.block.timestamp.toI32().toString());
-    assert.fieldEquals("Account", taker.toHex(), "latestInteractionDate", orderComplete.block.timestamp.toI32().toString());
+    assert.fieldEquals("Account", taker.toHex(), "latestUpdateDate", orderComplete.block.timestamp.toI32().toString());
 
     const offerSuccessEventId = getEventUniqueId(offerSuccessEvent);
     assert.fieldEquals("OfferFilled", offerSuccessEventId, "creationDate", offerSuccessEvent.block.timestamp.toString());
@@ -942,7 +953,7 @@ describe("Describe entity assertions", () => {
   });
 
   test("Order, handleCleanComplete", () => {
-    createDummyOffer(BigInt.fromI32(1), olKeyHash01);
+    createDummyOffer(BigInt.fromI32(1), olKeyHash01, newMockEvent().block);
 
     const cleanOrderStart = createCleanStartEvent(olKeyHash01, taker, BigInt.fromI32(1));
     handleCleanStart(cleanOrderStart);
