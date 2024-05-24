@@ -142,7 +142,6 @@ export function handlePopulateStart(event: PopulateStart): void {
   kandelPopulateRetract.save();
 
   const kandel = KandelEntity.load(event.address)!;
-
   kandel.totalPublishedBase = BigInt.fromI32(0);
   kandel.totalPublishedQuote = BigInt.fromI32(0);
   kandel.save();

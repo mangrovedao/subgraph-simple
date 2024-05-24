@@ -2,7 +2,7 @@ import { Address, BigDecimal, BigInt, Bytes, ethereum } from "@graphprotocol/gra
 import { Account, KandelParameters, LimitOrder, Market, Offer, Token } from "../generated/schema";
 
 export const getKandelParamsId = (txHash: Bytes, kandel: Address): string => {
-  return `${txHash}-${kandel.toHex()}`;
+  return `${txHash.toHex()}-${kandel.toHex()}`;
 };
 
 export const getOfferId = (olKeyHash: Bytes, id: BigInt): string => {

@@ -7,8 +7,8 @@ const createNewMarketActivityEntry = (user: Address, market: Market, timestamp: 
   const marketActivityId = getMarketActivityId(user, market);
   const activity = new MarketActivity(marketActivityId);
 
-  activity.creationDate = BigInt.fromI32(0);
-  activity.latestInteractionDate = BigInt.fromI32(0);
+  activity.creationDate = timestamp;
+  activity.latestInteractionDate = timestamp;
   activity.account = user;
   activity.market = market.id;
   activity.inboundAmountGot = BigInt.fromI32(0);
@@ -23,8 +23,6 @@ const createNewMarketActivityEntry = (user: Address, market: Market, timestamp: 
   activity.outboundAmountGotDisplay = BigInt.fromI32(0).toBigDecimal();
   activity.outboundAmountGaveDisplay = BigInt.fromI32(0).toBigDecimal();
 
-  activity.creationDate = timestamp;
-
   return activity;
 };
 
@@ -32,8 +30,8 @@ const createNewMarketActivityPairEntry = (maker: Address, taker: Address, market
   const marketActivityPairId = getMarketActivityPairId(maker, taker, market);
   const activity = new MarketActivityPair(marketActivityPairId);
 
-  activity.creationDate = BigInt.fromI32(0);
-  activity.latestInteractionDate = BigInt.fromI32(0);
+  activity.creationDate = timestamp;
+  activity.latestInteractionDate = timestamp;
   activity.maker = maker;
   activity.taker = taker;
   activity.market = market.id;
@@ -43,8 +41,6 @@ const createNewMarketActivityPairEntry = (maker: Address, taker: Address, market
 
   activity.outboundAmountDisplay = BigInt.fromI32(0).toBigDecimal();
 
-  activity.creationDate = timestamp;
-
   return activity;
 };
 
@@ -52,16 +48,14 @@ const createNewTokenActivityEntry = (user: Address, token: Token, timestamp: Big
   const tokenActivityId = getTokenActivityId(user, token);
   const activity = new TokenActivity(tokenActivityId);
 
-  activity.creationDate = BigInt.fromI32(0);
-  activity.latestInteractionDate = BigInt.fromI32(0);
+  activity.creationDate = timestamp;
+  activity.latestInteractionDate = timestamp;
   activity.account = user;
   activity.token = token.id;
   activity.amountSent = BigInt.fromI32(0);
   activity.amountReceived = BigInt.fromI32(0);
   activity.amountReceivedDisplay = BigInt.fromI32(0).toBigDecimal();
   activity.amountSentDisplay = BigInt.fromI32(0).toBigDecimal();
-
-  activity.creationDate = timestamp;
 
   return activity;
 };
@@ -131,7 +125,7 @@ export function sendAmount(
   const rootAcc = getOrCreateAccount(zero, block.timestamp, true);
   rootAcc.save();
 
-  const marketActivityPair = getOrCreateMarketActivityPairEntry(taker, maker, market, block);
+  const marketActivityPair = getOrCreateMarketActivityPairEntry(maker, taker, market, block);
 
   const tokenActivityInboundTaker = getOrCreateTokenActivityEntry(taker, inbound, block);
   const tokenActivityOutboundTaker = getOrCreateTokenActivityEntry(taker, outbound, block);
@@ -244,22 +238,35 @@ export function handleTPV(market: Market, block: ethereum.Block): void {
   }
 
   if (marketSide == "ask") {
-    marketPair.minAsk = tickForMarket.neg();
     marketPair.asks = BigInt.fromI32(allOffers.length);
+    marketPair.minAsk = tickForMarket.neg();
     marketPair.totalVolumePromisedQuote = totalVolumePromised;
     marketPair.totalVolumePromisedQuoteDisplay = scaleByToken(totalVolumePromised, token);
   } else {
-    marketPair.maxBid = tickForMarket;
     marketPair.bids = BigInt.fromI32(allOffers.length);
+    marketPair.maxBid = tickForMarket;
     marketPair.totalVolumePromisedBase = totalVolumePromised;
     marketPair.totalVolumePromisedBaseDisplay = scaleByToken(totalVolumePromised, token);
   }
 
-  if (marketPair.minAsk !== null && marketPair.maxBid !== null && !marketPair.minAsk!.isZero() && !marketPair.maxBid!.isZero()) {
+  const hasBid = marketPair.maxBid !== null && !marketPair.maxBid!.isZero();
+  const hasAsk = marketPair.minAsk !== null && !marketPair.minAsk!.isZero();
+  if (hasAsk && hasBid) {
     let minAskPrice = 1.0001 ** <f64>marketPair.minAsk!.toI64();
     let maxBidPrice = 1.0001 ** <f64>marketPair.maxBid!.toI64();
     marketPair.midPrice = BigDecimal.fromString(((minAskPrice + maxBidPrice) / 2).toString());
     marketPair.spread = BigDecimal.fromString(((maxBidPrice - minAskPrice) / maxBidPrice).toString());
+  } else if (!hasBid) {
+    let minAskPrice = 1.0001 ** <f64>marketPair.minAsk!.toI64();
+    marketPair.midPrice = BigDecimal.fromString(minAskPrice.toString());
+    marketPair.spread = null;
+  } else if (!hasAsk) {
+    let maxBidPrice = 1.0001 ** <f64>marketPair.maxBid!.toI64();
+    marketPair.midPrice = BigDecimal.fromString(maxBidPrice.toString());
+    marketPair.spread = null;
+  } else {
+    marketPair.midPrice = null;
+    marketPair.spread = null;
   }
   marketPair.latestUpdateDate = block.timestamp;
   marketPair.save();

@@ -28,7 +28,7 @@ export function handleNewOwnedOffer(event: NewOwnedOffer): void {
   }
 
   const owner = getOrCreateAccount(event.params.owner, event.block.timestamp, true);
-  offer.owner = owner.id;
+  offer.realMaker = owner.id;
   const limitOrder = getLatestLimitOrderFromStack();
   if (limitOrder !== null) {
     limitOrder.offer = offer.id;

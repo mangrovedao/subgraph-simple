@@ -154,8 +154,6 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
   offer.posthookFailReason = posthookData;
   offer.latestPenalty = BigInt.fromI32(0);
 
-  const owner = Address.fromBytes(offer.owner !== null ? offer.owner! : offer.maker);
-
   let order = getLatestOrderFromStack(true);
 
   const market = Market.load(offer.market)!;
@@ -166,7 +164,14 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
   offerFilled.creationDate = event.block.timestamp;
   offerFilled.transactionHash = event.transaction.hash;
   offerFilled.taker = order.taker;
-  offerFilled.account = owner;
+  offerFilled.realTaker = order.taker;
+
+  if (order.limitOrder) {
+    const takerLO = LimitOrder.load(order.limitOrder!)!;
+    offerFilled.realTaker = Address.fromBytes(takerLO.realTaker);
+  }
+
+  offerFilled.realMaker = offer.realMaker;
   offerFilled.makerGot = event.params.takerGives;
   offerFilled.makerGotDisplay = event.params.takerGives.toBigDecimal().div(
     BigInt.fromU32(10)
@@ -183,11 +188,8 @@ export function handleOfferSuccessEvent(event: OfferSuccess, posthookData: Bytes
   offerFilled.market = offer.market;
   offerFilled.save();
 
-  const taker = Address.fromBytes(order.taker);
-  let maker = Address.fromBytes(offer.maker);
-  if (offer.realMaker) {
-    maker = Address.fromBytes(offer.realMaker!);
-  }
+  const taker = Address.fromBytes(offerFilled.realTaker);
+  const maker = Address.fromBytes(offerFilled.realMaker);
 
   sendAmount(taker, maker, market, inbound, outbound, offerFilled.makerGot, offerFilled.makerGave, event.block);
 
@@ -274,13 +276,7 @@ const handlePartialOfferWrite = (offerWrite: PartialOfferWrite, block: ethereum.
 
   if (offer.kandel) {
     const kandel = Kandel.load(offer.kandel!);
-    offer.owner = kandel!.admin;
     offer.realMaker = kandel!.admin;
-  }
-
-  if (offer.limitOrder) {
-    const limitOrder = LimitOrder.load(offer.limitOrder!);
-    offer.realMaker = limitOrder!.realTaker;
   }
 
   offer.save();
