@@ -1,6 +1,6 @@
-import { Entity, log, store } from "@graphprotocol/graph-ts";
-import { AmplifiedOfferBundle, CleanOrder, LimitOrder, Order, Stack } from "../generated/schema";
-import { OfferWrite, OfferWrite__Params } from "../generated/Mangrove/Mangrove";
+import { Entity, store } from "@graphprotocol/graph-ts";
+import { LimitOrder, Order, Stack } from "../generated/schema";
+import { OfferWrite } from "../generated/Mangrove/Mangrove";
 import { PartialOfferWrite } from "./types";
 
 const getStack = (type: string): Stack => {
@@ -76,17 +76,6 @@ export function getLatestLimitOrderFromStack(): LimitOrder | null {
   const order = getLatestFromStack("LimitOrder", false);
   return changetype<LimitOrder | null>(order);
 }
-
-export function getLatestCleanOrderFromStack(): CleanOrder | null {
-  const order = getLatestFromStack("CleanOrder", false);
-  return changetype<CleanOrder | null>(order);
-}
-
-export function getLatestBundleFromStack(): AmplifiedOfferBundle | null {
-  const order = getLatestFromStack("AmplifiedOfferBundle", false);
-  return changetype<AmplifiedOfferBundle | null>(order);
-}
-
 function addToStack(type: string, entity: Entity): void {
   const orderStack = getStack(type);
   if (type == "Order") {
@@ -94,12 +83,6 @@ function addToStack(type: string, entity: Entity): void {
     orderStack.ids = `${orderStack.ids}|${order.id}`;
   } else if (type == "LimitOrder") {
     const order = changetype<LimitOrder>(entity);
-    orderStack.ids = `${orderStack.ids}|${order.id}`;
-  } else if (type == "CleanOrder") {
-    const order = changetype<CleanOrder>(entity);
-    orderStack.ids = `${orderStack.ids}|${order.id}`;
-  } else if (type == "AmplifiedOfferBundle") {
-    const order = changetype<AmplifiedOfferBundle>(entity);
     orderStack.ids = `${orderStack.ids}|${order.id}`;
   }
   orderStack.save();
@@ -124,14 +107,6 @@ export function addLimitOrderToStack(order: LimitOrder): void {
   addToStack("LimitOrder", order);
 }
 
-export function addCleanOrderToStack(order: CleanOrder): void {
-  addToStack("CleanOrder", order);
-}
-
-export function addBundleToStack(offer: AmplifiedOfferBundle): void {
-  addToStack("AmplifiedOfferBundle", offer);
-}
-
 function removeLatestFromStack(type: string): void {
   let stack = getStack(type);
   const ids = stack.ids;
@@ -152,12 +127,4 @@ export function removeLatestOrderFromStack(): void {
 
 export function removeLatestLimitOrderFromStack(): void {
   removeLatestFromStack("LimitOrder");
-}
-
-export function removeLatestCleanOrderFromStack(): void {
-  removeLatestFromStack("CleanOrder");
-}
-
-export function removeLatestBundleFromStack(): void {
-  removeLatestFromStack("AmplifiedOfferBundle");
 }

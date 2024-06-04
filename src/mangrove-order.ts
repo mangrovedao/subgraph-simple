@@ -1,10 +1,8 @@
 import { log } from "matchstick-as";
-import { LogIncident, MangroveOrderComplete, MangroveOrderStart, NewOwnedOffer, SetAdmin, SetReneging } from "../generated/MangroveOrder/MangroveOrder";
+import { MangroveOrderComplete, MangroveOrderStart, NewOwnedOffer, SetAdmin, SetReneging } from "../generated/MangroveOrder/MangroveOrder";
 import { LimitOrder, Offer } from "../generated/schema";
 import { getEventUniqueId, getOfferId, getOrCreateAccount } from "./helpers";
 import { addLimitOrderToStack, getLatestLimitOrderFromStack, removeLatestLimitOrderFromStack } from "./stack";
-
-export function handleLogIncident(event: LogIncident): void {}
 
 export const limitOrderSetIsOpen = (limitOrderId: string | null, value: boolean): void => {
   if (limitOrderId === null) {
@@ -52,28 +50,10 @@ export function handleMangroveOrderStart(event: MangroveOrderStart): void {
   limitOrder.fillWants = event.params.fillWants;
   limitOrder.tick = event.params.tick;
 
-  limitOrder.inboundRoute = event.params.takerWantsLogic;
-  limitOrder.outboundRoute = event.params.takerGivesLogic;
-
   limitOrder.save();
   addLimitOrderToStack(limitOrder);
 }
 
 export function handleMangroveOrderComplete(event: MangroveOrderComplete): void {
   removeLatestLimitOrderFromStack();
-}
-
-export function handleSetAdmin(event: SetAdmin): void {}
-
-export function handleSetReneging(event: SetReneging): void {
-  const offerId = getOfferId(event.params.olKeyHash, event.params.offerId);
-  const limitOrder = getLatestLimitOrderFromStack();
-  if (!limitOrder) {
-    log.debug("Missing mangrove order for offerId {}", [offerId]);
-    return;
-  }
-  limitOrder.expiryDate = event.params.date;
-  limitOrder.maxVolume = event.params.volume;
-  limitOrder.latestUpdateDate = event.block.timestamp;
-  limitOrder.save();
 }

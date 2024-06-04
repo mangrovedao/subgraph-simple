@@ -1,15 +1,10 @@
 specVersion: 0.0.6
 schema:
   file: ./schema.graphql
-features:
-  - grafting
-graft:
-  base: QmbDfGa8DFWS5M5SutD66PnEmTZQ1ntnEmxoK2WbSpA5Ae
-  block: 3600000
 templates:
   - kind: ethereum
     name: Kandel
-    network: mangrove-private-blast
+    network: base-sepolia
     source:
       abi: Kandel
     mapping:
@@ -17,68 +12,17 @@ templates:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - Credit
-        - Debit
-        - LogIncident
-        - Mgv
-        - OfferListKey
-        - PopulateEnd
-        - PopulateStart
-        - RetractEnd
-        - RetractStart
         - SetAdmin
-        - SetBaseQuoteTickOffset
-        - SetGasprice
-        - SetGasreq
-        - SetIndexMapping
-        - SetLength
-        - SetReserveId
-        - SetRouter
-        - SetStepSize
       abis:
         - name: Kandel
           file: ./abis/Kandel.json
       eventHandlers:
-        - event: Credit(indexed address,uint256)
-          handler: handleCredit
-        - event: Debit(indexed address,uint256)
-          handler: handleDebit
-        - event: LogIncident(indexed bytes32,indexed uint256,bytes32,bytes32)
-          handler: handleLogIncident
-        - event: Mgv(address)
-          handler: handleMgv
-        - event: OfferListKey(bytes32)
-          handler: handleOfferListKey
-        - event: PopulateEnd()
-          handler: handlePopulateEnd
-        - event: PopulateStart()
-          handler: handlePopulateStart
-        - event: RetractEnd()
-          handler: handleRetractEnd
-        - event: RetractStart()
-          handler: handleRetractStart
         - event: SetAdmin(address)
           handler: handleSetAdmin
-        - event: SetBaseQuoteTickOffset(uint256)
-          handler: handleSetBaseQuoteTickOffset
-        - event: SetGasprice(uint256)
-          handler: handleSetGasprice
-        - event: SetGasreq(uint256)
-          handler: handleSetGasreq
-        - event: SetIndexMapping(indexed uint8,uint256,uint256)
-          handler: handleSetIndexMapping
-        - event: SetLength(uint256)
-          handler: handleSetLength
-        - event: SetReserveId(indexed address)
-          handler: handleSetReserveId
-        - event: SetRouter(address)
-          handler: handleSetRouter
-        - event: SetStepSize(uint256)
-          handler: handleSetStepSize
       file: ./src/kandel.ts
   - kind: ethereum
     name: SmartRouterProxy
-    network: mangrove-private-blast
+    network: base-sepolia
     source:
       abi: SmartRouter
     mapping:
@@ -87,26 +31,17 @@ templates:
       language: wasm/assemblyscript
       entities:
         - SetRouteLogic
-        - MakerBind
-        - MakerUnbind
-        - SetAdmin
       abis:
         - name: SmartRouter
           file: ./abis/SmartRouter.json
       eventHandlers:
         - event: SetRouteLogic(indexed address,indexed bytes32,uint256,address)
           handler: handleSetRouteLogic
-        - event: MakerBind(indexed address)
-          handler: handleMakerBind
-        - event: MakerUnbind(indexed address)
-          handler: handleMakerUnbind
-        - event: SetAdmin(address)
-          handler: handleSetAdmin
       file: ./src/smart-router-proxy.ts
 dataSources:
   - kind: ethereum
     name: Mangrove
-    network: mangrove-private-blast
+    network: base-sepolia
     source:
       abi: Mangrove
       address: "0xb1a49C54192Ea59B233200eA38aB56650Dfb448C"
@@ -116,13 +51,6 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - Approval
-        - CleanComplete
-        - CleanStart
-        - Credit
-        - Debit
-        - Kill
-        - NewMgv
         - OfferFail
         - OfferFailWithPosthookData
         - OfferRetract
@@ -132,37 +60,12 @@ dataSources:
         - OrderComplete
         - OrderStart
         - SetActive
-        - SetDensity96X32
-        - SetFee
-        - SetGasbase
-        - SetGasmax
-        - SetGasprice
-        - SetGovernance
-        - SetMaxGasreqForFailingOffers
-        - SetMaxRecursionDepth
-        - SetMonitor
-        - SetNotify
-        - SetUseOracle
       abis:
         - name: Mangrove
           file: ./abis/Mangrove.json
         - name: ERC20
           file: ./abis/ERC20.json
       eventHandlers:
-        - event: Approval(indexed address,indexed address,indexed address,address,uint256)
-          handler: handleApproval
-        - event: CleanComplete()
-          handler: handleCleanComplete
-        - event: CleanStart(indexed bytes32,indexed address,uint256)
-          handler: handleCleanStart
-        - event: Credit(indexed address,uint256)
-          handler: handleCredit
-        - event: Debit(indexed address,uint256)
-          handler: handleDebit
-        - event: Kill()
-          handler: handleKill
-        - event: NewMgv()
-          handler: handleNewMgv
         - event: OfferFail(indexed bytes32,indexed address,indexed
             uint256,uint256,uint256,uint256,bytes32)
           handler: handleOfferFail
@@ -186,32 +89,10 @@ dataSources:
           handler: handleOrderStart
         - event: SetActive(indexed bytes32,indexed address,indexed address,uint256,bool)
           handler: handleSetActive
-        - event: SetDensity96X32(indexed bytes32,uint256)
-          handler: handleSetDensity
-        - event: SetFee(indexed bytes32,uint256)
-          handler: handleSetFee
-        - event: SetGasbase(indexed bytes32,uint256)
-          handler: handleSetGasbase
-        - event: SetGasmax(uint256)
-          handler: handleSetGasmax
-        - event: SetGasprice(uint256)
-          handler: handleSetGasprice
-        - event: SetGovernance(address)
-          handler: handleSetGovernance
-        - event: SetMaxGasreqForFailingOffers(uint256)
-          handler: handleSetMaxGasreqForFailingOffers
-        - event: SetMaxRecursionDepth(uint256)
-          handler: handleSetMaxRecursionDepth
-        - event: SetMonitor(address)
-          handler: handleSetMonitor
-        - event: SetNotify(bool)
-          handler: handleSetNotify
-        - event: SetUseOracle(bool)
-          handler: handleSetUseOracle
       file: ./src/mangrove.ts
   - kind: ethereum
     name: KandelSeeder
-    network: mangrove-private-blast
+    network: base-sepolia
     source:
       abi: KandelSeeder
       address: "0x4BB7567303C8BDE27a4b490B3e5f1593c891B03d"
@@ -231,7 +112,7 @@ dataSources:
       file: ./src/kandel-seeder.ts
   - kind: ethereum
     name: SmartKandelSeeder
-    network: mangrove-private-blast
+    network: base-sepolia
     source:
       abi: SmartKandelSeeder
       address: "0x3cbb6ad1b287748b92d1b4dfc1776af1dd9284b2"
@@ -251,7 +132,7 @@ dataSources:
       file: ./src/kandel-seeder.ts
   - kind: ethereum
     name: MangroveOrder
-    network: mangrove-private-blast
+    network: base-sepolia
     source:
       abi: MangroveOrder
       address: "0x83251E7F36a51c5238C9aa0c6Bb7cc209b32d80e"
@@ -261,32 +142,24 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - LogIncident
         - MangroveOrderStart
         - MangroveOrderComplete
-        - SetReneging
         - NewOwnedOffer
-        - SetAdmin
       abis:
         - name: MangroveOrder
           file: ./abis/MangroveOrder.json
       eventHandlers:
-        - event: LogIncident(indexed bytes32,indexed uint256,bytes32,bytes32)
-          handler: handleLogIncident
         - event: MangroveOrderStart(indexed bytes32,indexed
             address,int256,uint8,uint256,bool,uint256,address,address)
           handler: handleMangroveOrderStart
         - event: MangroveOrderComplete()
           handler: handleMangroveOrderComplete
-        - event: SetReneging(indexed bytes32,indexed uint256,uint256,uint256)
-          handler: handleSetReneging
         - event: NewOwnedOffer(indexed bytes32,indexed uint256,indexed address)
           handler: handleNewOwnedOffer
-        - event: SetAdmin(address)
-          handler: handleSetAdmin
+
       file: ./src/mangrove-order.ts
   - kind: ethereum
-    network: mangrove-private-blast
+    network: base-sepolia
     name: RouterProxyFactory
     source:
       abi: RouterProxyFactory
@@ -305,78 +178,3 @@ dataSources:
         - event: ProxyDeployed(address,indexed address,indexed address)
           handler: handleNewRouterProxy
       file: ./src/router-proxy-factory.ts
-  - kind: ethereum
-    name: MangroveAmplifier
-    network: mangrove-private-blast
-    source:
-      abi: MangroveAmplifier
-      address: "0x8d1B8aa759A40EF0B5121d1F1b6F9A2694996612"
-      startBlock: 133207
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - EndBundle
-        - InitBundle
-        - NewOwnedOffer
-        - SetReneging
-      abis:
-        - name: MangroveAmplifier
-          file: ./abis/MangroveAmplifier.json
-      eventHandlers:
-        - event: EndBundle()
-          handler: handleEndBundle
-        - event: InitBundle(indexed uint256,indexed address)
-          handler: handleInitBundle
-        - event: NewOwnedOffer(indexed bytes32,indexed uint256,indexed address)
-          handler: handleNewOwnedOffer
-        - event: SetReneging(indexed bytes32,indexed uint256,uint256,uint256)
-          handler: handleSetReneging
-      file: ./src/mangrove-amplifier.ts
-  - kind: ethereum
-    name: PointsWeights
-    network: mangrove-private-blast
-    source:
-      abi: PointsWeights
-      address: "0xa3b5b77Ab0A15D8BE7736f214a2d2591f65d53C8"
-      startBlock: 710670
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - Weigths
-      abis:
-        - name: PointsWeights
-          file: ./abis/PointsWeights.json
-      eventHandlers:
-        - event: Weigths(indexed address,indexed
-            address,uint256,uint256,uint256,uint256,uint256,uint256)
-          handler: handleWeigths
-      file: ./src/points-weigths.ts
-  - kind: ethereum
-    name: MgvReferral
-    network: mangrove-private-blast
-    source:
-      abi: MgvReferral
-      address: "0x07e5a2DCf82D7b5b8ab684d9b40842E174e49908"
-      startBlock: 133207
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - EIP712DomainChanged
-        - OwnershipTransferred
-        - ReferStarted
-        - ReferralRecorded
-      abis:
-        - name: MgvReferral
-          file: ./abis/MgvReferral.json
-      eventHandlers:
-        - event: ReferStarted(indexed address)
-          handler: handleReferStarted
-        - event: ReferralRecorded(indexed address,indexed address)
-          handler: handleReferralRecorded
-      file: ./src/mgv-referral.ts

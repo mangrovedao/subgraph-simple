@@ -1,45 +1,5 @@
 {
-  "mumbai": {
-    "Mangrove": {
-      "address": "0x80cd6Ef14c23dD3957FD5629141a9d7028557c39",
-      "startBlock": 43711819
-    },
-    "KandelSeeder": {
-      "address": "0x878f8820cd99a96381074548a1B72d27A77fadA2",
-      "startBlock": 43711838
-    },
-    "AaveKandelSeeder": {
-      "address": "0x215A21620Ded0451F4867A5Ffa347351826233a4",
-      "startBlock": 45080305
-    },
-    "MangroveOrder": {
-      "address": "0x092FC43fe474030387BBa4C657F0ceBc1dC218E7",
-      "startBlock": 44653500
-    },
-    "RouterProxyFactory": {
-      "address": "0xaA1f5A0313D3AE6E1B9AA94229630679a1ffd3f2",
-      "startBlock": 44652796
-    },
-    "PointsWeights": {
-      "address": "0x787612FA81529FECF44882Dae128254329727dCE",
-      "startBlock": 46140257
-    },
-    "MgvReferral": {
-      "address": "0x5e852CA313995f7C5382061e9119a96b74Ccc928",
-      "startBlock": 45942861
-    },
-    "MangroveAmplifier": {
-      "address": "0x5936A0CA18C72074852Ec81147B8D3FA714c423C",
-      "startBlock": 46141094
-    },
-    "SmartKandelSeeder": {
-      "address": "0x09356C801ca3eE28A461C3e3469acfF3a13C6E90",
-      "startBlock": 47504272
-    }
-  },
-  "matic": {
-  },
-  "mangrove-private-blast": {
+  "blast-mainnet": {
     "Mangrove": {
       "address": "0xb1a49C54192Ea59B233200eA38aB56650Dfb448C",
       "startBlock": 133207
@@ -50,10 +10,6 @@
     },
     "MangroveOrder": {
       "address": "0x83251E7F36a51c5238C9aa0c6Bb7cc209b32d80e",
-      "startBlock": 133207
-    },
-    "MangroveAmplifier": {
-      "address": "0x8d1B8aa759A40EF0B5121d1F1b6F9A2694996612",
       "startBlock": 133207
     },
     "RouterProxyFactory": {
@@ -73,34 +29,40 @@
       "startBlock": 983264
     }
   },
-  "mangrove-private-blast-sepolia": {
+  "base": {
     "Mangrove": {
-      "address": "0x579ba1708e8E15c9D41143a3da4B8382831E0897",
-      "startBlock": 1842865
-    },
-    "KandelSeeder": {
-      "address": "0x1A839030107167452D69d8f1a673004B2a1b8A3A",
-      "startBlock": 1911217
+      "address": "0x22613524f5905Cb17cbD785b956e9238Bf725FAa",
+      "startBlock": 15192144
     },
     "MangroveOrder": {
-      "address": "0x710cE7BB7eC4c4e76C716A9c0F8Ba8Fe55445460",
-      "startBlock": 1848609
-    },
-    "MangroveAmplifier": {
-      "address": "0xCbB118083D78f424b73602E05c141313215b732d",
-      "startBlock": 1848773
+      "address": "0xA3c363Ca0EA3603faEe9FAcffD65E777122adF36",
+      "startBlock": 15192980
     },
     "RouterProxyFactory": {
-      "address": "0x77CD6977011658019B8aF1b77C6b1310dFA35508",
-      "startBlock": 1848367 
+      "address": "0x79C3F23F210e30F6AA9072F0ddFd2D180C8B7131",
+      "startBlock": 15192860
     },
-    "PointsWeights": {
-      "address": "0x27FF6d775F32E02044ea41B0a6CC9D7305C79224",
-      "startBlock": 1911778
+    "SmartKandelSeeder": {
+      "address": "0x614FE2edEeB9DfBcCbb0884455E0591C9F5d770a",
+      "startBlock": 15193091
+    }
+  },
+  "base-sepolia": {
+    "Mangrove": {
+      "address": "0xBe1E54d0fC7A6044C0913013593FCd7D854C07FB",
+      "startBlock": 10695514
     },
-    "MgvReferral": {
-      "address": "0xCb62cD0Ea7aD46d5B630C1068C7bED2cBd2b7E23",
-      "startBlock": 1911920
+    "MangroveOrder": {
+      "address": "0xC00D2Da52195B123d3c994aaf2eb1E8DA8999d4f",
+      "startBlock": 10697524
+    },
+    "RouterProxyFactory": {
+      "address": "0xE44FfC50ED6673d6A1C385B76152E1551a6c14a3",
+      "startBlock": 10697438
+    },
+    "SmartKandelSeeder": {
+      "address": "0xb4C0B66F158C314FfBDF1b64d9B517B8aaB46773",
+      "startBlock": 10697715
     }
   }
 }
